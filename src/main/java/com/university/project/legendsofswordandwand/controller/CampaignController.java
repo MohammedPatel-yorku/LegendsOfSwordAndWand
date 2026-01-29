@@ -1,4 +1,3 @@
 package com.university.project.legendsofswordandwand.controller;
 
-public class CampaignController {
-}
+public class CampaignController {}
