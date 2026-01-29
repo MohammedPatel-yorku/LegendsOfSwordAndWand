@@ -1,4 +1,3 @@
 package com.university.project.legendsofswordandwand.service;
 
-public class HeroService {
-}
+public class HeroService {}
