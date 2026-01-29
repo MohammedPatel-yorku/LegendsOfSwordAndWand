@@ -1,4 +1,3 @@
 package com.university.project.legendsofswordandwand.repository;
 
-public class PartyRepository {
-}
+public class PartyRepository {}

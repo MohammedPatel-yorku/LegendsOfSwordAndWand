@@ -1,4 +1,3 @@
 package com.university.project.legendsofswordandwand.model;
 
-public class Party {
-}
+public class Party {}
