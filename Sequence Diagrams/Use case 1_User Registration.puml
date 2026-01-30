@@ -1,0 +1,38 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+skinparam responseMessageBelowArrow true
+
+title Use Case 1 - User Registration and Login
+
+actor User
+boundary UserController
+control UserService
+database UserRepository
+
+==Registration==
+
+User -> UserController: Enter username and password
+UserController -> UserService: registerUser(username, password)
+UserService -> UserService: validate(username, password)
+UserService -> UserService: hashPassword(password)
+UserService -> UserRepository: save(User)
+
+UserRepository --> UserService: User saved
+UserService --> UserController: Registration successful
+UserController -> User: Registration confirmation
+
+==Login==
+
+User -> UserController: Enter username and password
+UserController -> UserService: loginUser(username, password)
+UserService -> UserRepository: findByUsername(username)
+
+UserRepository --> UserService: User found
+UserService -> UserService: verifyPassword(password)
+UserService --> UserController: Login successful/failed
+UserController --> User: Login result
+
+@enduml

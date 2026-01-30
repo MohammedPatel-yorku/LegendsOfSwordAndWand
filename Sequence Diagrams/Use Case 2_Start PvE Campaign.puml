@@ -1,0 +1,34 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+actor User
+boundary CampaignController
+control CampaignService
+control PartyService
+control HeroService
+database CampaignRepository
+database HeroRepository
+database PartyRepository
+
+User -> CampaignController: Start new PvE Campaign
+CampaignController -> CampaignService: startNewCampaign(userId)
+
+CampaignService -> HeroService: createHero(selectedClass)
+HeroService -> HeroService: initializeBaseStats(hero)
+HeroService -> HeroRepository: save(hero)
+HeroRepository --> HeroService: Hero saved
+
+CampaignService -> PartyService: createParty(hero)
+PartyService -> PartyRepository: save(party)
+PartyRepository --> PartyService: Party saved
+
+CampaignService -> CampaignService: initializeCampaign(room=1)
+CampaignService -> CampaignRepository: save(campaign)
+CampaignRepository --> CampaignService: Campaign saved
+
+CampaignService --> CampaignController: Campaign started
+CampaignController --> User: Show campaign view
+
+@enduml
