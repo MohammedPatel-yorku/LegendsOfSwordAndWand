@@ -11,19 +11,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Campaign {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    private User owner;
+  @ManyToOne private User owner;
 
-    private int currentRoom;
-    private boolean active;
+  private int currentRoom;
+  private boolean active;
 
-    public Campaign(User owner) {
-        this.owner = owner;
-        this.currentRoom = 1;
-        this.active = true;
-    }
+  public Campaign(User owner) {
+    this.owner = owner;
+    this.currentRoom = 1;
+    this.active = true;
+  }
 }

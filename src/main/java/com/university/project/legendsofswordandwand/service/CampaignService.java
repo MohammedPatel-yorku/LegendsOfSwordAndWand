@@ -10,16 +10,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CampaignService {
 
-    private final CampaignRepository campaignRepository;
-    private final HeroService heroService;
+  private final CampaignRepository campaignRepository;
+  private final HeroService heroService;
 
-    public Campaign startNewCampaign(User owner, String heroClass, String heroName){
+  public Campaign startNewCampaign(User owner, String heroClass, String heroName) {
 
-        Campaign campaign = new Campaign(owner);
-        campaignRepository.save(campaign);
+    Campaign campaign = new Campaign(owner);
+    campaignRepository.save(campaign);
 
-        heroService.createHeroForUser(owner, heroName, heroClass);
+    heroService.createHeroForUser(owner, heroName, heroClass);
 
-        return campaign;
-    }
+    return campaign;
+  }
 }

@@ -15,13 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class CampaignController {
 
-    private final CampaignService campaignService;
-    private final UserService userService;
+  private final CampaignService campaignService;
+  private final UserService userService;
 
-    @PostMapping("/start")
-    public Campaign startCampaign(@RequestParam Long userId, @RequestParam String heroName, @RequestParam String heroClass){
-        User user = userService.findById(userId).orElseThrow(() -> new RuntimeException("Usr not found"));
+  @PostMapping("/start")
+  public Campaign startCampaign(
+      @RequestParam Long userId, @RequestParam String heroName, @RequestParam String heroClass) {
+    User user =
+        userService.findById(userId).orElseThrow(() -> new RuntimeException("Usr not found"));
 
-        return campaignService.startNewCampaign(user, heroName, heroClass);
-    }
+    return campaignService.startNewCampaign(user, heroName, heroClass);
+  }
 }
