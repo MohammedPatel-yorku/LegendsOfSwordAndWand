@@ -14,6 +14,7 @@ public class HeroService {
 
   public Hero createHeroForUser(User owner, String name, String heroClass) {
     Hero hero = new Hero(name, heroClass, 1, 100, 10, owner);
+    owner.getHeroes().add(hero);
 
     return heroRepository.save(hero);
   }
