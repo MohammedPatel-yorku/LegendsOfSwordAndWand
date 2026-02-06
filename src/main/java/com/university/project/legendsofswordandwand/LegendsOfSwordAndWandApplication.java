@@ -25,8 +25,8 @@ public class LegendsOfSwordAndWandApplication {
     return args -> {
       User user = userService.login("demo", "pass");
 
-      Hero mage = heroService.createHeroForUser(user, "Arcanis", "Mage");
-      Hero warrior = heroService.createHeroForUser(user, "Thorn", "Warrior");
+      Hero mage = heroService.createHeroForUser(user.getId(), "Arcanis", "Mage");
+      Hero warrior = heroService.createHeroForUser(user.getId(), "Thorn", "Warrior");
 
       battleService.fight(mage, warrior);
 

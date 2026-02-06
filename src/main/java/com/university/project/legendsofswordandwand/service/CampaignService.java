@@ -18,7 +18,7 @@ public class CampaignService {
     Campaign campaign = new Campaign(owner);
     campaignRepository.save(campaign);
 
-    heroService.createHeroForUser(owner, heroName, heroClass);
+    heroService.createHeroForUser(owner.getId(), heroName, heroClass);
 
     return campaign;
   }
