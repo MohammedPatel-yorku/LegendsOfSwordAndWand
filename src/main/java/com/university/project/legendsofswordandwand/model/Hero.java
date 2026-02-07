@@ -1,7 +1,7 @@
 package com.university.project.legendsofswordandwand.model;
 
+import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "heroes")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class Hero {
 
   @Id
@@ -17,12 +17,16 @@ public class Hero {
   private Long id;
 
   @Column(nullable = false)
+  @Setter
   private String name;
 
-  @Column(nullable = false)
-  private String heroClass;
+  @Column(name = "hero_class", nullable = false)
+  @Setter
+  @Enumerated(EnumType.STRING)
+  private HeroClass heroClass;
 
   @Column(nullable = false)
+  @Setter
   private int level;
 
   @Column(nullable = false)
@@ -30,16 +34,13 @@ public class Hero {
   private int health;
 
   @Column(nullable = false)
+  @Setter
   private int attack;
 
-  @ManyToOne private User owner;
+  @ManyToOne @Setter @JoinColumn(name = "owner_id") private User owner;
 
-  public Hero(String name, String heroClass, int level, int health, int attack, User owner) {
-    this.name = name;
-    this.heroClass = heroClass;
-    this.level = level;
-    this.health = health;
-    this.attack = attack;
-    this.owner = owner;
-  }
+  @ManyToOne
+  @JoinColumn(name = "party_id")
+  @Setter
+  private Party party;
 }
