@@ -14,10 +14,10 @@ database PartyRepository
 
 User -> CampaignController: Start new PvE Campaign
 activate CampaignController
-CampaignController -> CampaignService: startNewCampaign(userId)
+CampaignController -> CampaignService: startNewCampaign(userId, heroName, heroClass)
 activate CampaignService
 
-CampaignService -> HeroService: createHero(selectedClass)
+CampaignService -> HeroService: createHeroForUser(userId, selectedHeroClass, selectedHeroName)
 activate HeroService
 HeroService -> HeroService: initializeBaseStats(hero)
 HeroService -> HeroRepository: save(hero)

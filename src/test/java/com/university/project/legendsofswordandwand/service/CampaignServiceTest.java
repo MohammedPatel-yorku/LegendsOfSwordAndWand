@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.User;
+import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.repository.CampaignRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ public class CampaignServiceTest {
   void startingCampaignCreatesCampaign() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user, "Arcanis", "Mage");
+    Campaign campaign = campaignService.startNewCampaign(user, HeroClass.MAGE, "Arcanis");
 
     assertNotNull(campaign.getId());
   }
@@ -35,7 +36,7 @@ public class CampaignServiceTest {
   void newCampaignStartsAtRoomOne() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user, "Thorn", "Warrior");
+    Campaign campaign = campaignService.startNewCampaign(user, HeroClass.WARRIOR, "Thor");
 
     assertEquals(1, campaign.getCurrentRoom());
   }
@@ -44,7 +45,7 @@ public class CampaignServiceTest {
   void newCampaignIsActive() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user, "Luna", "Order");
+    Campaign campaign = campaignService.startNewCampaign(user, HeroClass.ROGUE, "Luna");
 
     assertTrue(campaign.isActive());
   }
@@ -53,7 +54,7 @@ public class CampaignServiceTest {
   void startingCampaignCreatesNewHeroForUser() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user, "Mage", "Nova");
+    Campaign campaign = campaignService.startNewCampaign(user, HeroClass.CLERIC, "Nova");
 
     assertEquals(1, user.getHeroes().size());
     assertEquals("Nova", user.getHeroes().get(0).getName());
