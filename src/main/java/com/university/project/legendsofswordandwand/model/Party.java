@@ -17,7 +17,10 @@ public class Party {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne @Setter @JoinColumn(name = "owner_id") private User owner;
+  @ManyToOne
+  @Setter
+  @JoinColumn(name = "owner_id")
+  private User owner;
 
   @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Hero> heroes = new ArrayList<>();

@@ -27,7 +27,8 @@ public class CampaignService {
    * @param selectedHeroName Name to assign to starting Hero
    * @return Newly created Campaign Object
    */
-  public Campaign startNewCampaign(User owner, HeroClass selectedHeroClass, String selectedHeroName) {
+  public Campaign startNewCampaign(
+      User owner, HeroClass selectedHeroClass, String selectedHeroName) {
 
     Hero hero =
         heroService.createBaseHeroForUser(owner.getId(), selectedHeroName, selectedHeroClass);

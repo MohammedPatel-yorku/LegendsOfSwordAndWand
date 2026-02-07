@@ -37,7 +37,10 @@ public class Hero {
   @Setter
   private int attack;
 
-  @ManyToOne @Setter @JoinColumn(name = "owner_id") private User owner;
+  @ManyToOne
+  @Setter
+  @JoinColumn(name = "owner_id")
+  private User owner;
 
   @ManyToOne
   @JoinColumn(name = "party_id")

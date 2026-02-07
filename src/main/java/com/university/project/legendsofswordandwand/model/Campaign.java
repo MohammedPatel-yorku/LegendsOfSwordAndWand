@@ -15,7 +15,10 @@ public class Campaign {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne @Setter @JoinColumn(name = "owner_id") private User owner;
+  @ManyToOne
+  @Setter
+  @JoinColumn(name = "owner_id")
+  private User owner;
 
   @OneToOne
   @JoinColumn(name = "party_id", nullable = false, unique = true)
