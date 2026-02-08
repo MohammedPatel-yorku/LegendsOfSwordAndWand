@@ -7,34 +7,34 @@ actor User
 boundary CampaignController
 control CampaignService
 control PartyService
-control HeroService
-database CampaignRepository
-database HeroRepository
 database PartyRepository
+control HeroService
+database HeroRepository
+database CampaignRepository
 
 User -> CampaignController: Start new PvE Campaign
 activate CampaignController
 CampaignController -> CampaignService: startNewCampaign(userId, heroName, heroClass)
 activate CampaignService
 
-CampaignService -> HeroService: createHeroForUser(userId, selectedHeroClass, selectedHeroName)
+CampaignService -> PartyService: createPartyForUser(userId)
+activate PartyService
+PartyService -> PartyRepository: save(party)
+activate PartyRepository
+PartyRepository --> PartyService: Party saved
+deactivate PartyRepository
+PartyService --> CampaignService: return Party
+deactivate PartyService
+
+CampaignService -> HeroService: createBaseHeroForParty(partyId, heroName, heroClass)
 activate HeroService
-HeroService -> HeroService: initializeBaseStats(hero)
 HeroService -> HeroRepository: save(hero)
 activate HeroRepository
 HeroRepository --> HeroService: Hero saved
 deactivate HeroRepository
 deactivate HeroService
 
-CampaignService -> PartyService: createParty(hero)
-activate PartyService
-PartyService -> PartyRepository: save(party)
-activate PartyRepository
-PartyRepository --> PartyService: Party saved
-deactivate PartyRepository
-deactivate PartyService
-
-CampaignService -> CampaignService: initializeCampaign(room=1)
+CampaignService -> CampaignService: initializeCampaign(currentlyActive, room=1)
 CampaignService -> CampaignRepository: save(campaign)
 activate CampaignRepository
 CampaignRepository --> CampaignService: Campaign saved

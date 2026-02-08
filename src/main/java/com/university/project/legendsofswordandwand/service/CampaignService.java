@@ -24,12 +24,12 @@ public class CampaignService {
    * Hero for the requesting user.
    *
    * @param userId ID of User that is starting a new Campaign
-   * @param selectedHeroClass Hero Class to assign to starting Hero
    * @param selectedHeroName Name to assign to starting Hero
+   * @param selectedHeroClass Hero Class to assign to starting Hero
    * @return Newly created Campaign Object
    */
   public Campaign startNewCampaign(
-      Long userId, HeroClass selectedHeroClass, String selectedHeroName) {
+      Long userId, String selectedHeroName, HeroClass selectedHeroClass) {
     User user =
         userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
