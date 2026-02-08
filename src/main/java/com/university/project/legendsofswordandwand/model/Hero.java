@@ -2,14 +2,14 @@ package com.university.project.legendsofswordandwand.model;
 
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "heroes")
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Hero {
 
   @Id
@@ -36,11 +36,6 @@ public class Hero {
   @Column(nullable = false)
   @Setter
   private int attack;
-
-  @ManyToOne
-  @Setter
-  @JoinColumn(name = "owner_id")
-  private User owner;
 
   @ManyToOne
   @JoinColumn(name = "party_id")
