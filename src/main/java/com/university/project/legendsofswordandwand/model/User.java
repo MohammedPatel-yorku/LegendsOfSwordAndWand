@@ -22,8 +22,8 @@ public class User {
   @Column(nullable = false)
   private String password;
 
-  @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
-  private List<Hero> heroes = new ArrayList<>();
+  @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Party> parties = new ArrayList<>();
 
   public User(String username, String password) {
     this.username = username;

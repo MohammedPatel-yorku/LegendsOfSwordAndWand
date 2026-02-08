@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
-import com.university.project.legendsofswordandwand.repository.CampaignRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +20,11 @@ public class CampaignServiceTest {
 
   @Autowired private UserService userService;
 
-  @Autowired private CampaignRepository campaignRepository;
-
   @Test
   void startingCampaignCreatesCampaign() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user, HeroClass.MAGE, "Arcanis");
+    Campaign campaign = campaignService.startNewCampaign(user.getId(), HeroClass.MAGE, "Arcanis");
 
     assertNotNull(campaign.getId());
   }
@@ -36,7 +33,7 @@ public class CampaignServiceTest {
   void newCampaignStartsAtRoomOne() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user, HeroClass.WARRIOR, "Thor");
+    Campaign campaign = campaignService.startNewCampaign(user.getId(), HeroClass.WARRIOR, "Thor");
 
     assertEquals(1, campaign.getCurrentRoom());
   }
@@ -45,7 +42,7 @@ public class CampaignServiceTest {
   void newCampaignIsActive() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user, HeroClass.ROGUE, "Luna");
+    Campaign campaign = campaignService.startNewCampaign(user.getId(), HeroClass.ROGUE, "Luna");
 
     assertTrue(campaign.isActive());
   }
@@ -54,9 +51,9 @@ public class CampaignServiceTest {
   void startingCampaignCreatesNewHeroForUser() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user, HeroClass.CLERIC, "Nova");
+    Campaign campaign = campaignService.startNewCampaign(user.getId(), HeroClass.CLERIC, "Nova");
 
-    assertEquals(1, user.getHeroes().size());
-    assertEquals("Nova", user.getHeroes().get(0).getName());
+    assertEquals(user, campaign.getOwner());
+    assertEquals("Nova", campaign.getParty().getHeroes().get(0).getName());
   }
 }

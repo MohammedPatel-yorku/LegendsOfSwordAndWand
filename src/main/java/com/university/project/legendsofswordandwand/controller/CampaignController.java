@@ -1,7 +1,6 @@
 package com.university.project.legendsofswordandwand.controller;
 
 import com.university.project.legendsofswordandwand.model.Campaign;
-import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.service.CampaignService;
 import com.university.project.legendsofswordandwand.service.UserService;
@@ -31,9 +30,6 @@ public class CampaignController {
   @PostMapping("/start")
   public Campaign startCampaign(
       @RequestParam Long userId, @RequestParam String heroName, @RequestParam HeroClass heroClass) {
-    User user =
-        userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-
-    return campaignService.startNewCampaign(user, heroClass, heroName);
+    return campaignService.startNewCampaign(userId, heroClass, heroName);
   }
 }

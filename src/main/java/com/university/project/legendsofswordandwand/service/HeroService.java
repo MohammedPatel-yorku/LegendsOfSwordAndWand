@@ -1,10 +1,10 @@
 package com.university.project.legendsofswordandwand.service;
 
 import com.university.project.legendsofswordandwand.model.Hero;
-import com.university.project.legendsofswordandwand.model.User;
+import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.repository.HeroRepository;
-import com.university.project.legendsofswordandwand.repository.UserRepository;
+import com.university.project.legendsofswordandwand.repository.PartyRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,30 +16,34 @@ import org.springframework.stereotype.Service;
 public class HeroService {
 
   private final HeroRepository heroRepository;
-  private final UserRepository userRepository;
+  private final PartyRepository partyRepository;
 
   /**
-   * Creates a new base stat (Level 1, 100 HP, 10 Attack) Hero for User.
+   * Creates a new base stat (Level 1, 100 HP, 10 Attack) Hero for requesting Party.
    *
-   * @param userId ID of User to create Hero Object for
+   * @param partyId ID of Party to create Hero Object for
    * @param selectedHeroName Name to assign to Hero
    * @param selectedHeroClass Hero Class to assign to Hero
-   * @return Newly created and saved Hero Object
    */
-  public Hero createBaseHeroForUser(
-      Long userId, String selectedHeroName, HeroClass selectedHeroClass) {
-    User owner = userRepository.findById(userId).orElseThrow();
+  public void createBaseHeroForParty(
+      Long partyId, String selectedHeroName, HeroClass selectedHeroClass) {
+    Party party =
+        partyRepository
+            .findById(partyId)
+            .orElseThrow(() -> new RuntimeException("Party Not Found"));
 
-    Hero hero = new Hero();
-    hero.setName(selectedHeroName);
-    hero.setHeroClass(selectedHeroClass);
-    hero.setLevel(1);
-    hero.setHealth(100);
-    hero.setAttack(10);
-    hero.setOwner(owner);
+    Hero hero =
+        Hero.builder()
+            .name(selectedHeroName)
+            .heroClass(selectedHeroClass)
+            .level(1)
+            .health(100)
+            .attack(10)
+            .party(party)
+            .build();
 
-    owner.getHeroes().add(hero);
+    party.getHeroes().add(hero);
 
-    return heroRepository.save(hero);
+    heroRepository.save(hero);
   }
 }
