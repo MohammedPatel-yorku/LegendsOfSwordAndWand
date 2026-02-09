@@ -3,7 +3,6 @@ package com.university.project.legendsofswordandwand.controller;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.service.CampaignService;
-import com.university.project.legendsofswordandwand.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,10 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class CampaignController {
 
   private final CampaignService campaignService;
-  private final UserService userService;
 
   /**
-   * Starts new campaign, mapped to '/start'.
+   * Starts new campaign, mapped to POST '/start'.
    *
    * @param userId ID of User that Campaign belongs to
    * @param heroName Name to give to starting Hero
