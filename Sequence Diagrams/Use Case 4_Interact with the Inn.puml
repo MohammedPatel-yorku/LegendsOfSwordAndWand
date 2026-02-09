@@ -1,0 +1,76 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+title Use Case 4 - Interact with the Inn
+
+actor User
+boundary InnController
+control InnService
+control PartyService
+control InventoryService
+database PartyRepository
+database InventoryRepository
+
+User -> InnController: Enter Inn
+activate InnController
+
+InnController -> InnService: loadInnView(campaignId)
+activate InnService
+
+InnService -> PartyService: reviveAndHealParty()
+activate PartyService
+PartyService -> PartyRepository: updatePartyStatus()
+activate PartyRepository
+
+PartyRepository --> PartyService: Party updated
+deactivate PartyRepository
+deactivate PartyService
+
+InnService --> InnController: Display party status
+
+loop While User in Inn
+    User -> InnController: Select Inn action;
+
+    alt Buy Item
+        InnController -> InventoryService: purchaseItem(itemId)
+        activate InventoryService
+        InventoryService -> InventoryRepository: saveInventory()
+        activate InventoryRepository
+
+        InventoryRepository --> InventoryService: Inventory saved
+        deactivate InventoryService
+        InventoryRepository --> InnController: Purchase successful
+        deactivate InventoryRepository
+
+    else Recruit Hero
+        InnController -> PartyService: recruitHero(heroId)
+        activate PartyService
+        PartyService -> PartyRepository: saveParty()
+        activate PartyRepository
+
+        PartyRepository --> PartyService: Party saved
+        deactivate PartyRepository
+        PartyService --> InnController: Hero recruited
+        deactivate PartyService
+
+    else Leave Inn
+        InnController --> User: Exit Inn
+    end
+end
+
+InnController -> InnService: exitInn()
+InnService -> PartyRepository: savePartyState()
+activate PartyRepository
+
+PartyRepository --> InnService: Party state saved
+deactivate PartyRepository
+
+InnService --> InnController: Proceed to next room
+deactivate InnService
+
+InnController --> User: Show campaign view
+deactivate InnController
+
+@enduml

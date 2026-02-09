@@ -72,6 +72,25 @@ public class UserService {
             return false;
         }
 
+  private final UserRepository userRepository;
+
+  public User createUser(String username, String password) {
+    User user = new User(username, password);
+
+    return userRepository.save(user);
+  }
+
+  public User login(String username, String password) {
+    return userRepository
+        .findByUsername(username)
+        .filter(user -> user.getPassword().equals(password))
+        .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+  }
+
+  public User save(User user) {
+    return userRepository.save(user);
+  }
+
         return passwordEncoder.matches(password, user.getPassword());
     }
 

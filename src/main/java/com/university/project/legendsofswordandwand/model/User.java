@@ -1,6 +1,8 @@
 package com.university.project.legendsofswordandwand.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +21,9 @@ public class User {
 
   @Column(nullable = false)
   private String password;
+
+  @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Party> parties = new ArrayList<>();
 
   public User(String username, String password) {
     this.username = username;

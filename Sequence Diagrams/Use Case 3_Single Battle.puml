@@ -1,0 +1,78 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+title Use Case 3 - Single Battle
+
+actor User
+boundary BattleController
+control BattleService
+control TurnManager
+control AbilityExecutor
+control DamageCalculator
+database PartyRepository
+
+User -> BattleController: Enter battle room
+activate BattleController
+
+BattleController -> BattleService: startBattle(playerParty, enemyParty)
+activate BattleService
+
+BattleService -> TurnManager: initializeTurnOrder(parties)
+activate TurnManager
+TurnManager --> BattleService: Turn queue ready
+
+loop Each Turn Until Battle Ends
+    BattleService -> TurnManager: getNextUnit()
+    TurnManager --> BattleService: activeUnit
+
+    BattleService -> BattleController: requestAction(activeUnit)
+    BattleController -> User: Show available actions
+
+    User -> BattleController: Select action
+    BattleController -> BattleService: executeAction(action)
+
+    alt Attack / Ability
+        BattleService -> AbilityExecutor: executeAction
+        activate AbilityExecutor
+        AbilityExecutor -> DamageCalculator: calculateDamage()
+        activate DamageCalculator
+
+        DamageCalculator --> AbilityExecutor: Damage result
+        deactivate DamageCalculator
+        AbilityExecutor --> BattleService: Apply effects
+        deactivate AbilityExecutor
+
+    else Defend
+        BattleService -> BattleService: Restore HP and mana
+
+    else Wait
+        BattleService -> TurnManager: moveUnitToEnd(activeUnit)
+        deactivate TurnManager
+    end
+
+    BattleService -> BattleService: updatePartyStatus()
+end
+
+BattleService -> BattleService: checkBattleOutcome()
+
+alt Player Wins
+    BattleService -> PartyRepository: saveUpdatedParty()
+    activate PartyRepository
+
+    PartyRepository --> BattleService: Party saved
+    deactivate PartyRepository
+
+    BattleService --> BattleController: Battle result - victory
+
+else Player Loses
+    BattleService --> BattleController: Battle result - defeat
+end
+
+deactivate BattleService
+
+BattleController --> User: Show battle results
+deactivate BattleController
+
+@enduml
