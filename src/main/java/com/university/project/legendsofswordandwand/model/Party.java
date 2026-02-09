@@ -5,6 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
 
+/**
+ * Party Entity class mapped to 'parties' Table with Lombok getters, builder, no-args and all-args
+ * constructors. ID is automatically generated. Setter for owner field.
+ *
+ * <p>A Party is owned by a User and itself owns a List of Hero Objects.
+ */
 @Entity
 @Table(name = "parties")
 @Getter

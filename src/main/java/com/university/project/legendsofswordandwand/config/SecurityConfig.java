@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SecurityConfig {
 
   /**
-   * makes a PasswordEncoder bean that uses BCrypt hashing BCrypt is a hashing algorithm that
+   * Makes a PasswordEncoder Bean that uses BCrypt hashing. BCrypt is a hashing algorithm that
    * automatically applies salting and adaptive hashing
    *
    * @return a BCrypt-based PasswordEncoder

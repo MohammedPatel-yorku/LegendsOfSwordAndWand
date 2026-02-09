@@ -4,6 +4,12 @@ import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * Hero Entity class mapped to 'heroes' Table with Lombok getters, builder, no-args and all-args
+ * constructors. ID is automatically generated. Setters for all fields except ID.
+ *
+ * <p>A Hero owned by a Party. It has a name, HeroClass, level, health and attack stats.
+ */
 @Entity
 @Table(name = "heroes")
 @Getter

@@ -7,10 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 // made with the help of AI
-/**
- * service layer for handling logic related to users including registration, login, and operations
- * use case: User Registration and Login
- */
+/** User Object Service class. */
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -19,22 +16,21 @@ public class UserService {
   private final PasswordEncoder passwordEncoder;
 
   /**
-   * saves a user to the database method exists to keep unit testing requirements and delegates
-   * directly to the UserRepository
+   * Saves a User to the database.
    *
-   * @param user the user to be saved
-   * @return the saved user entity
+   * @param user User to be saved
+   * @return the saved User entity
    */
   public User save(User user) {
     return userRepository.save(user);
   }
 
   /**
-   * registers a new user by validating input, hashing the password, and the user.
+   * Registers a new User by validating input, hashing the password, and persisting the User.
    *
-   * @param username the username entered by the user
-   * @param password the unhashed password entered by the user
-   * @return true if registration is successful false otherwise
+   * @param username Username entered by the User
+   * @param password Unhashed password entered by the User
+   * @return true if registration is successful, false otherwise
    */
   public boolean registerUser(String username, String password) {
     if (!validate(username, password)) {
@@ -49,11 +45,11 @@ public class UserService {
   }
 
   /**
-   * authenticates a user by verifying the provided password against the stored hashed password
+   * Authenticates a User by verifying the provided password against the persisted hashed password.
    *
-   * @param username the username entered by the user
-   * @param password the raw password entered by the user
-   * @return true if login is successful false otherwise
+   * @param username Username entered by the user
+   * @param password Password entered by the user
+   * @return true if login is successful, false otherwise
    */
   public boolean loginUser(String username, String password) {
     User user = userRepository.findByUsername(username);
@@ -64,17 +60,11 @@ public class UserService {
     return passwordEncoder.matches(password, user.getPassword());
   }
 
-  public User createUser(String username, String password) {
-    User user = new User(username, password);
-
-    return userRepository.save(user);
-  }
-
   /**
-   * validates registration credentials.
+   * Validates registration credentials.
    *
-   * @param username the username to validate
-   * @param password the password to validate
+   * @param username Username to validate
+   * @param password Password to validate
    * @return true if both username and password are non-null and non-empty
    */
   private boolean validate(String username, String password) {
