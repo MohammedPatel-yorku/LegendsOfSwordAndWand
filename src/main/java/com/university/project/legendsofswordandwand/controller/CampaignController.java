@@ -30,6 +30,6 @@ public class CampaignController {
   @PostMapping("/start")
   public Campaign startCampaign(
       @RequestParam Long userId, @RequestParam String heroName, @RequestParam HeroClass heroClass) {
-    return campaignService.startNewCampaign(userId, heroClass, heroName);
+    return campaignService.startNewCampaign(userId, heroName, heroClass);
   }
 }

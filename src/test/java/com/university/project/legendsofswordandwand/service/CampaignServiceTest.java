@@ -24,7 +24,7 @@ public class CampaignServiceTest {
   void startingCampaignCreatesCampaign() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user.getId(), HeroClass.MAGE, "Arcanis");
+    Campaign campaign = campaignService.startNewCampaign(user.getId(), "Harry", HeroClass.MAGE);
 
     assertNotNull(campaign.getId());
   }
@@ -33,7 +33,7 @@ public class CampaignServiceTest {
   void newCampaignStartsAtRoomOne() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user.getId(), HeroClass.WARRIOR, "Thor");
+    Campaign campaign = campaignService.startNewCampaign(user.getId(), "Thor", HeroClass.WARRIOR);
 
     assertEquals(1, campaign.getCurrentRoom());
   }
@@ -42,16 +42,16 @@ public class CampaignServiceTest {
   void newCampaignIsActive() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user.getId(), HeroClass.ROGUE, "Luna");
+    Campaign campaign = campaignService.startNewCampaign(user.getId(), "Luna", HeroClass.ROGUE);
 
     assertTrue(campaign.isActive());
   }
 
   @Test
-  void startingCampaignCreatesNewHeroForUser() {
+  void startingCampaignOwnedByUserAndPartyAndHeroAdded() {
     User user = userService.createUser("user", "pass");
 
-    Campaign campaign = campaignService.startNewCampaign(user.getId(), HeroClass.CLERIC, "Nova");
+    Campaign campaign = campaignService.startNewCampaign(user.getId(), "Nova", HeroClass.CLERIC);
 
     assertEquals(user, campaign.getOwner());
     assertEquals("Nova", campaign.getParty().getHeroes().get(0).getName());
