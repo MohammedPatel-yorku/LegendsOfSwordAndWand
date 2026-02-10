@@ -1,4 +1,3 @@
 package com.university.project.legendsofswordandwand.battle;
 
-public class DamageCalculator {
-}
+public class DamageCalculator {}

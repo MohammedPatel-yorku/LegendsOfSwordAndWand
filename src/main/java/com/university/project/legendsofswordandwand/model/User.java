@@ -1,34 +1,38 @@
 package com.university.project.legendsofswordandwand.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+/**
+ * Campaign Entity class mapped to 'users' Table with Lombok getters and a no-args constructor. ID
+ * is automatically generated.
+ *
+ * <p>A User owns a List of Party Objects. It has a username and password.
+ */
 @Entity
 @Table(name = "users")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String username;
-    private String password;
+  @Column(nullable = false, unique = true)
+  private String username;
 
-    public Long getId() {
-        return id;
-    }
+  @Column(nullable = false)
+  private String password;
 
-    public String getUsername() {
-        return username;
-    }
+  @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Party> parties = new ArrayList<>();
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+  public User(String username, String password) {
+    this.username = username;
+    this.password = password;
+  }
 }

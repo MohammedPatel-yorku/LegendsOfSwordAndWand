@@ -1,4 +1,3 @@
 package com.university.project.legendsofswordandwand.model.enums;
 
-public class ActionType {
-}
+public class ActionType {}
