@@ -16,7 +16,7 @@ public class InnService {
     private final InventoryRepository inventoryRepository;
 
     /**
-     * Load the inn view: revives and heals party (stub).
+     * Load the inn view: revives and heals party.
      *
      * @param partyId ID of the party entering the inn
      * @return Updated party state
@@ -47,3 +47,4 @@ public class InnService {
         return "Proceed to next room.";
     }
 }
+
