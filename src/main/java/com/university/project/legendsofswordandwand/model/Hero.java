@@ -8,43 +8,49 @@ import lombok.*;
  * Hero Entity class mapped to 'heroes' Table with Lombok getters, builder, no-args and all-args
  * constructors. ID is automatically generated. Setters for all fields except ID.
  *
- * <p>A Hero owned by a Party. It has a name, HeroClass, level, health and attack stats.
+ * <p>A Hero
  */
+
 @Entity
 @Table(name = "heroes")
-@Getter
+@Data // Use @Data to generate all Getters, Setters, and Required Methods
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Hero {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  @Setter
-  private String name;
+    @Column(nullable = false)
+    private String name;
 
-  @Column(name = "hero_class", nullable = false)
-  @Setter
-  @Enumerated(EnumType.STRING)
-  private HeroClass heroClass;
+    @Column(name = "hero_class", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private HeroClass heroClass;
 
-  @Column(nullable = false)
-  @Setter
-  private int level;
+    @Builder.Default
+    @Column(nullable = false)
+    private int level = 1;
 
-  @Column(nullable = false)
-  @Setter
-  private int health;
+    @Builder.Default
+    @Column(nullable = false)
+    private int health = 100;
 
-  @Column(nullable = false)
-  @Setter
-  private int attack;
+    @Builder.Default
+    @Column(nullable = false)
+    private int attack = 5;
 
-  @ManyToOne
-  @JoinColumn(name = "party_id")
-  @Setter
-  private Party party;
+    @Builder.Default
+    @Column(nullable = false)
+    private int defense = 5;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private int mana = 50;
+
+    @ManyToOne
+    @JoinColumn(name = "party_id")
+    private Party party;
 }
