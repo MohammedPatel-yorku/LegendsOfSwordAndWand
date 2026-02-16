@@ -70,4 +70,13 @@ public class UserService {
   private boolean validate(String username, String password) {
     return username != null && password != null && !username.isEmpty() && !password.isEmpty();
   }
+
+  public User createUser(String username, String password) {
+    String hashedPassword = passwordEncoder.encode(password);
+    User user = User.builder()
+            .username(username)
+            .password(hashedPassword)
+            .build();
+    return userRepository.save(user);
+  }
 }
