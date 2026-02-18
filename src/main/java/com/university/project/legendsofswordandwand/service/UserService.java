@@ -73,10 +73,7 @@ public class UserService {
 
   public User createUser(String username, String password) {
     String hashedPassword = passwordEncoder.encode(password);
-    User user = User.builder()
-            .username(username)
-            .password(hashedPassword)
-            .build();
+    User user = User.builder().username(username).password(hashedPassword).build();
     return userRepository.save(user);
   }
 }
