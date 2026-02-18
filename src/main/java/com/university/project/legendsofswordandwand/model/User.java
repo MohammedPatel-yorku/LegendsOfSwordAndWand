@@ -3,13 +3,22 @@ package com.university.project.legendsofswordandwand.model;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
+
+/**
+ * Campaign Entity class mapped to 'users' Table with Lombok getters and a no-args constructor. ID
+ * is automatically generated.
+ *
+ * <p>A User owns a List of Party Objects. It has a username and password.
+ */
 
 @Entity
 @Table(name = "users")
 @Getter
+@Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
   @Id
@@ -23,6 +32,7 @@ public class User {
   private String password;
 
   @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
   private List<Party> parties = new ArrayList<>();
 
   public User(String username, String password) {
