@@ -1,29 +1,38 @@
 package com.university.project.legendsofswordandwand.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.university.project.legendsofswordandwand.model.User;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-@ActiveProfiles("test")
+import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
-public class UserRepositoryTest {
+class UserRepositoryTest {
 
-  @Autowired private UserRepository userRepository;
+  @Autowired
+  private UserRepository userRepository;
 
   @Test
-  void saveAndFindUser() {
-    User user = new User("username", "password");
-    User savedUser = userRepository.save(user);
+  @DisplayName("have user and find by username")
+  void testFindByUsername() {
 
-    assertThat(savedUser.getId()).isNotNull();
+    User user = new User("wizard", "hashedPassword");
+    userRepository.save(user);
 
-    User found = userRepository.findById(savedUser.getId()).orElseThrow();
+    User found = userRepository.findByUsername("wizard");
 
-    assertThat(found.getUsername()).isEqualTo("username");
-    assertThat(found.getPassword()).isEqualTo("password");
+    assertThat(found).isNotNull();
+    assertThat(found.getUsername()).isEqualTo("wizard");
+    assertThat(found.getPassword()).isEqualTo("hashedPassword");
+  }
+
+  @Test
+  @DisplayName("Return null when username not found")
+  void testFindByUsername_NotFound() {
+
+    User found = userRepository.findByUsername("ghost");
+
+    assertThat(found).isNull();
   }
 }
