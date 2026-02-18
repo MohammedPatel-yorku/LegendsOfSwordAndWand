@@ -1,15 +1,10 @@
 package com.university.project.legendsofswordandwand.service;
 
-import com.university.project.legendsofswordandwand.model.Party;
-import com.university.project.legendsofswordandwand.repository.InventoryRepository;
-import com.university.project.legendsofswordandwand.repository.PartyRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -18,58 +13,65 @@ import static org.mockito.Mockito.*;
 class InnServiceTest {
 
     @Mock
-    private PartyRepository partyRepository;
+    private PartyService partyService;
 
     @Mock
-    private InventoryRepository inventoryRepository;
+    private InventoryService inventoryService;
 
     @InjectMocks
     private InnService innService;
 
-    // loadInnView properly calls reviveAndHealParty and returns correct message
+    // loadInnView should call reviveAndHealParty and return correct message
     @Test
     void loadInnView_shouldReturnPartyStatusMessage() {
-        Long partyId = 1L;
-        Party party = new Party();
+        Long campaignId = 1L;
 
-        when(partyRepository.findById(partyId))
-                .thenReturn(Optional.of(party));
-
-        String result = innService.loadInnView(partyId);
+        String result = innService.loadInnView(campaignId);
 
         assertEquals("Party status displayed.", result);
-        verify(partyRepository).findById(partyId);
+        verify(partyService).reviveAndHealParty(campaignId);
     }
 
-    // reviveAndHealParty throws exception if party not found
+    // reviveAndHealParty should throw exception if PartyService throws exception
     @Test
     void reviveAndHealParty_whenPartyNotFound_shouldThrowException() {
-        Long partyId = 99L;
+        Long campaignId = 99L;
 
-        when(partyRepository.findById(partyId))
-                .thenReturn(Optional.empty());
+        doThrow(new RuntimeException("Party not found."))
+                .when(partyService).reviveAndHealParty(campaignId);
 
         RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> innService.reviveAndHealParty(partyId));
+                () -> innService.loadInnView(campaignId));
 
         assertEquals("Party not found.", exception.getMessage());
-        verify(partyRepository).findById(partyId);
+        verify(partyService).reviveAndHealParty(campaignId);
     }
 
     // purchaseItem should return true
     @Test
     void purchaseItem_shouldReturnTrue() {
-        boolean result = innService.purchaseItem(1L);
+        Long campaignId = 1L;
+        Long itemId = 2L;
+
+        when(inventoryService.purchaseItem(campaignId, itemId))
+                .thenReturn(true);
+
+        boolean result = innService.purchaseItem(campaignId, itemId);
 
         assertTrue(result);
+        verify(inventoryService).purchaseItem(campaignId, itemId);
     }
 
     // recruitHero should return true
     @Test
     void recruitHero_shouldReturnTrue() {
-        boolean result = innService.recruitHero(1L, 2L);
+        Long campaignId = 1L;
+        Long heroId = 2L;
+
+        boolean result = innService.recruitHero(campaignId, heroId);
 
         assertTrue(result);
+        verify(partyService).recruitHero(campaignId, heroId);
     }
 
     // exitInn should return correct message
