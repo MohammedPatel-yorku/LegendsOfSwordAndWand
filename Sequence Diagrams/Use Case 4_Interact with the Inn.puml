@@ -1,9 +1,10 @@
 @startuml
 'https://plantuml.com/sequence-diagram
 
-autonumber
+@startuml
+'autonumber
 
-title Use Case 4 - Interact with the Inn
+title Use Case 4 - Interact with the Inn (Campaign specific)
 
 actor User
 boundary InnController
@@ -13,15 +14,15 @@ control InventoryService
 database PartyRepository
 database InventoryRepository
 
-User -> InnController: Enter Inn
+User -> InnController: Enter Inn (campaignId)
 activate InnController
 
 InnController -> InnService: loadInnView(campaignId)
 activate InnService
 
-InnService -> PartyService: reviveAndHealParty()
+InnService -> PartyService: reviveAndHealParty(campaignId)
 activate PartyService
-PartyService -> PartyRepository: updatePartyStatus()
+PartyService -> PartyRepository: updatePartyStatus(campaignId)
 activate PartyRepository
 
 PartyRepository --> PartyService: Party updated
@@ -34,20 +35,29 @@ loop While User in Inn
     User -> InnController: Select Inn action;
 
     alt Buy Item
-        InnController -> InventoryService: purchaseItem(itemId)
+        InnController -> InventoryService: purchaseItem(campaignId, itemId)
         activate InventoryService
-        InventoryService -> InventoryRepository: saveInventory()
+        InventoryService -> PartyService: getActiveParty(campaignId)
+        activate PartyService
+        PartyService -> PartyRepository: findActivePartyByCampaignId(campaignId)
+        activate PartyRepository
+        PartyRepository --> PartyService: Party returned
+        deactivate PartyRepository
+        PartyService --> InventoryService: Party with id (partyId)
+        deactivate PartyService
+
+        InventoryService -> InventoryRepository: saveInventory(partyId, itemId)
         activate InventoryRepository
 
         InventoryRepository --> InventoryService: Inventory saved
-        deactivate InventoryService
-        InventoryRepository --> InnController: Purchase successful
         deactivate InventoryRepository
+        InventoryService --> InnController: Purchase successful
+        deactivate InventoryService
 
     else Recruit Hero
-        InnController -> PartyService: recruitHero(heroId)
+        InnController -> PartyService: recruitHero(campaignId, heroId)
         activate PartyService
-        PartyService -> PartyRepository: saveParty()
+        PartyService -> PartyRepository: saveParty(campaignId)
         activate PartyRepository
 
         PartyRepository --> PartyService: Party saved
@@ -60,8 +70,8 @@ loop While User in Inn
     end
 end
 
-InnController -> InnService: exitInn()
-InnService -> PartyRepository: savePartyState()
+InnController -> InnService: exitInn(campaignId)
+InnService -> PartyRepository: savePartyState(campaignId)
 activate PartyRepository
 
 PartyRepository --> InnService: Party state saved
