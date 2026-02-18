@@ -3,21 +3,40 @@
 
 actor User
 
-component LegendsOfSwordAndWand <<system>> {
-    port SystemEntry
-    interface startCampaign
-    package "Web Layer" {
-        component CampaignController <<component>> {
-            port request
-        }
-    }
+package "Presentation Layer" {
+  component "CampaignController" as CC
 }
 
-interface GUI
+package "Business Layer" {
+  component "HeroService" as HS
+  component "CampaignService" as CS
+  component "PartyService" as PS
+}
 
-User --> GUI
-GUI --> SystemEntry
-SystemEntry --> startCampaign
-startCampaign --> request
+package "Persistence Layer" {
+  component "CampaignRepository" as CR
+  component "HeroRepository" as HR
+  component "PartyRepository" as PR
+}
+
+database "MySQL Database" as DB
+
+' === Connections ===
+
+User --> CC
+
+CC --> CS
+
+CS --> HS
+CS --> PS
+CS --> CR
+
+HS --> HR
+PS --> PR
+
+CR --> DB
+HR --> DB
+PR --> DB
+
 
 @enduml

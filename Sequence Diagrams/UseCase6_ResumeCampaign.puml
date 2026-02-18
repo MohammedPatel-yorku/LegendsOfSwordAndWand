@@ -1,0 +1,34 @@
+@startuml
+title Use Case 6 - Continue Incomplete PvE Campaign
+
+autonumber
+
+actor User
+boundary CampaignController
+control CampaignService
+database CampaignRepository
+database HeroRepository
+
+User -> CampaignController : Select "Continue Campaign"
+activate CampaignController
+
+CampaignController -> CampaignService : resumeCampaign(userId)
+activate CampaignService
+
+CampaignService -> CampaignRepository : findByUserId(userId)
+activate CampaignRepository
+CampaignRepository --> CampaignService : return Campaign entity
+deactivate CampaignRepository
+
+CampaignService -> HeroRepository : findHeroesByCampaignId(id)
+activate HeroRepository
+HeroRepository --> CampaignService : return List<Hero>
+deactivate HeroRepository
+
+CampaignService --> CampaignController : return loaded campaign
+deactivate CampaignService
+
+CampaignController --> User : Display Campaign/Inn View
+deactivate CampaignController
+
+@enduml
