@@ -1,60 +1,52 @@
 package com.university.project.legendsofswordandwand.service;
 
-import com.university.project.legendsofswordandwand.service.InventoryService;
-import com.university.project.legendsofswordandwand.service.PartyService;
+import com.university.project.legendsofswordandwand.model.Inventory;
+import com.university.project.legendsofswordandwand.model.Party;
+import com.university.project.legendsofswordandwand.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
+/**
+ * InventoryService handles business logic for Inventory objects.
+ */
 @Service
-@Transactional
 @RequiredArgsConstructor
-public class InnService {
+public class InventoryService {
 
+    private final InventoryRepository inventoryRepository;
     private final PartyService partyService;
-    private final InventoryService inventoryService;
 
     /**
-     * Load the inn view: revives and heals the party for this campaign.
+     * Get all items in the inventory for a specific party.
      *
-     * @param campaignId ID of the campaign entering the inn
-     * @return Updated party state message
+     * @param partyId ID of the party
+     * @return List of Inventory objects
      */
-    public String loadInnView(Long campaignId) {
-        partyService.reviveAndHealParty(campaignId);
-        return "Party status displayed.";
+    public List<Inventory> getInventoryByParty(Long partyId) {
+        return inventoryRepository.findByPartyId(partyId);
     }
 
     /**
-     * Purchase an item in the inn for the campaign's party.
+     * Purchase an item for the party belonging to the given campaign.
      *
      * @param campaignId ID of the campaign
      * @param itemId     ID of the item to purchase
      * @return true if purchase is successful
      */
     public boolean purchaseItem(Long campaignId, Long itemId) {
-        return inventoryService.purchaseItem(campaignId, itemId);
-    }
 
-    /**
-     * Recruit a hero in the inn for the campaign's party.
-     *
-     * @param campaignId ID of the campaign
-     * @param heroId     ID of the hero to recruit
-     * @return true if recruitment is successful
-     */
-    public boolean recruitHero(Long campaignId, Long heroId) {
-        partyService.recruitHero(campaignId, heroId);
         return true;
     }
 
     /**
-     * Exit the inn and save party state.
+     * Save or update an inventory in the database.
      *
-     * @param campaignId ID of the campaign
-     * @return message for next room
+     * @param inventory Inventory object to save
+     * @return saved Inventory object
      */
-    public String exitInn(Long campaignId) {
-        return "Proceed to next room.";
+    public Inventory saveInventory(Inventory inventory) {
+        return inventoryRepository.save(inventory);
     }
 }
