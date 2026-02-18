@@ -1,0 +1,78 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+title Send a PvP Battle Invitation
+
+actor User
+
+boundary PvPController
+control PvPService
+control BattleService
+database UserRepository
+database PartyRepository
+database PvPRepository
+database LeagueRepository
+
+actor Enemy
+
+== Send Invitation ==
+User -> PvPController: sendInvite(enemyUsername)
+activate PvPController
+PvPController -> PvPService: createInvitation(userId, enemyUsername, selectedParty)
+activate PvPService
+
+
+PvPService -> UserRepository: findByUsername(enemyUsername)
+activate UserRepository
+
+alt Player Does Not Exist
+    UserRepository --> PvPService: null
+    PvPService --> PvPController: error
+
+else Player Found
+    UserRepository --> PvPService: enemyUser
+    deactivate UserRepository
+
+    PvPService -> PartyRepository: hasSavedParty(enemyId)
+    activate PartyRepository
+
+    alt Enemy Has Saved Party
+        PartyRepository --> PvPService: true
+
+        PvPService -> PvPRepository: save(invitation)
+        activate PvPRepository
+        PvPRepository --> PvPService: Invitation Saved
+        deactivate PvPRepository
+        PvPService --> PvPController: success
+
+    else Enemy Has No Saved Party
+        PartyRepository --> PvPService: false
+        deactivate PartyRepository
+
+        PvPService --> PvPController: failed
+        deactivate PvPService
+
+    end
+
+end
+
+PvPController --> User: Display Invitation Result
+deactivate PvPController
+
+== Accept Invitation ==
+Enemy -> PvPController: acceptInvite(inviteId)
+PvPController -> PvPService: acceptInvitation(inviteId)
+
+PvPService -> PvPRepository: updateStatus(accepted)
+
+== Select Parties and Start Battle ==
+PvPService -> PartyRepository: getSavedParties(userId, enemyId)
+PvPService -> BattleService: startBattle(userParty, enemyParty)
+
+== Battle Ends ==
+BattleService -> UserRepository: updatePlayerStats()
+BattleService -> LeagueRepository: updateStandings()
+
+@enduml

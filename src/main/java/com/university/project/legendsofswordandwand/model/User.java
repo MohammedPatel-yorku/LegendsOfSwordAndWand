@@ -3,16 +3,14 @@ package com.university.project.legendsofswordandwand.model;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.*;
 
 /**
- * Campaign Entity class mapped to 'users' Table with Lombok getters and a no-args constructor. ID
- * is automatically generated.
+ * User Entity class mapped to 'users' Table with Lombok getters and a no-args constructor. ID is
+ * automatically generated.
  *
  * <p>A User owns a List of Party Objects. It has a username and password.
  */
-
 @Entity
 @Table(name = "users")
 @Getter

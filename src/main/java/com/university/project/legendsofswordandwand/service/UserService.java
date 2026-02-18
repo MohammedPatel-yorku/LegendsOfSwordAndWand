@@ -58,30 +58,36 @@ public class UserService {
         return "registration successful.";
     }
 
-    /**
-     * logs a user in
-     */
-    public String loginUser(String username, String password) {
+  /**
+   * Authenticates a User by verifying the provided password against the persisted hashed password.
+   *
+   * @param username Username entered by the user
+   * @param password Password entered by the user
+   * @return true if login is successful, false otherwise
+   */
+  public boolean loginUser(String username, String password) {
+    User user = userRepository.findByUsername(username).orElse(null);
 
-        User user = userRepository.findByUsername(username);
-
-        if (user == null) {
-            return "user not found.";
-        }
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            return "incorrect password.";
-        }
-
-        return "login successful.";
+    if (user == null) {
+      return false;
     }
+    return passwordEncoder.matches(password, user.getPassword());
+  }
 
-    /**
-     * validates credentials
-     */
-    private boolean validate(String username, String password) {
-        return username != null && password != null
-                && !username.isEmpty()
-                && !password.isEmpty();
-    }
+  /**
+   * Validates registration credentials.
+   *
+   * @param username Username to validate
+   * @param password Password to validate
+   * @return true if both username and password are non-null and non-empty
+   */
+  private boolean validate(String username, String password) {
+    return username != null && password != null && !username.isEmpty() && !password.isEmpty();
+  }
+
+  public User createUser(String username, String password) {
+    String hashedPassword = passwordEncoder.encode(password);
+    User user = User.builder().username(username).password(hashedPassword).build();
+    return userRepository.save(user);
+  }
 }
