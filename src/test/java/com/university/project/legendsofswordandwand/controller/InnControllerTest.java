@@ -1,5 +1,8 @@
 package com.university.project.legendsofswordandwand.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
 import com.university.project.legendsofswordandwand.service.InnService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -7,17 +10,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class InnControllerTest {
 
-    @Mock
-    private InnService innService;
+  @Mock private InnService innService;
 
-    @InjectMocks
-    private InnController innController;
+  @InjectMocks private InnController innController;
 
     // Enter inn
     @Test

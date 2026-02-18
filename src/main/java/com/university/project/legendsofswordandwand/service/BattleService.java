@@ -1,9 +1,11 @@
 package com.university.project.legendsofswordandwand.service;
 
 import com.university.project.legendsofswordandwand.model.Hero;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class BattleService {
 
   public void fight(Hero a, Hero b) {

@@ -1,0 +1,23 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+actor User
+
+component LegendsOfSwordAndWand <<system>> {
+    port SystemEntry
+    interface startCampaign
+    package "Web Layer" {
+        component CampaignController <<component>> {
+            port request
+        }
+    }
+}
+
+interface GUI
+
+User --> GUI
+GUI --> SystemEntry
+SystemEntry --> startCampaign
+startCampaign --> request
+
+@enduml

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/campaign/{campaignId}/inn")
 public class InnController {
 
-    private final InnService innService;
+  private final InnService innService;
 
     /**
      * Enter the inn for a specific campaign.

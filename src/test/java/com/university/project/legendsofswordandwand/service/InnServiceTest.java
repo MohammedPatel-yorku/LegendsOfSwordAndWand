@@ -18,8 +18,7 @@ class InnServiceTest {
     @Mock
     private InventoryService inventoryService;
 
-    @InjectMocks
-    private InnService innService;
+  @InjectMocks private InnService innService;
 
     // loadInnView should call reviveAndHealParty and return correct message
     @Test
@@ -74,11 +73,11 @@ class InnServiceTest {
         verify(partyService).recruitHero(campaignId, heroId);
     }
 
-    // exitInn should return correct message
-    @Test
-    void exitInn_shouldReturnNextRoomMessage() {
-        String result = innService.exitInn(1L);
+  // exitInn should return correct message
+  @Test
+  void exitInn_shouldReturnNextRoomMessage() {
+    String result = innService.exitInn(1L);
 
-        assertEquals("Proceed to next room.", result);
-    }
+    assertEquals("Proceed to next room.", result);
+  }
 }
