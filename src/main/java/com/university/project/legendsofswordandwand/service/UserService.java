@@ -52,7 +52,7 @@ public class UserService {
    * @return true if login is successful, false otherwise
    */
   public boolean loginUser(String username, String password) {
-    User user = userRepository.findByUsername(username);
+    User user = userRepository.findByUsername(username).orElse(null);
 
     if (user == null) {
       return false;
