@@ -4,10 +4,10 @@ import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-//made with the help of AI
+
 /**
  * service layer for handling logic related to users
- * including registration, login, and operations
+ * including registration and login
  * use case: User Registration and Login
  */
 @Service
@@ -18,9 +18,6 @@ public class UserService {
 
     /**
      * constructs a UserService with the needed dependencies
-     *
-     * @param userRepository repository used to persist and retrieve users
-     * @param passwordEncoder encoder used to hash and verify passwords
      */
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder) {
@@ -29,76 +26,56 @@ public class UserService {
     }
 
     /**
-     * saves a user to the database
-     * method exists to keep unit testing requirements
-     * and delegates directly to the UserRepository
-     * @param user the user to be saved
-     * @return the saved user entity
+     * saves a user to the database (used for testing)
      */
     public User save(User user) {
         return userRepository.save(user);
     }
 
     /**
-     * registers a new user by validating input, hashing the password,
-     * and the user.
-     * @param username the username entered by the user
-     * @param password the unhashed password entered by the user
-     * @return true if registration is successful false otherwise
+     * registers a new user
      */
-    public boolean registerUser(String username, String password) {
+    public String registerUser(String username, String password) {
+
         if (!validate(username, password)) {
-            return false;
+            return "username and password must not be empty.";
         }
 
+        // check duplicate username
+        User existingUser = userRepository.findByUsername(username);
+        if (existingUser != null) {
+            return "username already exists. please choose another.";
+        }
+
+        // hash password
         String hashedPassword = passwordEncoder.encode(password);
+
         User user = new User(username, hashedPassword);
         userRepository.save(user);
 
-        return true;
+        return "registration successful.";
     }
 
     /**
-     * authenticates a user by verifying the provided password against
-     * the stored hashed password
-     * @param username the username entered by the user
-     * @param password the raw password entered by the user
-     * @return true if login is successful false otherwise
+     * logs a user in
      */
-    public boolean loginUser(String username, String password) {
+    public String loginUser(String username, String password) {
+
         User user = userRepository.findByUsername(username);
 
         if (user == null) {
-            return false;
+            return "user not found.";
         }
 
-  private final UserRepository userRepository;
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            return "incorrect password.";
+        }
 
-  public User createUser(String username, String password) {
-    User user = new User(username, password);
-
-    return userRepository.save(user);
-  }
-
-  public User login(String username, String password) {
-    return userRepository
-        .findByUsername(username)
-        .filter(user -> user.getPassword().equals(password))
-        .orElseThrow(() -> new RuntimeException("Invalid credentials"));
-  }
-
-  public User save(User user) {
-    return userRepository.save(user);
-  }
-
-        return passwordEncoder.matches(password, user.getPassword());
+        return "login successful.";
     }
 
     /**
-     * validates registration credentials.
-     * @param username the username to validate
-     * @param password the password to validate
-     * @return true if both username and password are non-null and non-empty
+     * validates credentials
      */
     private boolean validate(String username, String password) {
         return username != null && password != null
