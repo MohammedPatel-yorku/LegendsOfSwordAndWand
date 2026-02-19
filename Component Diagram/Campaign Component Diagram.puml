@@ -1,42 +1,145 @@
 @startuml
-'https://plantuml.com/component-diagram
 
-actor User
+title Detailed Layered Architecture with Ports and Interfaces
 
-package "Presentation Layer" {
-  component "CampaignController" as CC
+' --- Actor ---
+() User
+
+' --- UI Layer ---
+component UI {
+    port uiPort
 }
-
-package "Business Layer" {
-  component "HeroService" as HS
-  component "CampaignService" as CS
-  component "PartyService" as PS
+package "Controller Layer" {
+    component BattleController {
+        port bcInPort
+        port bcOutPort
+    }
+    component CampaignController {
+        port ccInPort
+        port ccOutPort
+    }
+    component InnController {
+        port icInPort
+        port icOutPort
+    }
+    component PvPController {
+        port pcInPort
+        port pcOutPort
+    }
+    component UserController {
+        port ucInPort
+        port ucOutPort
+    }
 }
-
+package "Service Layer" {
+    component BattleService {
+        port bsInPort
+        port bsOutPort
+    }
+    component CampaignService {
+        port csInPort
+        port csOutPort
+    }
+    component HeroService {
+        port hsInPort
+        port hsOutPort
+    }
+    component PartyService {
+        port psInPort
+        port psOutPort
+    }
+    component InnService {
+        port isInPort
+        port isOutPort
+    }
+    component PvPService {
+        port vsInPort
+        port vsOutPort
+    }
+    component UserService {
+        port usInPort
+        port usOutPort
+    }
+}
 package "Persistence Layer" {
-  component "CampaignRepository" as CR
-  component "HeroRepository" as HR
-  component "PartyRepository" as PR
+    component CampaignRepository {
+        port crInPort
+        port crOutPort
+    }
+    component HeroRepository {
+        port hrInPort
+        port hrOutPort
+    }
+    component InventoryRepository {
+        port irInPort
+        port irOutPort
+    }
+    component PartyRepository {
+        port prInPort
+        port prOutPort
+    }
+    component PvPInvitationRepository {
+        port vrInPort
+        port vrOutPort
+    }
+    component UserRepository {
+        port urInPort
+        port urOutPort
+    }
 }
 
+User .u.> UI
+
+uiPort -u-( IBattleController
+uiPort -u-( ICampaignController
+uiPort -u-( IInnController
+uiPort -u-( IPvPController
+uiPort -u-( IUserController
+
+bcInPort -d-() IBattleController
+ccInPort -d-() ICampaignController
+icInPort -d-() IInnController
+pcInPort -d-() IPvPController
+ucInPort -d-() IUserController
+
+bcOutPort -u-( IBattleService
+ccOutPort -u-( ICampaignService
+icOutPort -u-( IInnService
+pcOutPort -u-( IPvPService
+ucOutPort -u-( IUserService
+
+bsInPort -d-() IBattleService
+csInPort -d-() ICampaignService
+isInPort -d-() IInnService
+vsInPort -d-() IPvPService
+usInPort -d-() IUserService
+
+PartyService ..> HeroService
+CampaignService ..> PartyService
+PvPService ..> PartyService
+BattleService ..> PartyService
+InnService ..> PartyService
+
+csOutPort -u-( ICampaignRepository
+hsOutPort -u-( IHeroRepository
+psOutPort -u-( IPartyRepository
+isOutPort -u-( IInventoryRepository
+vsOutPort -u-( IPvPInvitationRepository
+usOutPort -u-( IUserRepository
+
+crInPort -d-() ICampaignRepository
+hrInPort -d-() IHeroRepository
+irInPort -d-() IInventoryRepository
+prInPort -d-() IPartyRepository
+vrInPort -d-() IPvPInvitationRepository
+urInPort -d-() IUserRepository
+
+' Repositories access database
 database "MySQL Database" as DB
-
-' === Connections ===
-
-User --> CC
-
-CC --> CS
-
-CS --> HS
-CS --> PS
-CS --> CR
-
-HS --> HR
-PS --> PR
-
-CR --> DB
-HR --> DB
-PR --> DB
-
+crOutPort .u.> DB
+hrOutPort .u.> DB
+irOutPort .u.> DB
+prOutPort .u.> DB
+urOutPort .u.> DB
 
 @enduml
