@@ -6,43 +6,57 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-// made with the help of AI
-/** User Object Service class. */
+/**
+ * service layer for handling logic related to users
+ * including registration and login
+ * use case: User Registration and Login
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-  private final UserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-  /**
-   * Saves a User to the database.
-   *
-   * @param user User to be saved
-   * @return the saved User entity
-   */
-  public User save(User user) {
-    return userRepository.save(user);
-  }
-
-  /**
-   * Registers a new User by validating input, hashing the password, and persisting the User.
-   *
-   * @param username Username entered by the User
-   * @param password Unhashed password entered by the User
-   * @return true if registration is successful, false otherwise
-   */
-  public boolean registerUser(String username, String password) {
-    if (!validate(username, password)) {
-      return false;
+    /**
+     * constructs a UserService with the needed dependencies
+     */
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    String hashedPassword = passwordEncoder.encode(password);
-    User user = new User(username, hashedPassword);
-    userRepository.save(user);
+    /**
+     * saves a user to the database (used for testing)
+     */
+    public User save(User user) {
+        return userRepository.save(user);
+    }
 
-    return true;
-  }
+    /**
+     * registers a new user
+     */
+    public String registerUser(String username, String password) {
+
+        if (!validate(username, password)) {
+            return "username and password must not be empty.";
+        }
+
+        // check duplicate username
+        User existingUser = userRepository.findByUsername(username);
+        if (existingUser != null) {
+            return "username already exists. please choose another.";
+        }
+
+        // hash password
+        String hashedPassword = passwordEncoder.encode(password);
+
+        User user = new User(username, hashedPassword);
+        userRepository.save(user);
+
+        return "registration successful.";
+    }
 
   /**
    * Authenticates a User by verifying the provided password against the persisted hashed password.
