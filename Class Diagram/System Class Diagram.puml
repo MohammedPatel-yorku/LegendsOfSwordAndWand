@@ -149,12 +149,14 @@ class CampaignService
 class BattleService
 class PartyService
 class InventoryService
+class HeroService
 
 BattleService --> Battle
 CampaignService --> Campaign
 PartyService --> Party
 UserService --> User
 InventoryService --> Inventory
+HeroService --> HeroFactory
 
 }
 
@@ -165,11 +167,13 @@ interface CampaignRepository
 interface PartyRepository
 interface HeroRepository
 interface InventoryRepository
+interface HeroRepository
 
 UserService --> UserRepository
 CampaignService --> CampaignRepository
 PartyService --> PartyRepository
 InventoryService --> InventoryRepository
+HeroService --> HeroRepository
 
 }
 
