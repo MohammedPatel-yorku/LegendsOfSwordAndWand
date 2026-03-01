@@ -23,7 +23,7 @@ activate UserService
 UserService -> UserService: validate(username, password)
 
 alt Invalid Input
-    UserService --> UserController: "Username and password must not be empty."
+    UserService --> UserController: throw new IllegalArgumentException
 
 else Valid Input
     UserService -> UserRepository: findByUsername(username)
@@ -32,7 +32,7 @@ else Valid Input
     alt Username Already Exists
         UserRepository --> UserService: existing user
         deactivate UserRepository
-        UserService --> UserController: "Username already exists."
+        UserService --> UserController: throw new UsernameAlreadyExistsException
 
     else Username Available
         UserRepository --> UserService: null
@@ -71,7 +71,7 @@ activate UserRepository
 alt User Not Found
     UserRepository --> UserService: null
     deactivate UserRepository
-    UserService --> UserController: "User not found."
+    UserService --> UserController: throw new UserNotFoundException
 
 else User Found
     UserRepository --> UserService: User
@@ -83,7 +83,7 @@ else User Found
     alt Password Incorrect
         PasswordEncoder --> UserService: false
         deactivate PasswordEncoder
-        UserService --> UserController: "Incorrect password."
+        UserService --> UserController: throw new IncorrectPasswordException
 
     else Password Correct
         PasswordEncoder --> UserService: true

@@ -15,6 +15,7 @@ database HeroRepository
 database CampaignRepository
 control InventoryService
 database InventoryRepository
+control UserService
 database UserRepository
 
 ==Start New Campaign==
@@ -111,10 +112,14 @@ activate CampaignRepository
 CampaignRepository --> CampaignService: Campaign deleted
 deactivate CampaignRepository
 
-CampaignService -> UserRepository: update(score)
+CampaignService -> UserService: update(score)
+activate UserService
+UserService -> UserRepository: save()
 activate UserRepository
-UserRepository --> CampaignService: Score Saved
+UserRepository --> UserService: Score Saved
 deactivate UserRepository
+UserService --> CampaignService: Score Updated
+deactivate UserService
 
 CampaignService --> CampaignController: return score
 deactivate CampaignService
@@ -134,8 +139,8 @@ alt 5 Parties Saved
         CampaignService -> PartyRepository: delete(partyToReplaceId)
         activate PartyRepository
         PartyRepository --> CampaignService: Party Deleted
-        CampaignService -> CampaignRepository: save(partyId)
-        CampaignRepository --> CampaignService: Party Saved
+        CampaignService -> PartyRepository: save(partyId)
+        PartyRepository --> CampaignService: Party Saved
         deactivate PartyRepository
 
         CampaignService --> CampaignController: Party Replaced

@@ -27,7 +27,8 @@ loop Each Turn Until Battle Ends
     BattleService -> TurnManager: getNextUnit()
     TurnManager --> BattleService: activeUnit
 
-    BattleService -> BattleController: requestAction(activeUnit)
+    BattleController -> BattleService: getActiveUnit()
+    BattleService --> BattleController: return activeUnit
     BattleController -> User: Show available actions
 
     User -> BattleController: Select action

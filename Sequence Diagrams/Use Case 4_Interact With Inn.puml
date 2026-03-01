@@ -20,9 +20,9 @@ activate InnController
 InnController -> InnService: loadInnView(campaignId)
 activate InnService
 
-InnService -> PartyService: reviveAndHealParty(campaignId)
-activate PartyService
+InnService -> InnService: reviveAndHealParty(campaignId)
 PartyService -> PartyRepository: updatePartyStatus(campaignId)
+activate PartyService
 activate PartyRepository
 
 PartyRepository --> PartyService: Party updated

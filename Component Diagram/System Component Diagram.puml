@@ -1,145 +1,46 @@
 @startuml
 
-title Detailed Layered Architecture with Ports and Interfaces
+title Legends of Sword and Wand - Component Diagram
 
-' --- Actor ---
-() User
+package "Presentation Layer" {
+    [UserController]
+    [CampaignController]
+    [BattleController]
+}
 
-' --- UI Layer ---
-component UI {
-    port uiPort
+package "Application Layer" {
+    [UserService]
+    [CampaignService]
+    [BattleService]
+    [HeroService]
+    [PartyService]
 }
-package "Controller Layer" {
-    component BattleController {
-        port bcInPort
-        port bcOutPort
-    }
-    component CampaignController {
-        port ccInPort
-        port ccOutPort
-    }
-    component InnController {
-        port icInPort
-        port icOutPort
-    }
-    component PvPController {
-        port pcInPort
-        port pcOutPort
-    }
-    component UserController {
-        port ucInPort
-        port ucOutPort
-    }
-}
-package "Service Layer" {
-    component BattleService {
-        port bsInPort
-        port bsOutPort
-    }
-    component CampaignService {
-        port csInPort
-        port csOutPort
-    }
-    component HeroService {
-        port hsInPort
-        port hsOutPort
-    }
-    component PartyService {
-        port psInPort
-        port psOutPort
-    }
-    component InnService {
-        port isInPort
-        port isOutPort
-    }
-    component PvPService {
-        port vsInPort
-        port vsOutPort
-    }
-    component UserService {
-        port usInPort
-        port usOutPort
-    }
-}
+
 package "Persistence Layer" {
-    component CampaignRepository {
-        port crInPort
-        port crOutPort
-    }
-    component HeroRepository {
-        port hrInPort
-        port hrOutPort
-    }
-    component InventoryRepository {
-        port irInPort
-        port irOutPort
-    }
-    component PartyRepository {
-        port prInPort
-        port prOutPort
-    }
-    component PvPInvitationRepository {
-        port vrInPort
-        port vrOutPort
-    }
-    component UserRepository {
-        port urInPort
-        port urOutPort
-    }
+    [UserRepository]
+    [HeroRepository]
+    [PartyRepository]
+    [CampaignRepository]
 }
 
-User .u.> UI
+database "MySQL Database"
 
-uiPort -u-( IBattleController
-uiPort -u-( ICampaignController
-uiPort -u-( IInnController
-uiPort -u-( IPvPController
-uiPort -u-( IUserController
+[UserController] --> [UserService]
+[CampaignController] --> [CampaignService]
+[BattleController] --> [BattleService]
 
-bcInPort -d-() IBattleController
-ccInPort -d-() ICampaignController
-icInPort -d-() IInnController
-pcInPort -d-() IPvPController
-ucInPort -d-() IUserController
+[CampaignService] --> [HeroService]
+[CampaignService] --> [PartyService]
+[CampaignService] --> [BattleService]
 
-bcOutPort -u-( IBattleService
-ccOutPort -u-( ICampaignService
-icOutPort -u-( IInnService
-pcOutPort -u-( IPvPService
-ucOutPort -u-( IUserService
+[UserService] --> [UserRepository]
+[HeroService] --> [HeroRepository]
+[PartyService] --> [PartyRepository]
+[CampaignService] --> [CampaignRepository]
 
-bsInPort -d-() IBattleService
-csInPort -d-() ICampaignService
-isInPort -d-() IInnService
-vsInPort -d-() IPvPService
-usInPort -d-() IUserService
-
-PartyService ..> HeroService
-CampaignService ..> PartyService
-PvPService ..> PartyService
-BattleService ..> PartyService
-InnService ..> PartyService
-
-csOutPort -u-( ICampaignRepository
-hsOutPort -u-( IHeroRepository
-psOutPort -u-( IPartyRepository
-isOutPort -u-( IInventoryRepository
-vsOutPort -u-( IPvPInvitationRepository
-usOutPort -u-( IUserRepository
-
-crInPort -d-() ICampaignRepository
-hrInPort -d-() IHeroRepository
-irInPort -d-() IInventoryRepository
-prInPort -d-() IPartyRepository
-vrInPort -d-() IPvPInvitationRepository
-urInPort -d-() IUserRepository
-
-' Repositories access database
-database "MySQL Database" as DB
-crOutPort .u.> DB
-hrOutPort .u.> DB
-irOutPort .u.> DB
-prOutPort .u.> DB
-urOutPort .u.> DB
+[UserRepository] --> "MySQL Database"
+[HeroRepository] --> "MySQL Database"
+[PartyRepository] --> "MySQL Database"
+[CampaignRepository] --> "MySQL Database"
 
 @enduml

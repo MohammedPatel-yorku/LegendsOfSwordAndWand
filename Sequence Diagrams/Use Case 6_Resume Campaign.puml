@@ -7,6 +7,7 @@ actor User
 boundary CampaignController
 control CampaignService
 database CampaignRepository
+control HeroService
 database HeroRepository
 
 User -> CampaignController : Select "Continue Campaign"
@@ -20,10 +21,14 @@ activate CampaignRepository
 CampaignRepository --> CampaignService : return Campaign entity
 deactivate CampaignRepository
 
-CampaignService -> HeroRepository : findHeroesByCampaignId(id)
+CampaignService -> HeroService: getHeroes(campaignId)
+activate HeroService
+HeroService -> HeroRepository : findHeroesByCampaignId(id)
 activate HeroRepository
-HeroRepository --> CampaignService : return List<Hero>
+HeroRepository --> HeroService : return List<Hero>
 deactivate HeroRepository
+HeroService --> CampaignService: return heroes
+deactivate HeroService
 
 CampaignService --> CampaignController : return loaded campaign
 deactivate CampaignService
