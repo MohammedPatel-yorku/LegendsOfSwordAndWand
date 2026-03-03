@@ -1,0 +1,180 @@
+@startuml
+
+title Legends of Sword and Wand - Pattern Integrated Architecture
+
+skinparam packageStyle rectangle
+
+package "Domain Layer" {
+
+class User {
+    - id: Long
+    - username: String
+    - password: String
+    - parties: List<Party>
+    + addParty(party: Party)
+    + removeParty(party: Party)
+}
+
+class Party {
+    - id: Long
+    - heroes: List<Hero>
+    - gold: int
+    + addHero(hero: Hero)
+    + removeHero(hero: Hero)
+}
+
+User "1" o--> "0..4" Party
+
+class Hero <<Entity>> {
+    - id: Long
+    - name: String
+    - level: int
+    - baseAttack: int
+    - baseDefense: int
+    - baseHealth: int
+    - baseMana: int
+    - currentHealth: int
+    - currentMana: int
+    - experience: int
+    - primaryClass: HeroClassType
+    - secondaryClass: HeroClassType
+    - ability: Ability {transient}
+    - state: HeroState {transient}
+}
+
+Party "1" o--> "0..5" Hero
+
+class ClassProgression <<Entity>> {
+    - id: Long
+    - classType: HeroClassType
+    - level: int
+    - specializationActive: boolean
+}
+
+Hero "1" o-- "1..*" ClassProgression
+
+interface Ability {
+    + execute(caster: Hero, targets: List<Hero>)
+}
+
+class HealAbility
+class FireballAbility
+class BerserkerAbility
+class ProtectAbility
+
+Ability <|.. HealAbility
+Ability <|.. FireballAbility
+Ability <|.. BerserkerAbility
+Ability <|.. ProtectAbility
+
+Hero "1" --> "1..*" Ability
+
+interface HeroState {
+    + handleTurn(hero: Hero)
+}
+
+class ReadyState
+class DefendingState
+class StunnedState
+class WaitingState
+
+HeroState <|.. ReadyState
+HeroState <|.. DefendingState
+HeroState <|.. StunnedState
+HeroState <|.. WaitingState
+
+Hero --> HeroState
+
+enum HeroClassType {
+    ORDER
+    CHAOS
+    WARRIOR
+    MAGE
+}
+
+Hero --> HeroClassType
+ClassProgression --> HeroClassType
+
+class Campaign {
+    - id: Long
+    - owner: User
+    - party: Party
+    - currentRoom: int
+    - active: boolean
+}
+
+Campaign --> Party
+
+class Battle {
+    - partyA: Party
+    - partyB: Party
+}
+
+class TurnManager {
+    - turnQueue: Queue<Hero>
+    + initializeTurnOrder(parties: List<Party>)
+    + getNextHero(): Hero
+}
+
+Battle "1" --> "1" TurnManager
+
+class Inventory {
+    - id: Long
+    - campaign: Campaign
+}
+
+class Item {
+    - id: Long
+}
+
+Campaign "1" *--> "1" Inventory
+Inventory --> Item
+
+}
+
+package "Factory" {
+
+class HeroFactory {
+    + createHero(type: HeroType): Hero
+}
+
+HeroFactory --> Hero
+
+}
+
+package "Service Layer" {
+
+class UserService
+class CampaignService
+class BattleService
+class PartyService
+class InventoryService
+class HeroService
+
+BattleService --> Battle
+CampaignService --> Campaign
+PartyService --> Party
+UserService --> User
+InventoryService --> Inventory
+HeroService --> HeroFactory
+
+}
+
+package "Repository Layer" {
+
+interface UserRepository
+interface CampaignRepository
+interface PartyRepository
+interface HeroRepository
+interface InventoryRepository
+interface HeroRepository
+
+UserService --> UserRepository
+CampaignService --> CampaignRepository
+PartyService --> PartyRepository
+InventoryService --> InventoryRepository
+HeroService --> HeroRepository
+
+}
+
+@enduml

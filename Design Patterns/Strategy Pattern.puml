@@ -1,0 +1,25 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+title Battle Actions - Strategy Pattern
+
+interface ActionStrategy {
+    + execute(actor : Hero, target : Hero)
+}
+
+class AttackStrategy
+class DefendStrategy
+class CastSpellStrategy
+
+ActionStrategy <|.. AttackStrategy
+ActionStrategy <|.. DefendStrategy
+ActionStrategy <|.. CastSpellStrategy
+
+class BattleService {
+    - strategy : ActionStrategy
+    + performAction(actor : Hero, target : Hero)
+}
+
+BattleService --> ActionStrategy
+
+@enduml

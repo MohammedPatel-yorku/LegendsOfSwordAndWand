@@ -6,73 +6,90 @@ autonumber
 title Use Case 3 - Single Battle
 
 actor User
+
 boundary BattleController
 control BattleService
 control TurnManager
 control AbilityExecutor
 control DamageCalculator
-database PartyRepository
+entity Battle
+database BattleRepository
 
-User -> BattleController: Enter battle room
+== Initialize Battle ==
+
+User -> BattleController: startBattle(partyA, partyB)
 activate BattleController
 
-BattleController -> BattleService: startBattle(playerParty, enemyParty)
+BattleController -> BattleService: initializeBattle(partyA, partyB)
 activate BattleService
 
-BattleService -> TurnManager: initializeTurnOrder(parties)
+BattleService -> Battle: createBattle(partyA, partyB)
+activate Battle
+Battle --> BattleService: Battle Instance
+deactivate Battle
+
+BattleService -> TurnManager: determineFirstTurn(battleInstance)
 activate TurnManager
-TurnManager --> BattleService: Turn queue ready
+TurnManager --> BattleService: First Active Unit
+deactivate TurnManager
 
-loop Each Turn Until Battle Ends
-    BattleService -> TurnManager: getNextUnit()
-    TurnManager --> BattleService: activeUnit
-
-    BattleService -> BattleController: requestAction(activeUnit)
-    BattleController -> User: Show available actions
-
-    User -> BattleController: Select action
-    BattleController -> BattleService: executeAction(action)
-
-    alt Attack / Ability
-        BattleService -> AbilityExecutor: executeAction
-        activate AbilityExecutor
-        AbilityExecutor -> DamageCalculator: calculateDamage()
-        activate DamageCalculator
-
-        DamageCalculator --> AbilityExecutor: Damage result
-        deactivate DamageCalculator
-        AbilityExecutor --> BattleService: Apply effects
-        deactivate AbilityExecutor
-
-    else Defend
-        BattleService -> BattleService: Restore HP and mana
-
-    else Wait
-        BattleService -> TurnManager: moveUnitToEnd(activeUnit)
-        deactivate TurnManager
-    end
-
-    BattleService -> BattleService: updatePartyStatus()
-end
-
-BattleService -> BattleService: checkBattleOutcome()
-
-alt Player Wins
-    BattleService -> PartyRepository: saveUpdatedParty()
-    activate PartyRepository
-
-    PartyRepository --> BattleService: Party saved
-    deactivate PartyRepository
-
-    BattleService --> BattleController: Battle result - victory
-
-else Player Loses
-    BattleService --> BattleController: Battle result - defeat
-end
-
+BattleService --> BattleController: Battle Initialized
 deactivate BattleService
 
-BattleController --> User: Show battle results
+== Battle Loop ==
+
+loop Until One Party Defeated
+
+    BattleController -> BattleService: getActiveUnit()
+    activate BattleService
+    BattleService --> BattleController: Active Unit
+    deactivate BattleService
+
+    User -> BattleController: selectAbility(target)
+
+    BattleController -> BattleService: executeTurn(ability, target)
+    activate BattleService
+
+    BattleService -> AbilityExecutor: execute(ability, attacker, target)
+    activate AbilityExecutor
+
+    AbilityExecutor -> DamageCalculator: calculateDamage(attacker, target)
+    activate DamageCalculator
+    DamageCalculator --> AbilityExecutor: Damage Value
+    deactivate DamageCalculator
+
+    AbilityExecutor --> BattleService: Action Result
+    deactivate AbilityExecutor
+
+    BattleService -> TurnManager: nextTurn()
+    activate TurnManager
+    TurnManager --> BattleService: Next Active Unit
+    deactivate TurnManager
+
+    BattleService --> BattleController: Turn Resolved
+    deactivate BattleService
+
+end
+
+== Battle End ==
+
+BattleController -> BattleService: finalizeBattle()
+activate BattleService
+
+BattleService -> Battle: determineWinner()
+activate Battle
+Battle --> BattleService: Battle Result
+deactivate Battle
+
+BattleService -> BattleRepository: save(battleResult)
+activate BattleRepository
+BattleRepository --> BattleService: saved
+deactivate BattleRepository
+
+BattleService --> BattleController: return battleResult
+deactivate BattleService
+
+BattleController --> User: Display Result
 deactivate BattleController
 
 @enduml
