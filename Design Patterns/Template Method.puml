@@ -1,0 +1,17 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+abstract class Battle {
+    + executeBattle()
+    # determineTurnOrder()
+    # executeAction()
+    # checkVictory()
+}
+
+class PvEBattle
+class PvPBattle
+
+Battle <|-- PvEBattle
+Battle <|-- PvPBattle
+
+@enduml

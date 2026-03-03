@@ -3,43 +3,89 @@
 
 title Battle Component - Class Diagram
 
-class Battle {
-    - Long id
-    - Party partyA
-    - Party partyB
-    - Queue<Hero> turnOrder
-    + startBattle()
-    + executeTurn()
-    + determineWinner(): Party
+package "Battle Module" {
+
+    class BattleController {
+        - battleService: IBattleService
+        + startBattle(partyA, partyB)
+        + getActiveUnit()
+        + ExecuteTurn(abilityId, targetId)
+        + finalizeBattle()
+    }
+
+    interface IBattleService {
+        + initiateBattle(partyA, partyB): Battle
+        + getActiveUnit(): Hero
+        + executeTurn(ability, target)
+        + finalizeBattle(): BattleResult
+    }
+
+    class BattleService implements IBattleService {
+        - turnManager: TurnManager
+        - abilityExecutor: AbilityExecutor
+        - battleRepository: BattleRepository
+        + initializeBattle(partyA, partyB): Battle
+        + getActiveUnit(): Hero
+        + executeTurn(ability, target)
+        + finalizeBattle(): BattleResult
+    }
+
+    class Battle {
+        - id: Long
+        - partyA: Party
+        - partyB: Party
+        - currentTurn: Hero
+        + determineWinner(): BattleResult
+    }
+
+    class TurnManager {
+        + determineFirstTurn(battle: Battle): Unit
+        + nextTurn(): Hero
+    }
+
+    class AbilityExecutor {
+        - damageCalculator: DamageCalculator
+        + execute(ability: ActionStrategy, attacker: Hero, target: Hero)
+    }
+
+    class DamageCalculator {
+        + calculateDamage(attacker: Hero, target: Hero): int
+    }
+
+    interface AbilityStrategy {
+        + execute(Hero actor, Hero target)
+    }
+
+    class AttackStrategy {
+        + execute(Hero actor, Hero target)
+    }
+
+    class DefendStrategy {
+        + execute(Hero actor, Hero target)
+    }
+
+    class CastSpellStrategy {
+        + execute(Hero actor, Hero target)
+    }
+
+    interface BattleRepository {
+        + save(battleResult: BattleResult
+    }
+
 }
 
-interface ActionStrategy {
-    + execute(Hero actor, Hero target)
-}
 
-class AttackStrategy {
-    + execute(Hero actor, Hero target)
-}
+AttackStrategy ..|> AbilityStrategy
+DefendStrategy ..|> AbilityStrategy
+CastSpellStrategy ..|> AbilityStrategy
 
-class DefendStrategy {
-    + execute(Hero actor, Hero target)
-}
-
-class CastSpellStrategy {
-    + execute(Hero actor, Hero target)
-}
-
-interface IBattleService {
-    + initiateBattle(Party p1, Party p2): Battle
-    + performAction(Hero actor, ActionStrategy strategy, Hero target)
-}
-
-Battle --> Party
-Battle --> Hero
-BattleService ..|> IBattleService
+BattleController --> IBattleService
+BattleService --> TurnManager
+BattleService --> AbilityExecutor
+BattleService --> BattleRepository
+AbilityExecutor --> DamageCalculator
+AbilityExecutor --> AbilityStrategy
 BattleService --> Battle
-AttackStrategy ..|> ActionStrategy
-DefendStrategy ..|> ActionStrategy
-CastSpellStrategy ..|> ActionStrategy
+Battle --> Party
 
 @enduml

@@ -2,45 +2,97 @@
 
 title Legends of Sword and Wand - Component Diagram
 
+left to right direction
+
 package "Presentation Layer" {
     [UserController]
+    [HeroController]
     [CampaignController]
+    [PvPController]
     [BattleController]
+    [InnController]
 }
 
 package "Application Layer" {
-    [UserService]
-    [CampaignService]
-    [BattleService]
-    [HeroService]
-    [PartyService]
-}
 
-package "Persistence Layer" {
-    [UserRepository]
-    [HeroRepository]
-    [PartyRepository]
-    [CampaignRepository]
+    package "User Module" {
+        interface IUserService
+        [UserService]
+        [UserRepository]
+    }
+
+    package "Hero Module" {
+        interface IHeroService
+        [HeroService]
+        [HeroRepository]
+    }
+
+    package "Party Module" {
+        interface IPartyService
+        [PartyService]
+        [PartyRepository]
+    }
+
+    package "Campaign Module" {
+        interface ICampaignService
+        [CampaignService]
+        [CampaignRepository]
+    }
+
+    package "PvP Module" {
+        interface IPvPService
+        [PvPService]
+        [PvPRepository]
+    }
+
+    package "Battle Module" {
+        interface IBattleService
+        [BattleService]
+        [BattleRepository]
+    }
+
+    package "Inn Module" {
+        interface IInnService
+        [InnService]
+    }
 }
 
 database "MySQL Database"
 
-[UserController] --> [UserService]
-[CampaignController] --> [CampaignService]
-[BattleController] --> [BattleService]
+[UserController] --> IUserService
+[HeroController] --> IHeroService
+[CampaignController] --> ICampaignService
+[PvPController] --> IPvPService
+[BattleController] --> IBattleService
+[InnController] --> IInnService
 
-[CampaignService] --> [HeroService]
-[CampaignService] --> [PartyService]
-[CampaignService] --> [BattleService]
+IUserService <|.. [UserService]
+IHeroService <|.. [HeroService]
+ICampaignService <|.. [CampaignService]
+IPvPService <|.. [PvPService]
+IPartyService <|.. [PartyService]
+IBattleService <|.. [BattleService]
+IInnService <|.. [InnService]
+
+[CampaignService] --> IHeroService
+[CampaignService] --> IPartyService
+[CampaignService] --> IBattleService
+[BattleService] --> IPartyService
+[PvPService] --> IBattleService
+[InnService] --> IHeroService
 
 [UserService] --> [UserRepository]
 [HeroService] --> [HeroRepository]
 [PartyService] --> [PartyRepository]
 [CampaignService] --> [CampaignRepository]
+[PvPService] --> [PvPRepository]
+[BattleService] --> [BattleRepository]
 
 [UserRepository] --> "MySQL Database"
 [HeroRepository] --> "MySQL Database"
 [PartyRepository] --> "MySQL Database"
 [CampaignRepository] --> "MySQL Database"
+[PvPRepository] --> "MySQL Database"
+[BattleRepository] --> "MySQL Database"
 
 @enduml

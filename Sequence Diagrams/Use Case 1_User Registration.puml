@@ -8,7 +8,7 @@ title Use Case 1 - User Registration and Login (Updated)
 
 actor User
 boundary UserController
-control UserService
+control IUserService
 database UserRepository
 collections PasswordEncoder
 
@@ -17,42 +17,42 @@ collections PasswordEncoder
 User -> UserController: Enter username and password
 activate UserController
 
-UserController -> UserService: registerUser(username, password)
-activate UserService
+UserController -> IUserService: registerUser(username, password)
+activate IUserService
 
-UserService -> UserService: validate(username, password)
+IUserService -> IUserService: validate(username, password)
 
 alt Invalid Input
-    UserService --> UserController: throw new IllegalArgumentException
+    IUserService --> UserController: throw new IllegalArgumentException
 
 else Valid Input
-    UserService -> UserRepository: findByUsername(username)
+    IUserService -> UserRepository: findByUsername(username)
     activate UserRepository
 
     alt Username Already Exists
-        UserRepository --> UserService: existing user
+        UserRepository --> IUserService: existing user
         deactivate UserRepository
-        UserService --> UserController: throw new UsernameAlreadyExistsException
+        IUserService --> UserController: throw new UsernameAlreadyExistsException
 
     else Username Available
-        UserRepository --> UserService: null
+        UserRepository --> IUserService: null
         deactivate UserRepository
 
-        UserService -> PasswordEncoder: encode(password)
+        IUserService -> PasswordEncoder: encode(password)
         activate PasswordEncoder
-        PasswordEncoder --> UserService: hashedPassword
+        PasswordEncoder --> IUserService: hashedPassword
         deactivate PasswordEncoder
 
-        UserService -> UserRepository: save(User)
+        IUserService -> UserRepository: save(User)
         activate UserRepository
-        UserRepository --> UserService: User saved
+        UserRepository --> IUserService: User saved
         deactivate UserRepository
 
-        UserService --> UserController: "Registration successful."
+        IUserService --> UserController: "Registration successful."
     end
 end
 
-deactivate UserService
+deactivate IUserService
 UserController --> User: Display registration message
 deactivate UserController
 
@@ -62,37 +62,37 @@ deactivate UserController
 User -> UserController: Enter username and password
 activate UserController
 
-UserController -> UserService: loginUser(username, password)
-activate UserService
+UserController -> IUserService: loginUser(username, password)
+activate IUserService
 
-UserService -> UserRepository: findByUsername(username)
+IUserService -> UserRepository: findByUsername(username)
 activate UserRepository
 
 alt User Not Found
-    UserRepository --> UserService: null
+    UserRepository --> IUserService: null
     deactivate UserRepository
-    UserService --> UserController: throw new UserNotFoundException
+    IUserService --> UserController: throw new UserNotFoundException
 
 else User Found
-    UserRepository --> UserService: User
+    UserRepository --> IUserService: User
     deactivate UserRepository
 
-    UserService -> PasswordEncoder: matches(password, storedHash)
+    IUserService -> PasswordEncoder: matches(password, storedHash)
     activate PasswordEncoder
 
     alt Password Incorrect
-        PasswordEncoder --> UserService: false
+        PasswordEncoder --> IUserService: false
         deactivate PasswordEncoder
-        UserService --> UserController: throw new IncorrectPasswordException
+        IUserService --> UserController: throw new IncorrectPasswordException
 
     else Password Correct
-        PasswordEncoder --> UserService: true
+        PasswordEncoder --> IUserService: true
         deactivate PasswordEncoder
-        UserService --> UserController: "Login successful."
+        IUserService --> UserController: "Login successful."
     end
 end
 
-deactivate UserService
+deactivate IUserService
 UserController --> User: Display login message
 deactivate UserController
 
