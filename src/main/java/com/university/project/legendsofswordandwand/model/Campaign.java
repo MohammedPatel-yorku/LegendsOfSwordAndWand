@@ -14,7 +14,7 @@ import lombok.*;
 @Table(name = "campaigns")
 @Getter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Campaign {
 
@@ -39,4 +39,9 @@ public class Campaign {
   @Column(nullable = false)
   @Setter
   private boolean active;
+
+  @Column(nullable = false)
+  @Setter
+  @Builder.Default
+  private int score = 0;
 }

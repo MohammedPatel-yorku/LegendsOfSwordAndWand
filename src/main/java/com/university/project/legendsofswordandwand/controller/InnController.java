@@ -1,15 +1,16 @@
 package com.university.project.legendsofswordandwand.controller;
 
-import com.university.project.legendsofswordandwand.service.InnService;
+import com.university.project.legendsofswordandwand.service.IInnService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 @RequiredArgsConstructor
 @RequestMapping("/campaign/{campaignId}/inn")
 public class InnController {
 
-  private final InnService innService;
+  private final IInnService innService;
 
   /** Enter the inn for a specific campaign. */
   @PostMapping("/enter")
