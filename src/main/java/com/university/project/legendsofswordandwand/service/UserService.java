@@ -1,93 +1,45 @@
 package com.university.project.legendsofswordandwand.service;
 
+import com.university.project.legendsofswordandwand.dto.DashboardInfo;
+import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
- * service layer for handling logic related to users
- * including registration and login
- * use case: User Registration and Login
+ * service layer for handling logic related to users including registration and login use case: User
+ * Registration and Login
  */
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+  private final UserRepository userRepository;
+  private final CampaignService campaignService;
 
-    /**
-     * constructs a UserService with the needed dependencies
-     */
-    public UserService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+  public DashboardInfo getDashboardInfo(String username) {
+
+    User user =
+        userRepository
+            .findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+    boolean hasParty = user.getParties() != null && !user.getParties().isEmpty();
+    boolean hasCampaign = campaignService.hasActiveCampaign(user.getId());
+
+    int partySize = 0;
+    int cumulativeLevel = 0;
+    int gold = 0;
+
+    if (hasParty) {
+
+      Party latest = user.getParties().get(user.getParties().size() - 1);
+      partySize = latest.getHeroes().size();
+      cumulativeLevel = latest.getCumulativeLevel();
+      gold = latest.getGold();
     }
 
-    /**
-     * saves a user to the database (used for testing)
-     */
-    public User save(User user) {
-        return userRepository.save(user);
-    }
-
-    /**
-     * registers a new user
-     */
-    public String registerUser(String username, String password) {
-
-        if (!validate(username, password)) {
-            return "username and password must not be empty.";
-        }
-
-        // check duplicate username
-        User existingUser = userRepository.findByUsername(username);
-        if (existingUser != null) {
-            return "username already exists. please choose another.";
-        }
-
-        // hash password
-        String hashedPassword = passwordEncoder.encode(password);
-
-        User user = new User(username, hashedPassword);
-        userRepository.save(user);
-
-        return "registration successful.";
-    }
-
-  /**
-   * Authenticates a User by verifying the provided password against the persisted hashed password.
-   *
-   * @param username Username entered by the user
-   * @param password Password entered by the user
-   * @return true if login is successful, false otherwise
-   */
-  public boolean loginUser(String username, String password) {
-    User user = userRepository.findByUsername(username).orElse(null);
-
-    if (user == null) {
-      return false;
-    }
-    return passwordEncoder.matches(password, user.getPassword());
-  }
-
-  /**
-   * Validates registration credentials.
-   *
-   * @param username Username to validate
-   * @param password Password to validate
-   * @return true if both username and password are non-null and non-empty
-   */
-  private boolean validate(String username, String password) {
-    return username != null && password != null && !username.isEmpty() && !password.isEmpty();
-  }
-
-  public User createUser(String username, String password) {
-    String hashedPassword = passwordEncoder.encode(password);
-    User user = User.builder().username(username).password(hashedPassword).build();
-    return userRepository.save(user);
+    return new DashboardInfo(username, hasParty, hasCampaign, partySize, cumulativeLevel, gold);
   }
 }

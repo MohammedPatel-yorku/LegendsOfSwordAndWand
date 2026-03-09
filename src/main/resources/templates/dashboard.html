@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<!-- With the use of AI -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard — Legends of Sword and Wand</title>
+        <link rel="stylesheet" th:href="@{/css/style.css}">
+        <style>
+            .party-summary {
+                background: var(--bg-raised);
+                border: 1px solid var(--border-dim);
+                border-left: 3px solid var(--gold-muted);
+                border-radius: 0 var(--radius-md) var(--radius-md) 0;
+                padding: 0.8rem 1.2rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 1rem;
+                font-size: 0.9rem;
+            }
+            .party-summary-stats { display: flex; gap: 1.5rem; }
+            .party-summary-stat  { text-align: center; }
+            .party-summary-val   { font-family: 'Cinzel Decorative', serif; color: var(--gold-bright); font-size: 1.1rem; display: block; }
+            .party-summary-lbl   { font-family: 'Cinzel', serif; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+        </style>
+    </head>
+    <body>
+        <div class="page-wrapper">
+            <div class="card wide">
+                <div class="card-ornament tl"></div>
+                <div class="card-ornament tr"></div>
+                <div class="card-ornament bl"></div>
+                <div class="card-ornament br"></div>
+
+                <div class="user-bar">
+                    <span class="user-greeting">
+                        Welcome back, <span th:text="${username}">Adventurer</span>
+                    </span>
+                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <a href="/profile" class="btn btn-ghost" style="padding:0.4rem 0.9rem;font-size:0.7rem;">
+                            👤 Profile
+                        </a>
+                        <form action="/logout" method="post" style="margin:0">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <button class="btn btn-ghost" type="submit" style="padding:0.4rem 0.9rem;font-size:0.7rem;">
+                                ⬚ &nbsp;Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card-header">
+                    <span class="game-logo flicker">⚔ Legends of Sword and Wand ⚔</span>
+                    <p class="subtitle">Choose Your Path</p>
+                </div>
+
+                <div th:if="${hasParty}" class="party-summary">
+                    <span style="font-family: 'Cinzel',serif; font-size: 0.75rem; color: var(--text-secondary);">
+                        Active Party
+                    </span>
+                    <div class="party-summary-stats">
+                        <div class="party-summary-stat">
+                            <span class="party-summary-val" th:text="${partySize}">0</span>
+                            <span class="party-summary-lbl">Heroes</span>
+                        </div>
+                        <div class="party-summary-stat">
+                            <span class="party-summary-val" th:text="${cumulativeLevel}">0</span>
+                            <span class="party-summary-lbl">Total Lv</span>
+                        </div>
+                        <div class="party-summary-stat">
+                            <span class="party-summary-val" th:text="${gold}">0</span>
+                            <span class="party-summary-lbl">Gold</span>
+                        </div>
+                    </div>
+                    <a href="/profile" style="font-family: 'Cinzel',serif; font-size: 0.75rem; color: var(--text-secondary);">
+                        Full details →
+                    </a>
+                </div>
+
+                <div class="divider">The Adventure Awaits</div>
+
+                <div class="dashboard-grid">
+
+                    <a href="/campaign/new" class="action-card" style="--accent-color: #d4a017;">
+                        <span class="action-icon">🗺</span>
+                        <span class="action-title">New Campaign</span>
+                        <span class="action-desc">Forge a new hero and venture into the dungeon depths.</span>
+                    </a>
+
+                    <a th:href="${hasCampaign} ? '/campaign/continue' : '#'"
+                       th:class="${hasCampaign} ? 'action-card' : 'action-card action-disabled'"
+                       style="--accent-color: #6ab0e0;">
+                        <span class="action-icon">🔥</span>
+                        <span class="action-title">Continue</span>
+                        <span class="action-desc">Resume your last campaign from where you left off.</span>
+                    </a>
+
+                    <a th:href="${hasParty} ? '/pvp' : '#'"
+                       th:class="${hasParty} ? 'action-card' : 'action-card action-disabled'"
+                       style="--accent-color: #c0392b;">
+                        <span class="action-icon">⚔</span>
+                        <span class="action-title">PvP Battle</span>
+                        <span class="action-desc">Challenge another player's party to glorious combat.</span>
+                    </a>
+
+                    <a href="/rankings" class="action-card" style="--accent-color: #a070d0;">
+                        <span class="action-icon">👑</span>
+                        <span class="action-title">Hall of Fame</span>
+                        <span class="action-desc">See the greatest legends who walked these lands.</span>
+                    </a>
+
+                </div>
+
+                <div th:if="${!hasParty}" class="alert alert-error" style="margin-top:1.5rem;">
+                    ✦ You have no saved party yet. Start a new campaign to build yours.
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

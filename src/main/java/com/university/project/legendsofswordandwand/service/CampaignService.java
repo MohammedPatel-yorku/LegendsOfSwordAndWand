@@ -19,21 +19,33 @@ public class CampaignService {
   private final PartyService partyService;
   private final UserRepository userRepository;
 
+  public boolean hasActiveCampaign(Long userId) {
+    return campaignRepository.existsActiveCampaignByOwnerId(userId);
+  }
+
+  public Campaign startNewCampaign(
+      String username, String selectedHeroName, HeroClass selectedHeroClass) {
+
+    User user =
+        userRepository
+            .findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+    return startNewCampaign(user, selectedHeroName, selectedHeroClass);
+  }
+
   /**
    * Creates new Campaign Object, sends it to CampaignRepository to save and creates a new Party and
    * Hero for the requesting user.
    *
-   * @param userId ID of User that is starting a new Campaign
    * @param selectedHeroName Name to assign to starting Hero
    * @param selectedHeroClass Hero Class to assign to starting Hero
    * @return Newly created Campaign Object
    */
-  public Campaign startNewCampaign(
-      Long userId, String selectedHeroName, HeroClass selectedHeroClass) {
-    User user =
-        userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+  private Campaign startNewCampaign(
+      User user, String selectedHeroName, HeroClass selectedHeroClass) {
 
-    Party party = partyService.createPartyForUser(userId);
+    Party party = partyService.createPartyForUser(user.getId());
 
     heroService.createBaseHeroForParty(party.getId(), selectedHeroName, selectedHeroClass);
 

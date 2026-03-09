@@ -14,9 +14,6 @@ import lombok.*;
 @Entity
 @Table(name = "users")
 @Getter
-@Setter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
   @Id
@@ -24,17 +21,29 @@ public class User {
   private Long id;
 
   @Column(nullable = false, unique = true)
+  @Setter
   private String username;
 
   @Column(nullable = false)
+  @Setter
   private String password;
 
+  @Column(nullable = false)
+  @Setter
+  private int pvpWins = 0;
+
+  @Column(nullable = false)
+  @Setter
+  private int pvpLosses = 0;
+
   @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
-  @Builder.Default
   private List<Party> parties = new ArrayList<>();
 
+  @Builder
   public User(String username, String password) {
     this.username = username;
     this.password = password;
+    this.pvpWins = 0;
+    this.pvpLosses = 0;
   }
 }
