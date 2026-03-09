@@ -2,9 +2,8 @@ package com.university.project.legendsofswordandwand.controller;
 
 import com.university.project.legendsofswordandwand.dto.DashboardInfo;
 import com.university.project.legendsofswordandwand.dto.RegisterRequest;
-import com.university.project.legendsofswordandwand.repository.UserRepository;
-import com.university.project.legendsofswordandwand.service.AuthService;
-import com.university.project.legendsofswordandwand.service.UserService;
+import com.university.project.legendsofswordandwand.service.IAuthService;
+import com.university.project.legendsofswordandwand.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -16,9 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RequiredArgsConstructor
 public class AuthController {
 
-  private final AuthService authService;
-  private final UserRepository userRepository;
-  private final UserService userService;
+  private final IAuthService authService;
+  private final IUserService userService;
 
   @GetMapping("/login")
   public String loginPage() {

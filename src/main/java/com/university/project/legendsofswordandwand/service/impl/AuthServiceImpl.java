@@ -3,14 +3,14 @@ package com.university.project.legendsofswordandwand.service.impl;
 import com.university.project.legendsofswordandwand.dto.RegisterRequest;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
-import com.university.project.legendsofswordandwand.service.AuthService;
+import com.university.project.legendsofswordandwand.service.IAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class AuthServiceImpl implements AuthService {
+public class AuthServiceImpl implements IAuthService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;

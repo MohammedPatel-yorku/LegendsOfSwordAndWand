@@ -1,9 +1,11 @@
-package com.university.project.legendsofswordandwand.service;
+package com.university.project.legendsofswordandwand.service.impl;
 
 import com.university.project.legendsofswordandwand.dto.DashboardInfo;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
+import com.university.project.legendsofswordandwand.service.ICampaignService;
+import com.university.project.legendsofswordandwand.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +15,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserServiceImpl implements IUserService {
 
   private final UserRepository userRepository;
-  private final CampaignService campaignService;
+  private final ICampaignService campaignService;
 
+  @Override
   public DashboardInfo getDashboardInfo(String username) {
 
     User user =

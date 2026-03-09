@@ -1,19 +1,20 @@
 package com.university.project.legendsofswordandwand.controller;
 
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
-import com.university.project.legendsofswordandwand.service.CampaignService;
+import com.university.project.legendsofswordandwand.service.ICampaignService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 /** Rest Controller class mapped with '/campaign' to handle campaign requests. */
-@RestController
+@Controller
 @RequestMapping("/campaign")
 @RequiredArgsConstructor
 public class CampaignController {
 
-  private final CampaignService campaignService;
+  private final ICampaignService campaignService;
 
   @GetMapping("/new")
   public String newCampaignPage(Authentication authentication) {

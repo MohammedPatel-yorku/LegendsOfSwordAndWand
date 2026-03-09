@@ -13,7 +13,9 @@ import lombok.*;
 @Entity
 @Table(name = "campaigns")
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Campaign {
 
   @Id
@@ -40,13 +42,6 @@ public class Campaign {
 
   @Column(nullable = false)
   @Setter
+  @Builder.Default
   private int score = 0;
-
-  @Builder
-  public Campaign(User owner, Party party, int currentRoom, boolean active) {
-    this.owner = owner;
-    this.party = party;
-    this.currentRoom = currentRoom;
-    this.active = active;
-  }
 }

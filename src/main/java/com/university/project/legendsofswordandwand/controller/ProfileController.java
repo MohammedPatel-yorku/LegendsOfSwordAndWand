@@ -1,7 +1,7 @@
 package com.university.project.legendsofswordandwand.controller;
 
 import com.university.project.legendsofswordandwand.dto.ProfileInfo;
-import com.university.project.legendsofswordandwand.service.ProfileService;
+import com.university.project.legendsofswordandwand.service.IProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class ProfileController {
 
-  private final ProfileService profileService;
+  private final IProfileService profileService;
 
   @GetMapping
   public String profilePage(Authentication authentication, Model model) {

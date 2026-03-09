@@ -1,11 +1,10 @@
 package com.university.project.legendsofswordandwand.controller;
 
-import com.university.project.legendsofswordandwand.model.Party;
-import com.university.project.legendsofswordandwand.repository.PartyRepository;
-import com.university.project.legendsofswordandwand.service.BattleService;
-import com.university.project.legendsofswordandwand.service.PvPService;
+import com.university.project.legendsofswordandwand.service.IBattleService;
+import com.university.project.legendsofswordandwand.service.IPvPService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,14 +12,14 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PvPController {
 
-  private final BattleService battleService;
-  private final PartyRepository partyRepository;
-  PvPService pvpService;
+  private final IBattleService battleService;
+  private final IPvPService pvpService;
 
   @PostMapping("/invite")
-  public ResponseEntity<?> sendInvite(@RequestParam String enemyUsername) {
+  public ResponseEntity<?> sendInvite(
+      Authentication authentication, @RequestParam String enemyUsername) {
 
-    pvpService.createInvitation(1L, enemyUsername);
+    pvpService.createInvitation(authentication.getName(), enemyUsername);
     return ResponseEntity.ok("Invitation Sent");
   }
 
@@ -32,15 +31,5 @@ public class PvPController {
   }
 
   @PostMapping("/start")
-  public void startBattle(Long inviteId, Long senderPartyId, Long receiverPartyId) {
-
-    Party senderParty =
-        partyRepository
-            .findById(senderPartyId)
-            .orElseThrow(() -> new RuntimeException("Party not found"));
-    Party receiverParty =
-        partyRepository
-            .findById(receiverPartyId)
-            .orElseThrow(() -> new RuntimeException("Party not found"));
-  }
+  public void startBattle(Long inviteId, Long senderPartyId, Long receiverPartyId) {}
 }

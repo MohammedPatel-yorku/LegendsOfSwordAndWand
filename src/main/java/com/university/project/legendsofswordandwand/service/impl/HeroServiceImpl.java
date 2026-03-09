@@ -1,10 +1,11 @@
-package com.university.project.legendsofswordandwand.service;
+package com.university.project.legendsofswordandwand.service.impl;
 
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.repository.HeroRepository;
 import com.university.project.legendsofswordandwand.repository.PartyRepository;
+import com.university.project.legendsofswordandwand.service.IHeroService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class HeroService {
+public class HeroServiceImpl implements IHeroService {
 
   private final HeroRepository heroRepository;
   private final PartyRepository partyRepository;
@@ -25,6 +26,7 @@ public class HeroService {
    * @param selectedHeroName Name to assign to Hero
    * @param selectedHeroClass Hero Class to assign to Hero
    */
+  @Override
   public void createBaseHeroForParty(
       Long partyId, String selectedHeroName, HeroClass selectedHeroClass) {
     Party party =
@@ -38,7 +40,7 @@ public class HeroService {
             .heroClass(selectedHeroClass)
             .level(1)
             .health(100)
-            .attack(10)
+            .attack(5)
             .party(party)
             .build();
 
