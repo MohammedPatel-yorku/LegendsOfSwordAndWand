@@ -1,6 +1,7 @@
 package com.university.project.legendsofswordandwand.model;
 
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
+import com.university.project.legendsofswordandwand.model.enums.HybridClass;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,17 +26,49 @@ public class Hero {
   @Column(nullable = false)
   private String name;
 
-  @Column(name = "hero_class", nullable = false)
-  @Enumerated(EnumType.STRING)
-  private HeroClass heroClass;
-
   @Builder.Default
   @Column(nullable = false)
   private int level = 1;
 
   @Builder.Default
   @Column(nullable = false)
+  private int orderLevels = 0;
+
+  @Builder.Default
+  @Column(nullable = false)
+  private int chaosLevels = 0;
+
+  @Builder.Default
+  @Column(nullable = false)
+  private int warriorLevels = 0;
+
+  @Builder.Default
+  @Column(nullable = false)
+  private int mageLevels = 0;
+
+  @Column(name = "primary_class", nullable = true)
+  @Enumerated(EnumType.STRING)
+  private HeroClass primaryClass;
+
+  @Column(name = "secondary_class", nullable = true)
+  @Enumerated(EnumType.STRING)
+  private HeroClass secondaryClass;
+
+  @Builder.Default
+  @Column(name = "is_hybrid", nullable = false)
+  private boolean isHybrid = false;
+
+  @Column(name = "hybrid_class", nullable = true)
+  @Enumerated(EnumType.STRING)
+  private HybridClass hybridClass;
+
+  @Builder.Default
+  @Column(nullable = false)
   private int health = 100;
+
+  @Builder.Default
+  @Column(name = "max_health", nullable = false)
+  private int maxHealth = 100;
 
   @Builder.Default
   @Column(nullable = false)
@@ -48,6 +81,18 @@ public class Hero {
   @Builder.Default
   @Column(nullable = false)
   private int mana = 50;
+
+  @Builder.Default
+  @Column(name = "max_mana", nullable = false)
+  private int maxMana = 50;
+
+  @Builder.Default
+  @Column(nullable = false)
+  private int experience = 0;
+
+  @Builder.Default
+  @Column(name = "experience_to_next_level", nullable = false)
+  private int experienceToNextLevel = 575;
 
   @ManyToOne
   @JoinColumn(name = "party_id")
