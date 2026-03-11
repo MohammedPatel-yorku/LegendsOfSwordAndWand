@@ -43,7 +43,7 @@ public class ProfileServiceImpl implements IProfileService {
   private HeroInfo toHeroInfo(Hero hero) {
     return new HeroInfo(
         hero.getName(),
-        hero.getHeroClass(),
+        hero.getPrimaryClass(),
         hero.getLevel(),
         hero.getHealth(),
         hero.getAttack(),

@@ -37,7 +37,7 @@ public class HeroServiceImpl implements IHeroService {
     Hero hero =
         Hero.builder()
             .name(selectedHeroName)
-            .heroClass(selectedHeroClass)
+            .primaryClass(selectedHeroClass)
             .level(1)
             .health(100)
             .attack(5)
