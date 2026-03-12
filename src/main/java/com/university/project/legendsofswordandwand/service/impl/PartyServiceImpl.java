@@ -2,6 +2,7 @@ package com.university.project.legendsofswordandwand.service.impl;
 
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;
+import com.university.project.legendsofswordandwand.repository.CampaignRepository;
 import com.university.project.legendsofswordandwand.repository.PartyRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
 import com.university.project.legendsofswordandwand.service.IPartyService;
@@ -17,6 +18,7 @@ public class PartyServiceImpl implements IPartyService {
 
   private final PartyRepository partyRepository;
   private final UserRepository userRepository;
+  private final CampaignRepository campaignRepository;
 
   /** Creates a new Party for User to use in a newly created Campaign. */
   @Override
@@ -27,15 +29,14 @@ public class PartyServiceImpl implements IPartyService {
     Party party = Party.builder().owner(owner).build();
 
     owner.getParties().add(party);
-
     return partyRepository.save(party);
   }
 
   /** Returns the active party for a given campaign. */
   @Override
   public Party getActiveParty(Long campaignId) {
-    return partyRepository
-        .findById(campaignId)
+    return campaignRepository
+        .findActivePartyByCampaignId(campaignId)
         .orElseThrow(() -> new RuntimeException("Party not found for campaign " + campaignId));
   }
 
@@ -43,9 +44,17 @@ public class PartyServiceImpl implements IPartyService {
   @Override
   public Party reviveAndHealParty(Long campaignId) {
     Party party =
-        partyRepository
-            .findById(campaignId)
+        campaignRepository
+            .findActivePartyByCampaignId(campaignId)
             .orElseThrow(() -> new RuntimeException("Party not found for campaign " + campaignId));
+
+    party
+        .getHeroes()
+        .forEach(
+            hero -> {
+              hero.setHealth(hero.getMaxHealth());
+              hero.setMana(hero.getMaxMana());
+            });
 
     return partyRepository.save(party);
   }
@@ -54,9 +63,11 @@ public class PartyServiceImpl implements IPartyService {
   @Override
   public Party recruitHero(Long campaignId, Long heroId) {
     Party party =
-        partyRepository
-            .findById(campaignId)
+        campaignRepository
+            .findActivePartyByCampaignId(campaignId)
             .orElseThrow(() -> new RuntimeException("Party not found for campaign " + campaignId));
+
+    if (party.getHeroes().size() >= 5) throw new RuntimeException("Party is full");
 
     return partyRepository.save(party);
   }

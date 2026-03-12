@@ -82,7 +82,9 @@
 
                 <div class="dashboard-grid">
 
-                    <a href="/campaign/new" class="action-card" style="--accent-color: #d4a017;">
+                    <a th:href="${!hasCampaign} ? '/campaign/new' : '#'"
+                       th:class="${!hasCampaign} ? 'action-card' : 'action-card action-disabled'"
+                       style="--accent-color: #d4a017;">
                         <span class="action-icon">🗺</span>
                         <span class="action-title">New Campaign</span>
                         <span class="action-desc">Forge a new hero and venture into the dungeon depths.</span>

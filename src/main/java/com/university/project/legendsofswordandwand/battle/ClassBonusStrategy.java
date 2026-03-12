@@ -5,7 +5,7 @@ import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 
 public interface ClassBonusStrategy {
 
-    HeroClass getHeroClass();
+  HeroClass getHeroClass();
 
-    void applyLevelBonus(Hero hero);
+  void applyLevelBonus(Hero hero);
 }

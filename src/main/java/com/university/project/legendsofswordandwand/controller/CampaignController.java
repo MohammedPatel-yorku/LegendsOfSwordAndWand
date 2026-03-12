@@ -47,7 +47,7 @@ public class CampaignController {
     try {
       campaignService.startNewCampaign(authentication.getName(), heroName.trim(), heroClass);
     } catch (Exception e) {
-      model.addAttribute("error", "The campaign could not begin: " + e.getMessage());
+      model.addAttribute("error", e.getMessage());
       return "new-campaign";
     }
 

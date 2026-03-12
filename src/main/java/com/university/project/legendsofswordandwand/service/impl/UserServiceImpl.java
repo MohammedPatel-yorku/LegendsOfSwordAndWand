@@ -28,7 +28,7 @@ public class UserServiceImpl implements IUserService {
             .findByUsername(username)
             .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
-    boolean hasParty = user.getParties() != null && !user.getParties().isEmpty();
+    boolean hasParty = user.getParties().stream().anyMatch(Party::isSaved);
     boolean hasCampaign = campaignService.hasActiveCampaign(user.getId());
 
     int partySize = 0;

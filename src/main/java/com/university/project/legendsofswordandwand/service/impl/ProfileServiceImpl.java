@@ -26,7 +26,8 @@ public class ProfileServiceImpl implements IProfileService {
             .findByUsername(username)
             .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
-    List<PartyInfo> partyInfoList = user.getParties().stream().map(this::toPartyInfo).toList();
+    List<PartyInfo> partyInfoList =
+        user.getParties().stream().filter(Party::isSaved).map(this::toPartyInfo).toList();
 
     List<CampaignResultInfo> campaignResults =
         campaignService.getCampaignResultsForUser(user.getId()); // delegated to campaign service

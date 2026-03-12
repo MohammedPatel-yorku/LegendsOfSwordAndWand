@@ -20,8 +20,8 @@ public class SecurityConfig {
   private final CustomUserDetailsService userDetailsService;
 
   /**
-   * Wires the CustomUserDetailsService and BCrypt encoder into Spring Security's
-   * authentication provider so it knows how to look up and verify users.
+   * Wires the CustomUserDetailsService and BCrypt encoder into Spring Security's authentication
+   * provider so it knows how to look up and verify users.
    */
   @Bean
   public DaoAuthenticationProvider authenticationProvider() {
@@ -32,24 +32,24 @@ public class SecurityConfig {
 
   @Bean
   public AuthenticationManager authenticationManager(
-          AuthenticationConfiguration authenticationConfiguration) {
+      AuthenticationConfiguration authenticationConfiguration) {
     return authenticationConfiguration.getAuthenticationManager();
   }
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) {
-    http
-            .authenticationProvider(authenticationProvider())
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**")
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.authenticationProvider(authenticationProvider())
+        .authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**")
                     .permitAll()
                     .anyRequest()
                     .authenticated())
-            .formLogin(form -> form
-                    .loginPage("/login")
-                    .defaultSuccessUrl("/dashboard", true)
-                    .permitAll())
-            .logout(logout -> logout
+        .formLogin(
+            form -> form.loginPage("/login").defaultSuccessUrl("/dashboard", true).permitAll())
+        .logout(
+            logout ->
+                logout
                     .logoutUrl("/logout")
                     .logoutSuccessUrl("/login?logout")
                     .invalidateHttpSession(true)

@@ -1,5 +1,6 @@
 package com.university.project.legendsofswordandwand.service.impl;
 
+import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.PvPInvitation;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.model.enums.InvitationStatus;
@@ -28,9 +29,9 @@ public class PvPServiceImpl implements IPvPService {
             .findByUsername(receiverUsername)
             .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
-    if (sender.getParties().isEmpty())
+    if (sender.getParties().stream().noneMatch(Party::isSaved))
       throw new RuntimeException("You must have at least one saved party to challenge");
-    if (receiver.getParties().isEmpty())
+    if (receiver.getParties().stream().noneMatch(Party::isSaved))
       throw new RuntimeException("That player has no saved party");
 
     PvPInvitation invite =

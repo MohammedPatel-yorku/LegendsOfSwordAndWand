@@ -12,4 +12,8 @@ public interface ICampaignService {
   boolean hasActiveCampaign(Long userId);
 
   List<ProfileInfo.CampaignResultInfo> getCampaignResultsForUser(Long userId);
+
+  void savePartyFromCampaign(Long campaignId, Long userId);
+
+  void replacePartyFromCampaign(Long campaignId, Long userId, Long partyIdToReplace);
 }
