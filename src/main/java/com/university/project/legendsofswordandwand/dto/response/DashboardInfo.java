@@ -1,4 +1,4 @@
-package com.university.project.legendsofswordandwand.dto;
+package com.university.project.legendsofswordandwand.dto.response;
 
 public record DashboardInfo(
     String username,

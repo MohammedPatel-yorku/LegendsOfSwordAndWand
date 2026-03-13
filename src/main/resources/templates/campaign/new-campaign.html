@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<!-- With the use of AI -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Campaign — Legends of Sword and Wand</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="card">
+            <div class="card-ornament tl"></div>
+            <div class="card-ornament tr"></div>
+            <div class="card-ornament bl"></div>
+            <div class="card-ornament br"></div>
+
+            <div class="card-header">
+                <span class="game-logo">⚔ New Campaign ⚔</span>
+                <p class="subtitle">Create Your Hero</p>
+            </div>
+
+            <div th:if="${error}" class="alert alert-error">
+                ✦ <span th:text="${error}">An error occurred.</span>
+            </div>
+
+            <form method="post" th:action="@{/campaign/new}" id="heroForm">
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+
+                <div class="form-group">
+                    <label class="form-label" for="heroName">Hero Name</label>
+                    <input class="form-input" type="text" id="heroName" name="heroName"
+                           placeholder="Name your champion..." maxlength="30" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Choose a Class</label>
+                    <div class="class-grid">
+
+                        <label class="class-card class-order" id="card-ORDER">
+                            <input type="radio" name="heroClass" value="ORDER" required
+                                   onchange="selectClass('ORDER')">
+                            <span class="class-icon">🛡</span>
+                            <span class="class-name">Order</span>
+                            <span class="class-tagline">Healer &amp; Protector</span>
+                        </label>
+
+                        <label class="class-card class-chaos" id="card-CHAOS">
+                            <input type="radio" name="heroClass" value="CHAOS"
+                                   onchange="selectClass('CHAOS')">
+                            <span class="class-icon">🔥</span>
+                            <span class="class-name">Chaos</span>
+                            <span class="class-tagline">Arcane Destroyer</span>
+                        </label>
+
+                        <label class="class-card class-warrior" id="card-WARRIOR">
+                            <input type="radio" name="heroClass" value="WARRIOR"
+                                   onchange="selectClass('WARRIOR')">
+                            <span class="class-icon">⚔</span>
+                            <span class="class-name">Warrior</span>
+                            <span class="class-tagline">Brute Force</span>
+                        </label>
+
+                        <label class="class-card class-mage" id="card-MAGE">
+                            <input type="radio" name="heroClass" value="MAGE"
+                                   onchange="selectClass('MAGE')">
+                            <span class="class-icon">🪄</span>
+                            <span class="class-name">Mage</span>
+                            <span class="class-tagline">Wand Wielder</span>
+                        </label>
+
+                    </div>
+
+                    <!-- Class description panel -->
+                    <div class="class-detail" id="classDetail">
+                        Select a class to learn more about their powers...
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-full" type="submit">
+                    ✦ &nbsp;Begin the Campaign
+                </button>
+            </form>
+
+            <div class="card-footer">
+                <a href="/dashboard">← Return to the keep</a>
+            </div>
+        </div>
+    </div>
+<script th:src="@{/js/campaign.js}"></script>
+</body>
+</html>

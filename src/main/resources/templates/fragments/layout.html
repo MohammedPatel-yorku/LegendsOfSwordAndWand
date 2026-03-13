@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(title, content)">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title th:replace="${title}">Legends of Sword and Wand</title>
+        <link rel="stylesheet" th:href="@{/css/main.css}">
+    </head>
+    <body>
+        <div class="page-wrapper">
+            <th:block th:replace="${content}" />
+        </div>
+    </body>
+</html>

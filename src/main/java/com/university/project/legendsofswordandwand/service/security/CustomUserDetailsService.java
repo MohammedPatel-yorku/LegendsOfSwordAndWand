@@ -1,4 +1,4 @@
-package com.university.project.legendsofswordandwand.service;
+package com.university.project.legendsofswordandwand.service.security;
 
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.repository.UserRepository;

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.university.project.legendsofswordandwand.dto.RegisterRequest;
+import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
 import com.university.project.legendsofswordandwand.service.impl.AuthServiceImpl;
 import org.junit.jupiter.api.Test;

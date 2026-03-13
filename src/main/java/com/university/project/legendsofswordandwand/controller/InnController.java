@@ -2,10 +2,9 @@ package com.university.project.legendsofswordandwand.controller;
 
 import com.university.project.legendsofswordandwand.service.IInnService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/campaign/{campaignId}/inn")
 public class InnController {

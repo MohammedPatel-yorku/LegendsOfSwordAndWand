@@ -20,7 +20,7 @@ public class BattleServiceImpl implements IBattleService {
 
   @Override
   public void executeDefend(Hero unit) {
-    unit.setHealth(unit.getHealth() + 10);
-    unit.setMana(unit.getMana() + 5);
+    unit.setHealth(Math.min(unit.getMaxHealth(), unit.getHealth() + 10));
+    unit.setMana(Math.min(unit.getMaxMana(), unit.getMana() + 5));
   }
 }

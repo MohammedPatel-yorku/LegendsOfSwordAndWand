@@ -1,0 +1,2 @@
+.badge-active   { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.1em; padding: 0.2rem 0.5rem; background: rgba(22,100,22,0.3); border: 1px solid #2e7d32; border-radius: 20px; color: #80c080; }
+.badge-complete { font-family: 'Cinzel', serif; font-size: 0.65rem; letter-spacing: 0.1em; padding: 0.2rem 0.5rem; background: rgba(139,105,20,0.2); border: 1px solid var(--gold-muted); border-radius: 20px; color: var(--gold-bright); }

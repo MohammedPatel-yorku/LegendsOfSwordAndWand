@@ -1,4 +1,4 @@
-package com.university.project.legendsofswordandwand.dto;
+package com.university.project.legendsofswordandwand.dto.response;
 
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import java.util.List;

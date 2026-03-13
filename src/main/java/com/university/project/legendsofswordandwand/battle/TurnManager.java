@@ -3,9 +3,7 @@ package com.university.project.legendsofswordandwand.battle;
 import com.university.project.legendsofswordandwand.model.Hero;
 import java.util.LinkedList;
 import java.util.List;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TurnManager {
 
   private LinkedList<Hero> activeQueue = new LinkedList<>();

@@ -1,0 +1,76 @@
+/* ── Class Cards (hero selection) ─────────────────────────  */
+.class-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+}
+
+.class-card {
+    background: var(--bg-deepest);
+    border: 2px solid var(--border-dim);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.class-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--class-color, var(--gold-bright));
+    transform: scaleX(0);
+    transition: transform var(--transition);
+}
+
+.class-card:hover { border-color: var(--class-color, var(--gold-muted)); transform: translateY(-2px); }
+.class-card:hover::before { transform: scaleX(1); }
+
+.class-card.selected {
+    border-color: var(--class-color, var(--gold-bright));
+    background: rgba(212,160,23,0.06);
+    box-shadow: 0 0 16px rgba(212,160,23,0.2);
+}
+.class-card.selected::before { transform: scaleX(1); }
+
+.class-card input[type="radio"] { display: none; }
+
+.class-icon { font-size: 2rem; display: block; margin-bottom: 0.4rem; }
+.class-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 0.2rem;
+}
+.class-tagline {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+    display: block;
+}
+
+/* ── Class Description Tooltip ──────────────────────────── */
+.class-detail {
+    background: var(--bg-raised);
+    border: 1px solid var(--border-dim);
+    border-left: 3px solid var(--gold-muted);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    min-height: 60px;
+    margin-bottom: 1.2rem;
+    transition: all var(--transition);
+}
+
+/* Class colour accents */
+.class-order   { --class-color: #6ab0e0; }
+.class-chaos   { --class-color: #e06060; }
+.class-warrior { --class-color: #b08040; }
+.class-mage    { --class-color: #a070d0; }

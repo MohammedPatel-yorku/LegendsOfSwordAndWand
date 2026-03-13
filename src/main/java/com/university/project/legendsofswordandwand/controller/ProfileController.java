@@ -1,6 +1,6 @@
 package com.university.project.legendsofswordandwand.controller;
 
-import com.university.project.legendsofswordandwand.dto.ProfileInfo;
+import com.university.project.legendsofswordandwand.dto.response.ProfileInfo;
 import com.university.project.legendsofswordandwand.service.IProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -24,6 +24,6 @@ public class ProfileController {
     ProfileInfo profile = profileService.getProfile(authentication.getName());
     model.addAttribute("profile", profile);
 
-    return "profile";
+    return "profile/profile";
   }
 }

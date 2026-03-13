@@ -1,6 +1,6 @@
 package com.university.project.legendsofswordandwand.service.impl;
 
-import com.university.project.legendsofswordandwand.dto.DashboardInfo;
+import com.university.project.legendsofswordandwand.dto.response.DashboardInfo;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
@@ -28,7 +28,7 @@ public class UserServiceImpl implements IUserService {
             .findByUsername(username)
             .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
-    boolean hasParty = user.getParties() != null && !user.getParties().isEmpty();
+    boolean hasParty = user.getParties().stream().anyMatch(Party::isSaved);
     boolean hasCampaign = campaignService.hasActiveCampaign(user.getId());
 
     int partySize = 0;

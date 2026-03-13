@@ -1,6 +1,6 @@
 package com.university.project.legendsofswordandwand.service;
 
-import com.university.project.legendsofswordandwand.dto.DashboardInfo;
+import com.university.project.legendsofswordandwand.dto.response.DashboardInfo;
 
 public interface IUserService {
 

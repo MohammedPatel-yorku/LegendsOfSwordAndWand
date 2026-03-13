@@ -5,25 +5,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Dashboard — Legends of Sword and Wand</title>
-        <link rel="stylesheet" th:href="@{/css/style.css}">
-        <style>
-            .party-summary {
-                background: var(--bg-raised);
-                border: 1px solid var(--border-dim);
-                border-left: 3px solid var(--gold-muted);
-                border-radius: 0 var(--radius-md) var(--radius-md) 0;
-                padding: 0.8rem 1.2rem;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 1rem;
-                font-size: 0.9rem;
-            }
-            .party-summary-stats { display: flex; gap: 1.5rem; }
-            .party-summary-stat  { text-align: center; }
-            .party-summary-val   { font-family: 'Cinzel Decorative', serif; color: var(--gold-bright); font-size: 1.1rem; display: block; }
-            .party-summary-lbl   { font-family: 'Cinzel', serif; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
-        </style>
+        <link rel="stylesheet" th:href="@{/css/main.css}">
     </head>
     <body>
         <div class="page-wrapper">
@@ -33,22 +15,7 @@
                 <div class="card-ornament bl"></div>
                 <div class="card-ornament br"></div>
 
-                <div class="user-bar">
-                    <span class="user-greeting">
-                        Welcome back, <span th:text="${username}">Adventurer</span>
-                    </span>
-                    <div style="display:flex; gap:0.5rem; align-items:center;">
-                        <a href="/profile" class="btn btn-ghost" style="padding:0.4rem 0.9rem;font-size:0.7rem;">
-                            👤 Profile
-                        </a>
-                        <form action="/logout" method="post" style="margin:0">
-                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
-                            <button class="btn btn-ghost" type="submit" style="padding:0.4rem 0.9rem;font-size:0.7rem;">
-                                ⬚ &nbsp;Logout
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                <div th:replace="~{fragments/navbar :: userbar}"></div>
 
                 <div class="card-header">
                     <span class="game-logo flicker">⚔ Legends of Sword and Wand ⚔</span>
@@ -82,7 +49,9 @@
 
                 <div class="dashboard-grid">
 
-                    <a href="/campaign/new" class="action-card" style="--accent-color: #d4a017;">
+                    <a th:href="${!hasCampaign} ? '/campaign/new' : '#'"
+                       th:class="${!hasCampaign} ? 'action-card' : 'action-card action-disabled'"
+                       style="--accent-color: #d4a017;">
                         <span class="action-icon">🗺</span>
                         <span class="action-title">New Campaign</span>
                         <span class="action-desc">Forge a new hero and venture into the dungeon depths.</span>

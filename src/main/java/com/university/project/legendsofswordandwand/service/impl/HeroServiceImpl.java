@@ -1,5 +1,6 @@
 package com.university.project.legendsofswordandwand.service.impl;
 
+import com.university.project.legendsofswordandwand.battle.HeroStatCalculator;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
@@ -18,6 +19,7 @@ public class HeroServiceImpl implements IHeroService {
 
   private final HeroRepository heroRepository;
   private final PartyRepository partyRepository;
+  private final HeroStatCalculator heroStatCalculator;
 
   /**
    * Creates a new base stat (Level 1, 100 HP, 10 Attack) Hero for requesting Party.
@@ -35,17 +37,87 @@ public class HeroServiceImpl implements IHeroService {
             .orElseThrow(() -> new RuntimeException("Party Not Found"));
 
     Hero hero =
-        Hero.builder()
-            .name(selectedHeroName)
-            .primaryClass(selectedHeroClass)
-            .level(1)
-            .health(100)
-            .attack(5)
-            .party(party)
-            .build();
+        Hero.builder().name(selectedHeroName).startingClass(selectedHeroClass).party(party).build();
+
+    incrementClassLevel(hero, selectedHeroClass);
 
     party.getHeroes().add(hero);
-
     heroRepository.save(hero);
+  }
+
+  @Override
+  public Hero levelUp(Long heroId, HeroClass chosenClass) {
+
+    Hero hero =
+        heroRepository.findById(heroId).orElseThrow(() -> new RuntimeException("Hero Not Found"));
+
+    if (hero.getLevel() >= 20) throw new RuntimeException("Hero is already at max level");
+
+    if (!isLevelUpPending(heroId))
+      throw new RuntimeException("Hero does not have enough XP to level up");
+
+    HeroClass effectiveChoice = hero.isHybrid() ? hero.getPrimaryClass() : chosenClass;
+
+    incrementClassLevel(hero, effectiveChoice);
+
+    if (!hero.isHybrid()
+        && hero.getPrimaryClass() == null
+        && getClassLevel(hero, chosenClass) == 5) {
+      hero.setPrimaryClass(chosenClass);
+    }
+
+    if (!hero.isHybrid()
+        && hero.getPrimaryClass() != null
+        && hero.getPrimaryClass() != chosenClass
+        && getClassLevel(hero, chosenClass) == 5) {
+      hero.setSecondaryClass(chosenClass);
+      hero.setHybrid(true);
+      hero.setHybridClass(
+          heroStatCalculator.resolveHybridClass(hero.getPrimaryClass(), chosenClass));
+    }
+
+    heroStatCalculator.applyLevelUp(hero, effectiveChoice);
+
+    return heroRepository.save(hero);
+  }
+
+  @Override
+  public Hero addExperience(Long heroId, int amount) {
+
+    Hero hero =
+        heroRepository.findById(heroId).orElseThrow(() -> new RuntimeException("Hero not found"));
+
+    hero.setExperience(hero.getExperience() + amount);
+
+    return heroRepository.save(hero);
+  }
+
+  @Override
+  public boolean isLevelUpPending(Long heroId) {
+
+    Hero hero =
+        heroRepository.findById(heroId).orElseThrow(() -> new RuntimeException("Hero not found"));
+
+    return hero.getLevel() < 20 && hero.getExperience() >= hero.getExperienceToNextLevel();
+  }
+
+  private void incrementClassLevel(Hero hero, HeroClass heroClass) {
+
+    switch (heroClass) {
+      case ORDER -> hero.setOrderLevels(hero.getOrderLevels() + 1);
+      case CHAOS -> hero.setChaosLevels(hero.getChaosLevels() + 1);
+      case WARRIOR -> hero.setWarriorLevels(hero.getWarriorLevels() + 1);
+      case MAGE -> hero.setMageLevels(hero.getMageLevels() + 1);
+    }
+  }
+
+  private int getClassLevel(Hero hero, HeroClass heroClass) {
+
+    return switch (heroClass) {
+      case ORDER -> hero.getOrderLevels();
+      case CHAOS -> hero.getChaosLevels();
+      case WARRIOR -> hero.getWarriorLevels();
+      case MAGE -> hero.getMageLevels();
+    };
   }
 }

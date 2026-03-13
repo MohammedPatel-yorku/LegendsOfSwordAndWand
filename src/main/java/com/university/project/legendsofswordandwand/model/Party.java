@@ -33,6 +33,11 @@ public class Party {
   @Builder.Default
   private int gold = 0;
 
+  @Column(nullable = false)
+  @Setter
+  @Builder.Default
+  private boolean saved = false;
+
   @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
   private List<Hero> heroes = new ArrayList<>();

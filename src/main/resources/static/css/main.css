@@ -1,0 +1,32 @@
+/* ============================================================
+   LEGENDS OF SWORD AND WAND — Dark Fantasy Stylesheet
+   With the use of AI
+   ============================================================ */
+
+/* Base */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+@import 'base/variables.css';
+@import 'base/reset.css';
+@import 'base/typography.css';
+
+/* Layout */
+@import 'layout/page.css';
+@import 'layout/grid.css';
+
+/* Components */
+@import 'components/buttons.css';
+@import 'components/forms.css';
+@import 'components/alerts.css';
+@import 'components/stats.css';
+@import 'components/badges.css';
+
+/* Views */
+@import 'views/dashboard.css';
+@import 'views/campaign.css';
+@import 'views/profile.css';
+@import 'views/battle.css';
+@import 'views/inn.css';
+@import 'views/pvp.css';
+
+/* Animations */
+@import 'animations.css';

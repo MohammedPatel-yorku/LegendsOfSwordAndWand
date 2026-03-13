@@ -1,4 +1,4 @@
-package com.university.project.legendsofswordandwand.usecases;
+package com.university.project.legendsofswordandwand.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.WebApplicationType;

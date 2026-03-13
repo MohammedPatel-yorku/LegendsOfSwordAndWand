@@ -1,0 +1,33 @@
+/* ── Typography ─────────────────────────────────────────── */
+h1, h2, h3, h4 {
+    font-family: 'Cinzel Decorative', serif;
+    color: var(--gold-bright);
+    line-height: 1.2;
+    letter-spacing: 0.04em;
+}
+
+h1 { font-size: clamp(1.8rem, 4vw, 3rem); }
+h2 { font-size: clamp(1.4rem, 3vw, 2.2rem); }
+h3 { font-size: clamp(1.1rem, 2vw, 1.6rem); }
+
+.subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+a {
+    color: var(--gold-bright);
+    text-decoration: none;
+    transition: color var(--transition), text-shadow var(--transition);
+}
+a:hover { color: var(--gold-light); text-shadow: var(--glow-gold); }
+
+.game-logo {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    text-shadow: var(--glow-gold);
+    display: block;
+    margin-bottom: 0.3rem;
+}

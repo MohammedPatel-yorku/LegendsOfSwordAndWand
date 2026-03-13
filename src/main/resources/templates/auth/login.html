@@ -2,18 +2,13 @@
 <!-- With the use of AI -->
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Login — Legends of Sword and Wand</title>
-        <link rel="stylesheet" th:href="@{/css/style.css}">
+        <link rel="stylesheet" th:href="@{/css/main.css}">
     </head>
     <body>
         <div class="page-wrapper">
             <div class="card">
-                <div class="card-ornament tl"></div>
-                <div class="card-ornament tr"></div>
-                <div class="card-ornament bl"></div>
-                <div class="card-ornament br"></div>
+                <div th:replace="~{fragments/card :: ornaments}"></div>
 
                 <div class="card-header">
                     <span class="game-logo gold-pulse">⚔ Legends of Sword and Wand ⚔</span>
