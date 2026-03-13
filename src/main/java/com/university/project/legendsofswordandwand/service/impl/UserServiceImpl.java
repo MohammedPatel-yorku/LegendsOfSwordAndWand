@@ -1,6 +1,6 @@
 package com.university.project.legendsofswordandwand.service.impl;
 
-import com.university.project.legendsofswordandwand.dto.DashboardInfo;
+import com.university.project.legendsofswordandwand.dto.response.DashboardInfo;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.repository.UserRepository;

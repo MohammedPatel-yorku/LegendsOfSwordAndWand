@@ -1,6 +1,6 @@
 package com.university.project.legendsofswordandwand.service.impl;
 
-import com.university.project.legendsofswordandwand.dto.RegisterRequest;
+import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
 import com.university.project.legendsofswordandwand.service.IAuthService;

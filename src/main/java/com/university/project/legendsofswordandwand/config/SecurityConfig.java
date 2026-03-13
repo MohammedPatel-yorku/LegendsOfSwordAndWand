@@ -1,6 +1,6 @@
 package com.university.project.legendsofswordandwand.config;
 
-import com.university.project.legendsofswordandwand.service.CustomUserDetailsService;
+import com.university.project.legendsofswordandwand.service.security.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

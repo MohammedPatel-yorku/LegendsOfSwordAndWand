@@ -1,0 +1,71 @@
+/* ── Stats row ───────────────────────────────────────────── */
+.stat-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-value {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.4rem;
+    color: var(--gold-bright);
+    line-height: 1;
+}
+
+.stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+}
+
+.party-summary {
+    background: var(--bg-raised);
+    border: 1px solid var(--border-dim);
+    border-left: 3px solid var(--gold-muted);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 0.8rem 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+.party-summary-stats { display: flex; gap: 1.5rem; }
+.party-summary-stat  { text-align: center; }
+.party-summary-val   { font-family: 'Cinzel Decorative', serif; color: var(--gold-bright); font-size: 1.1rem; display: block; }
+.party-summary-lbl   { font-family: 'Cinzel', serif; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+
+.hero-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto auto;
+    gap: 0.4rem 0.8rem;
+    align-items: center;
+    padding: 0.4rem 0;
+    border-top: 1px solid var(--border-dim);
+    font-size: 0.85rem;
+}
+.hero-name  { color: var(--text-primary); font-weight: 600; }
+.hero-class { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--text-secondary); }
+.hero-stat  { color: var(--text-muted); font-size: 0.8rem; text-align: center; }
+.hero-stat span { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.stat-header {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto auto;
+    gap: 0.4rem 0.8rem;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding-bottom: 0.3rem;
+    font-family: 'Cinzel', serif;
+}

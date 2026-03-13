@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Register — Legends of Sword and Wand</title>
+        <link rel="stylesheet" th:href="@{/css/main.css}">
+    </head>
+    <body>
+        <div class="page-wrapper">
+            <div class="card">
+                <div class="card-ornament tl"></div>
+                <div class="card-ornament tr"></div>
+                <div class="card-ornament bl"></div>
+                <div class="card-ornament br"></div>
+
+                <div class="card-header">
+                    <span class="game-logo gold-pulse">⚔ Legends of Sword and Wand ⚔</span>
+                    <p class="subtitle">Forge Your Legend</p>
+                </div>
+
+                <div th:if="${error}" class="alert alert-error">
+                    ✦ <span th:text="${error}">An error occurred.</span>
+                </div>
+
+                <form method="post" th:action="@{/register}">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+
+                    <div class="form-group">
+                        <label class="form-label" for="username">Choose a Name</label>
+                        <input class="form-input" type="text" id="username" name="username"
+                               placeholder="Your legend's name..." autocomplete="username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="password">Choose a Password</label>
+                        <input class="form-input" type="password" id="password" name="password"
+                               placeholder="A secret known only to you..." autocomplete="new-password" required>
+                    </div>
+
+                    <button class="btn btn-primary btn-full" type="submit">
+                        ✦ &nbsp;Begin Your Legend
+                    </button>
+                </form>
+
+                <div class="card-footer">
+                    Already sworn in? &nbsp;<a href="/login">Return to the gates →</a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

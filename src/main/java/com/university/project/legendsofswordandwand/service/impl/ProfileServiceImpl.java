@@ -1,7 +1,7 @@
 package com.university.project.legendsofswordandwand.service.impl;
 
-import com.university.project.legendsofswordandwand.dto.ProfileInfo;
-import com.university.project.legendsofswordandwand.dto.ProfileInfo.*;
+import com.university.project.legendsofswordandwand.dto.response.ProfileInfo;
+import com.university.project.legendsofswordandwand.dto.response.ProfileInfo.*;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;

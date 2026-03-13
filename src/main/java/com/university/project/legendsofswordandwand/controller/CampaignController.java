@@ -20,7 +20,7 @@ public class CampaignController {
   public String newCampaignPage(Authentication authentication) {
 
     if (authentication == null) return "redirect:/login";
-    return "new-campaign";
+    return "campaign/new-campaign";
   }
 
   /**
@@ -41,14 +41,14 @@ public class CampaignController {
 
     if (heroName == null || heroName.isBlank()) {
       model.addAttribute("error", "Your hero needs a name, adventurer.");
-      return "new-campaign";
+      return "campaign/new-campaign";
     }
 
     try {
       campaignService.startNewCampaign(authentication.getName(), heroName.trim(), heroClass);
     } catch (Exception e) {
       model.addAttribute("error", e.getMessage());
-      return "new-campaign";
+      return "campaign/new-campaign";
     }
 
     return "redirect:/dashboard";

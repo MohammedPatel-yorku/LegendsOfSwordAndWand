@@ -1,7 +1,7 @@
 package com.university.project.legendsofswordandwand.controller;
 
-import com.university.project.legendsofswordandwand.dto.DashboardInfo;
-import com.university.project.legendsofswordandwand.dto.RegisterRequest;
+import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
+import com.university.project.legendsofswordandwand.dto.response.DashboardInfo;
 import com.university.project.legendsofswordandwand.service.IAuthService;
 import com.university.project.legendsofswordandwand.service.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +21,12 @@ public class AuthController {
 
   @GetMapping("/login")
   public String loginPage() {
-    return "login";
+    return "auth/login";
   }
 
   @GetMapping("/register")
   public String registerPage() {
-    return "register";
+    return "auth/register";
   }
 
   @PostMapping("/register")

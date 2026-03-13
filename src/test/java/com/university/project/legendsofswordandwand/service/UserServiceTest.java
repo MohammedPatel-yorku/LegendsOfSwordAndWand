@@ -3,7 +3,7 @@ package com.university.project.legendsofswordandwand.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.university.project.legendsofswordandwand.dto.DashboardInfo;
+import com.university.project.legendsofswordandwand.dto.response.DashboardInfo;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
 import java.util.Optional;

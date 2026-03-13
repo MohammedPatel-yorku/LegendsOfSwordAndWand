@@ -1,0 +1,18 @@
+<div th:fragment="userbar" class="user-bar">
+    <span class="user-greeting">
+        Welcome back, <span th:text="${username}">Adventurer</span>
+    </span>
+    <div style="display:flex; gap:0.5rem; align-items:center;">
+        <a href="/profile" class="btn btn-ghost"
+           style="padding:0.4rem 0.9rem; font-size:0.7rem;">
+            👤 Profile
+        </a>
+        <form action="/logout" method="post" style="margin:0">
+            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+            <button class="btn btn-ghost" type="submit"
+                    style="padding:0.4rem 0.9rem; font-size:0.7rem;">
+                ⬚ &nbsp;Logout
+            </button>
+        </form>
+    </div>
+</div>
