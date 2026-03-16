@@ -14,7 +14,6 @@ import com.university.project.legendsofswordandwand.service.IHeroService;
 import com.university.project.legendsofswordandwand.service.IPartyService;
 import java.util.List;
 import java.util.Random;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +37,8 @@ public class CampaignServiceImpl implements ICampaignService {
   @Override
   public Campaign getActiveCampaign(String username) {
     return campaignRepository
-            .findActiveCampaignByUsername(username)
-            .orElseThrow(() -> new RuntimeException("No active campaign found"));
+        .findActiveCampaignByUsername(username)
+        .orElseThrow(() -> new RuntimeException("No active campaign found"));
   }
 
   @Override
@@ -47,8 +46,9 @@ public class CampaignServiceImpl implements ICampaignService {
 
     Campaign campaign = getActiveCampaign(username);
 
-    if (campaign.getCurrentRoom() >= 30)
-      throw new RuntimeException("Campaign is already complete");
+    if (campaign.getCurrentRoom() >= 30) throw new RuntimeException("Campaign is already complete");
+
+    if (campaign.isRoomPending()) return campaign.getLastRoomType();
 
     int cumulativeLevel = campaign.getParty().getCumulativeLevel();
     int battleChance = Math.min(90, 60 + (cumulativeLevel / 10) * 3);
@@ -72,7 +72,7 @@ public class CampaignServiceImpl implements ICampaignService {
   public int calculateScore(Campaign campaign) {
 
     int heroScore =
-            campaign.getParty().getHeroes().stream().mapToInt(h -> h.getLevel() * 100).sum();
+        campaign.getParty().getHeroes().stream().mapToInt(h -> h.getLevel() * 100).sum();
     int goldScore = campaign.getParty().getGold() * 10;
     int score = heroScore + goldScore;
 
@@ -167,7 +167,7 @@ public class CampaignServiceImpl implements ICampaignService {
   public Campaign getMostRecentCompletedCampaign(String username) {
 
     return campaignRepository.findCompletedByOwnerUsername(username).stream()
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No completed campaign found"));
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("No completed campaign found"));
   }
 }

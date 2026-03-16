@@ -99,7 +99,8 @@ public class CampaignController {
     try {
 
       campaignService.exitCampaign(authentication.getName());
-    } catch (Exception ignored) {}
+    } catch (Exception ignored) {
+    }
 
     return "redirect:/dashboard";
   }
@@ -118,11 +119,12 @@ public class CampaignController {
       model.addAttribute("gold", campaign.getParty().getGold());
       model.addAttribute("campaignId", campaign.getId());
 
-      long savedCount = campaign.getParty().getOwner().getParties().stream()
-              .filter(p -> p.isSaved()).count();
+      long savedCount =
+          campaign.getParty().getOwner().getParties().stream().filter(p -> p.isSaved()).count();
       model.addAttribute("partyFull", savedCount >= 5);
-      model.addAttribute("savedParties",
-              campaign.getOwner().getParties().stream().filter(p -> p.isSaved()).toList();
+      model.addAttribute(
+          "savedParties",
+          campaign.getOwner().getParties().stream().filter(p -> p.isSaved()).toList());
     } catch (Exception e) {
       return "redirect:/dashboard";
     }
@@ -132,16 +134,17 @@ public class CampaignController {
 
   @PostMapping("/complete/save")
   public String saveParty(
-          Authentication authentication,
-          @RequestParam("campaignId") Long campaignId,
-          Model model) {
+      Authentication authentication, @RequestParam("campaignId") Long campaignId, Model model) {
 
     if (authentication == null) return "redirect:/login";
 
     try {
 
-      Long userId = campaignService.getMostRecentCompletedCampaign(authentication.getName())
-              .getOwner().getId();
+      Long userId =
+          campaignService
+              .getMostRecentCompletedCampaign(authentication.getName())
+              .getOwner()
+              .getId();
       campaignService.savePartyFromCampaign(campaignId, userId);
     } catch (Exception e) {
 
@@ -154,18 +157,22 @@ public class CampaignController {
 
   @PostMapping("/complete/replace")
   public String replaceParty(
-          Authentication authentication,
-          @RequestParam("campaignId") Long campaignId,
-          @RequestParam("replacePartyId") Long replacePartyId) {
+      Authentication authentication,
+      @RequestParam("campaignId") Long campaignId,
+      @RequestParam("replacePartyId") Long replacePartyId) {
 
     if (authentication == null) return "redirect:/login";
 
     try {
 
-      Long userId = campaignService.getMostRecentCompletedCampaign(authentication.getName())
-              .getOwner().getId();
+      Long userId =
+          campaignService
+              .getMostRecentCompletedCampaign(authentication.getName())
+              .getOwner()
+              .getId();
       campaignService.replacePartyFromCampaign(campaignId, userId, replacePartyId);
-    } catch (Exception e) {}
+    } catch (Exception e) {
+    }
 
     return "redirect:/dashboard";
   }

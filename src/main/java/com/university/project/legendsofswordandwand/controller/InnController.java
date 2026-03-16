@@ -1,8 +1,12 @@
 package com.university.project.legendsofswordandwand.controller;
 
+import com.university.project.legendsofswordandwand.model.Campaign;
+import com.university.project.legendsofswordandwand.service.ICampaignService;
 import com.university.project.legendsofswordandwand.service.IInnService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -11,30 +15,28 @@ import org.springframework.web.bind.annotation.*;
 public class InnController {
 
   private final IInnService innService;
+  private final ICampaignService campaignService;
 
-  /** Enter the inn for a specific campaign. */
-  @PostMapping("/enter")
-  public String enterInn(@PathVariable Long campaignId) {
-    return innService.loadInnView(campaignId);
-  }
+  @GetMapping
+  public String innPage(Authentication authentication, Model model) {
 
-  /** Buy an item for the campaign's party. */
-  @PostMapping("/buy")
-  public String buyItem(@PathVariable Long campaignId, @RequestParam Long itemId) {
-    boolean success = innService.purchaseItem(campaignId, itemId);
-    return success ? "Item purchase successful." : "Item purchase failed.";
-  }
+    if (authentication == null) return "redirect:/login";
 
-  /** Recruit a hero for the campaign's party. */
-  @PostMapping("/recruit")
-  public String recruitHero(@PathVariable Long campaignId, @RequestParam Long heroId) {
-    boolean success = innService.recruitHero(campaignId, heroId);
-    return success ? "Hero recruited successfully." : "Hero recruitment failed.";
-  }
+    try {
 
-  /** Exit the inn for this campaign. */
-  @PostMapping("/exit")
-  public String exitInn(@PathVariable Long campaignId) {
-    return innService.exitInn(campaignId);
+      Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
+      innService.loadInnView(campaign.getId());
+      model.addAttribute("campaign", campaign);
+      model.addAttribute("heroes", campaign.getParty().getHeroes());
+      model.addAttribute("gold", campaign.getParty().getGold());
+      model.addAttribute("currentRoom", campaign.getCurrentRoom());
+      model.addAttribute("shopItems", innService.getShopItems());
+      model.addAttribute("availableRecruits", innService.getAvailableRecruits(campaign.getId()));
+    } catch (Exception e) {
+
+      return "redirect:/campaign";
+    }
+
+    return "campaign/inn";
   }
 }
