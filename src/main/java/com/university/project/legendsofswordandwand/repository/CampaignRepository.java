@@ -20,6 +20,13 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
   @Query("SELECT COUNT(c) > 0 FROM Campaign c WHERE c.owner.id = :userId AND c.active = true")
   boolean existsActiveCampaignByOwnerId(@Param("userId") Long userId);
 
+  @Query("SELECT c FROM Campaign c WHERE c.owner.username = :username AND c.active = true")
+  Optional<Campaign> findActiveCampaignByUsername(@Param("username") String username);
+
   @Query("SELECT c FROM Campaign c WHERE c.owner.id = :userId ORDER BY c.score DESC")
   List<Campaign> findAllByOwnerIdOrderByScoreDesc(@Param("userId") Long userId);
+
+  @Query(
+      "SELECT c FROM Campaign c WHERE c.owner.username = :username AND c.active = false ORDER BY c.id DESC")
+  List<Campaign> findCompletedByOwnerUsername(@Param("username") String username);
 }

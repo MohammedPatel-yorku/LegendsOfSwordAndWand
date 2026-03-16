@@ -1,7 +1,7 @@
 package com.university.project.legendsofswordandwand.controller;
 
 import com.university.project.legendsofswordandwand.dto.response.ProfileInfo;
-import com.university.project.legendsofswordandwand.service.IProfileService;
+import com.university.project.legendsofswordandwand.service.user.IProfileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;

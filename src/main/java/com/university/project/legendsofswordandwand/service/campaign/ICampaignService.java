@@ -1,9 +1,7 @@
-package com.university.project.legendsofswordandwand.service;
+package com.university.project.legendsofswordandwand.service.campaign;
 
-import com.university.project.legendsofswordandwand.dto.response.ProfileInfo;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
-import java.util.List;
 
 public interface ICampaignService {
 
@@ -11,7 +9,13 @@ public interface ICampaignService {
 
   boolean hasActiveCampaign(Long userId);
 
-  List<ProfileInfo.CampaignResultInfo> getCampaignResultsForUser(Long userId);
+  Campaign getActiveCampaign(String username);
+
+  Campaign exitCampaign(String username);
+
+  Campaign completeCampaign(String username);
+
+  Campaign getMostRecentCompletedCampaign(String username);
 
   void savePartyFromCampaign(Long campaignId, Long userId);
 

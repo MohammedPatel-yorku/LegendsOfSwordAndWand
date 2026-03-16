@@ -1,4 +1,4 @@
-package com.university.project.legendsofswordandwand.service;
+package com.university.project.legendsofswordandwand.service.battle;
 
 import com.university.project.legendsofswordandwand.model.Hero;
 

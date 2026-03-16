@@ -1,4 +1,4 @@
-package com.university.project.legendsofswordandwand.service;
+package com.university.project.legendsofswordandwand.service.inventory;
 
 import com.university.project.legendsofswordandwand.model.Inventory;
 import java.util.List;

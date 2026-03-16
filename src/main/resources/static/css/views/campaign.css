@@ -74,3 +74,254 @@
 .class-chaos   { --class-color: #e06060; }
 .class-warrior { --class-color: #b08040; }
 .class-mage    { --class-color: #a070d0; }
+
+/* ── Campaign / Dungeon View ────────────────────────────── */
+.campaign-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.dungeon-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.room-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-md);
+}
+
+.room-counter {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.4rem;
+    color: var(--gold-bright);
+    line-height: 1;
+}
+
+.room-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    display: block;
+}
+
+.room-progress {
+    width: 100%;
+    height: 6px;
+    background: var(--bg-deepest);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.room-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-muted), var(--gold-bright));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+.dungeon-art {
+    background: var(--bg-deepest);
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-md);
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.dungeon-art::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+            radial-gradient(ellipse at 50% 100%, rgba(139,26,26,0.12) 0%, transparent 60%),
+            radial-gradient(ellipse at 50% 0%, rgba(139,105,20,0.08) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.dungeon-glyph {
+    font-size: 4rem;
+    opacity: 0.9;
+    animation: goldPulse 4s ease-in-out infinite;
+}
+
+.dungeon-flavour {
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    max-width: 340px;
+}
+
+.next-room-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+}
+
+.party-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.party-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.2rem;
+}
+
+.party-panel-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-secondary);
+}
+
+.party-gold {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.9rem;
+    color: var(--gold-bright);
+}
+
+.hero-card {
+    background: var(--bg-deepest);
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-md);
+    padding: 0.9rem 1rem;
+    transition: border-color var(--transition);
+}
+
+.hero-card:hover { border-color: var(--gold-muted); }
+
+.hero-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.6rem;
+}
+
+.hero-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.hero-class-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 99px;
+    border: 1px solid;
+}
+
+.hero-class-badge.ORDER   { color: #6ab0e0; border-color: #6ab0e060; background: #6ab0e012; }
+.hero-class-badge.CHAOS   { color: #e06060; border-color: #e0606060; background: #e0606012; }
+.hero-class-badge.WARRIOR { color: #b08040; border-color: #b0804060; background: #b0804012; }
+.hero-class-badge.MAGE    { color: #a070d0; border-color: #a070d060; background: #a070d012; }
+.hero-class-badge.HYBRID  { color: var(--gold-bright); border-color: var(--border-gold); background: rgba(212,160,23,0.08); }
+
+.hero-level {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.stat-bar-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.stat-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.stat-bar {
+    height: 5px;
+    background: var(--bg-raised);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.stat-bar-fill.hp   { background: linear-gradient(90deg, #8b1a1a, #c0392b); }
+.stat-bar-fill.mana { background: linear-gradient(90deg, #2c3e8b, #5b7be0); }
+
+.hero-xp-row {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-family: 'Cinzel', serif;
+}
+
+.xp-bar {
+    height: 3px;
+    background: var(--bg-raised);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 0.25rem;
+}
+
+.xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-muted), var(--gold-bright));
+    border-radius: 3px;
+}
+
+.level-up-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    color: var(--gold-bright);
+    border: 1px solid var(--gold-muted);
+    border-radius: 99px;
+    padding: 0.1rem 0.5rem;
+    animation: goldPulse 1.5s ease-in-out infinite;
+}
+
+.exit-campaign-form {
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 700px) {
+    .campaign-layout {
+        grid-template-columns: 1fr;
+    }
+}

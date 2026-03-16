@@ -1,4 +1,4 @@
-package com.university.project.legendsofswordandwand.service.impl;
+package com.university.project.legendsofswordandwand.service.pvp.impl;
 
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.PvPInvitation;
@@ -6,14 +6,14 @@ import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.model.enums.InvitationStatus;
 import com.university.project.legendsofswordandwand.repository.PvPInvitationRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
-import com.university.project.legendsofswordandwand.service.IPvPService;
+import com.university.project.legendsofswordandwand.service.pvp.IPvPService;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class PvPServiceImpl implements IPvPService {
+class PvPServiceImpl implements IPvPService {
 
   private final UserRepository userRepository;
   private final PvPInvitationRepository pvpInvitationRepository;

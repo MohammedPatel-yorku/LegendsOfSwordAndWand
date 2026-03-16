@@ -1,5 +1,6 @@
 package com.university.project.legendsofswordandwand.model;
 
+import com.university.project.legendsofswordandwand.model.enums.RoomType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,9 +14,7 @@ import lombok.*;
 @Entity
 @Table(name = "campaigns")
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Campaign {
 
   @Id
@@ -42,6 +41,23 @@ public class Campaign {
 
   @Column(nullable = false)
   @Setter
-  @Builder.Default
   private int score = 0;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "last_room_type", nullable = true)
+  @Setter
+  private RoomType lastRoomType;
+
+  @Column(name = "room_pending", nullable = false)
+  @Setter
+  private boolean roomPending = false;
+
+  @Builder
+  public Campaign(User owner, Party party, int currentRoom, boolean active) {
+    this.owner = owner;
+    this.party = party;
+    this.currentRoom = currentRoom;
+    this.active = active;
+    this.score = 0;
+  }
 }

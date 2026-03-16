@@ -14,9 +14,7 @@ import lombok.*;
 @Entity
 @Table(name = "parties")
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Party {
 
   @Id
@@ -30,19 +28,31 @@ public class Party {
 
   @Column(nullable = false)
   @Setter
-  @Builder.Default
   private int gold = 0;
 
   @Column(nullable = false)
   @Setter
-  @Builder.Default
   private boolean saved = false;
 
   @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
-  @Builder.Default
   private List<Hero> heroes = new ArrayList<>();
 
   public int getCumulativeLevel() {
     return heroes.stream().mapToInt(Hero::getLevel).sum();
+  }
+
+  public int calculateScore() {
+
+    int heroScore = heroes.stream().mapToInt(h -> h.getLevel() * 100).sum();
+    int goldScore = gold * 10;
+    return heroScore + goldScore;
+  }
+
+  @Builder
+  public Party(User owner) {
+    this.owner = owner;
+    this.gold = 0;
+    this.saved = false;
+    this.heroes = new ArrayList<>();
   }
 }

@@ -1,34 +1,48 @@
-package com.university.project.legendsofswordandwand.service.impl;
+package com.university.project.legendsofswordandwand.service.campaign.impl;
 
-import com.university.project.legendsofswordandwand.dto.response.ProfileInfo;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.repository.CampaignRepository;
-import com.university.project.legendsofswordandwand.repository.PartyRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
-import com.university.project.legendsofswordandwand.service.ICampaignService;
-import com.university.project.legendsofswordandwand.service.IHeroService;
-import com.university.project.legendsofswordandwand.service.IPartyService;
-import java.util.List;
+import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
+import com.university.project.legendsofswordandwand.service.hero.IHeroService;
+import com.university.project.legendsofswordandwand.service.party.IPartyService;
+import jakarta.transaction.Transactional;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /** Campaign Object Service class. */
 @Service
+@Transactional
 @RequiredArgsConstructor
-public class CampaignServiceImpl implements ICampaignService {
+class CampaignServiceImpl implements ICampaignService {
 
   private final CampaignRepository campaignRepository;
   private final UserRepository userRepository;
   private final IHeroService heroService;
   private final IPartyService partyService;
-  private final PartyRepository partyRepository;
+  private final Random random = new Random();
 
   @Override
   public boolean hasActiveCampaign(Long userId) {
     return campaignRepository.existsActiveCampaignByOwnerId(userId);
+  }
+
+  @Override
+  public Campaign getActiveCampaign(String username) {
+    return campaignRepository
+        .findActiveCampaignByUsername(username)
+        .orElseThrow(() -> new RuntimeException("No active campaign found"));
+  }
+
+  @Override
+  public Campaign exitCampaign(String username) {
+
+    Campaign campaign = getActiveCampaign(username);
+    return campaignRepository.save(campaign);
   }
 
   @Override
@@ -45,17 +59,9 @@ public class CampaignServiceImpl implements ICampaignService {
     heroService.createBaseHeroForParty(party.getId(), heroName, heroClass);
 
     Campaign campaign =
-        Campaign.builder().owner(user).active(true).currentRoom(1).party(party).build();
+        Campaign.builder().owner(user).active(true).currentRoom(0).party(party).build();
 
     return campaignRepository.save(campaign);
-  }
-
-  @Override
-  public List<ProfileInfo.CampaignResultInfo> getCampaignResultsForUser(Long userId) {
-    return campaignRepository.findAllByOwnerIdOrderByScoreDesc(userId).stream()
-        .map(
-            c -> new ProfileInfo.CampaignResultInfo(c.getScore(), c.getCurrentRoom(), c.isActive()))
-        .toList();
   }
 
   @Override
@@ -92,9 +98,26 @@ public class CampaignServiceImpl implements ICampaignService {
             .orElseThrow(() -> new RuntimeException("Saved party not found"));
 
     user.getParties().remove(toReplace);
-    partyRepository.delete(toReplace);
+    partyService.deleteParty(toReplace.getId());
     userRepository.save(user);
 
     savePartyFromCampaign(campaignId, userId);
+  }
+
+  @Override
+  public Campaign completeCampaign(String username) {
+
+    Campaign campaign = getActiveCampaign(username);
+    campaign.setScore(campaign.getParty().calculateScore());
+    campaign.setActive(false);
+    return campaignRepository.save(campaign);
+  }
+
+  @Override
+  public Campaign getMostRecentCompletedCampaign(String username) {
+
+    return campaignRepository.findCompletedByOwnerUsername(username).stream()
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("No completed campaign found"));
   }
 }
