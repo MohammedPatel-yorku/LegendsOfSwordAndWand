@@ -8,6 +8,7 @@ import com.university.project.legendsofswordandwand.repository.HeroRepository;
 import com.university.project.legendsofswordandwand.repository.PartyRepository;
 import com.university.project.legendsofswordandwand.service.IHeroService;
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -99,6 +100,18 @@ public class HeroServiceImpl implements IHeroService {
         heroRepository.findById(heroId).orElseThrow(() -> new RuntimeException("Hero not found"));
 
     return hero.getLevel() < 20 && hero.getExperience() >= hero.getExperienceToNextLevel();
+  }
+
+  @Override
+  public Optional<Hero> findById(Long heroId) {
+
+    return heroRepository.findById(heroId);
+  }
+
+  @Override
+  public Hero save(Hero hero) {
+
+    return heroRepository.save(hero);
   }
 
   private void incrementClassLevel(Hero hero, HeroClass heroClass) {

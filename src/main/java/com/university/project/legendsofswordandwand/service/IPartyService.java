@@ -10,5 +10,9 @@ public interface IPartyService {
 
   Party reviveAndHealParty(Long campaignId);
 
-  Party recruitHero(Long campaignId, Long heroId);
+  void deleteParty(Long partyId);
+
+  void updateGold(Long partyId, int cost);
+
+  void addHeroToParty(Long partyId, Long heroId);
 }

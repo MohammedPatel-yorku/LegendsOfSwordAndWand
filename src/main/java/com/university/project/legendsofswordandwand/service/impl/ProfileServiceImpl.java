@@ -5,8 +5,8 @@ import com.university.project.legendsofswordandwand.dto.response.ProfileInfo.*;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;
+import com.university.project.legendsofswordandwand.repository.CampaignRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
-import com.university.project.legendsofswordandwand.service.ICampaignService;
 import com.university.project.legendsofswordandwand.service.IProfileService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class ProfileServiceImpl implements IProfileService {
 
   private final UserRepository userRepository;
-  private final ICampaignService campaignService;
+  private final CampaignRepository campaignRepository;
 
   @Override
   public ProfileInfo getProfile(String username) {
@@ -30,7 +30,9 @@ public class ProfileServiceImpl implements IProfileService {
         user.getParties().stream().filter(Party::isSaved).map(this::toPartyInfo).toList();
 
     List<CampaignResultInfo> campaignResults =
-        campaignService.getCampaignResultsForUser(user.getId()); // delegated to campaign service
+        campaignRepository.findAllByOwnerIdOrderByScoreDesc(user.getId()).stream()
+            .map(c -> new CampaignResultInfo(c.getScore(), c.getCurrentRoom(), c.isActive()))
+            .toList();
 
     return new ProfileInfo(
         user.getUsername(), user.getPvpWins(), user.getPvpLosses(), partyInfoList, campaignResults);

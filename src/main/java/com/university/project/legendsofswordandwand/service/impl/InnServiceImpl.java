@@ -4,30 +4,25 @@ import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Item;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
-import com.university.project.legendsofswordandwand.repository.HeroRepository;
 import com.university.project.legendsofswordandwand.repository.ItemRepository;
-import com.university.project.legendsofswordandwand.repository.PartyRepository;
+import com.university.project.legendsofswordandwand.service.IHeroService;
 import com.university.project.legendsofswordandwand.service.IInnService;
-import com.university.project.legendsofswordandwand.service.IInventoryService;
 import com.university.project.legendsofswordandwand.service.IPartyService;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import jakarta.transaction.Transactional;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /** InventoryService handles business logic for Inventory objects. */
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class InnServiceImpl implements IInnService {
 
   private final IPartyService partyService;
-  private final IInventoryService inventoryService;
   private final ItemRepository itemRepository;
   private final Random random = new Random();
-  private final PartyRepository partyRepository;
-  private final HeroRepository heroRepository;
+  private final IHeroService heroService;
 
   @Override
   public void loadInnView(Long campaignId) {
@@ -65,19 +60,24 @@ public class InnServiceImpl implements IInnService {
     int count = 1 + random.nextInt(3);
     HeroClass[] classes = HeroClass.values();
 
-    return java.util.stream.IntStream.range(0, count)
-        .mapToObj(
-            i -> {
-              HeroClass heroClass = classes[random.nextInt(classes.length)];
-              int level = 1 + random.nextInt(4);
+    List<Hero> recruits =
+        java.util.stream.IntStream.range(0, count)
+            .mapToObj(
+                i ->
+                    Hero.builder()
+                        .name(generateRecruitName())
+                        .startingClass(classes[random.nextInt(classes.length)])
+                        .party(party)
+                        .build())
+            .toList();
 
-              return Hero.builder()
-                  .name(generateRecruitName())
-                  .startingClass(heroClass)
-                  .party(party)
-                  .build();
-            })
-        .toList();
+    recruits.forEach(
+        h -> {
+          h.setTemporary(true);
+          heroService.save(h);
+        });
+
+    return recruits;
   }
 
   @Override
@@ -89,8 +89,7 @@ public class InnServiceImpl implements IInnService {
 
     if (party.getGold() < item.getCost()) return false;
 
-    party.setGold(party.getGold() + item.getCost());
-    partyRepository.save(party);
+    partyService.updateGold(party.getId(), item.getCost());
     return true;
   }
 
@@ -101,14 +100,13 @@ public class InnServiceImpl implements IInnService {
     if (party.getHeroes().size() >= 5) throw new RuntimeException("Party is full");
 
     Hero hero =
-        heroRepository.findById(heroId).orElseThrow(() -> new RuntimeException("Hero not found"));
+        heroService.findById(heroId).orElseThrow(() -> new RuntimeException("Hero not found"));
 
     int cost = hero.getLevel() == 1 ? 0 : hero.getLevel() * 200;
     if (party.getGold() < cost) throw new RuntimeException("Not enough gold");
 
-    party.setGold(party.getGold() - cost);
-    party.getHeroes().add(hero);
-    partyRepository.save(party);
+    partyService.addHeroToParty(party.getId(), hero.getId());
+    partyService.updateGold(party.getId(), cost);
     return true;
   }
 

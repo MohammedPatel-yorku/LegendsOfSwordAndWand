@@ -1,5 +1,7 @@
 package com.university.project.legendsofswordandwand.service.impl;
 
+import com.university.project.legendsofswordandwand.dto.response.CampaignViewInfo;
+import com.university.project.legendsofswordandwand.dto.response.CompleteCampaignInfo;
 import com.university.project.legendsofswordandwand.dto.response.ProfileInfo;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.Party;
@@ -7,11 +9,11 @@ import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.model.enums.RoomType;
 import com.university.project.legendsofswordandwand.repository.CampaignRepository;
-import com.university.project.legendsofswordandwand.repository.PartyRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
 import com.university.project.legendsofswordandwand.service.ICampaignService;
 import com.university.project.legendsofswordandwand.service.IHeroService;
 import com.university.project.legendsofswordandwand.service.IPartyService;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 /** Campaign Object Service class. */
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CampaignServiceImpl implements ICampaignService {
 
@@ -26,7 +29,6 @@ public class CampaignServiceImpl implements ICampaignService {
   private final UserRepository userRepository;
   private final IHeroService heroService;
   private final IPartyService partyService;
-  private final PartyRepository partyRepository;
   private final Random random = new Random();
 
   @Override
@@ -95,7 +97,7 @@ public class CampaignServiceImpl implements ICampaignService {
     heroService.createBaseHeroForParty(party.getId(), heroName, heroClass);
 
     Campaign campaign =
-        Campaign.builder().owner(user).active(true).currentRoom(1).party(party).build();
+        Campaign.builder().owner(user).active(true).currentRoom(0).party(party).build();
 
     return campaignRepository.save(campaign);
   }
@@ -142,7 +144,7 @@ public class CampaignServiceImpl implements ICampaignService {
             .orElseThrow(() -> new RuntimeException("Saved party not found"));
 
     user.getParties().remove(toReplace);
-    partyRepository.delete(toReplace);
+    partyService.deleteParty(toReplace.getId());
     userRepository.save(user);
 
     savePartyFromCampaign(campaignId, userId);
@@ -169,5 +171,36 @@ public class CampaignServiceImpl implements ICampaignService {
     return campaignRepository.findCompletedByOwnerUsername(username).stream()
         .findFirst()
         .orElseThrow(() -> new RuntimeException("No completed campaign found"));
+  }
+
+  @Override
+  public CompleteCampaignInfo getCompletionData(String username) {
+
+    Campaign campaign = getMostRecentCompletedCampaign(username);
+
+    List<Party> savedParties =
+        campaign.getOwner().getParties().stream().filter(Party::isSaved).toList();
+
+    boolean partyFull = savedParties.size() >= 5;
+
+    return new CompleteCampaignInfo(
+        campaign.getId(),
+        campaign.getScore(),
+        campaign.getParty().getGold(),
+        campaign.getParty().getHeroes(),
+        partyFull,
+        savedParties);
+  }
+
+  @Override
+  public CampaignViewInfo getCampaignViewData(String username) {
+
+    Campaign campaign = getActiveCampaign(username);
+
+    return new CampaignViewInfo(
+        campaign.getId(),
+        campaign.getCurrentRoom(),
+        campaign.getParty().getGold(),
+        campaign.getParty().getHeroes());
   }
 }

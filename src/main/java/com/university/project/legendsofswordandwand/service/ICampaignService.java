@@ -1,5 +1,7 @@
 package com.university.project.legendsofswordandwand.service;
 
+import com.university.project.legendsofswordandwand.dto.response.CampaignViewInfo;
+import com.university.project.legendsofswordandwand.dto.response.CompleteCampaignInfo;
 import com.university.project.legendsofswordandwand.dto.response.ProfileInfo;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
@@ -31,4 +33,8 @@ public interface ICampaignService {
   boolean isCampaignComplete(String username);
 
   Campaign getMostRecentCompletedCampaign(String username);
+
+  CompleteCampaignInfo getCompletionData(String username);
+
+  CampaignViewInfo getCampaignViewData(String username);
 }

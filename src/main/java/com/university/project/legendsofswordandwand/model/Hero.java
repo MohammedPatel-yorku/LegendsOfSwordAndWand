@@ -103,6 +103,10 @@ public class Hero {
   @JoinColumn(name = "party_id")
   private Party party;
 
+  @Column(nullable = false)
+  @Setter
+  private boolean temporary = false;
+
   @Builder
   public Hero(String name, HeroClass startingClass, Party party) {
     this.name = name;

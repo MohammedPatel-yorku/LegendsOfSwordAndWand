@@ -1,9 +1,11 @@
 package com.university.project.legendsofswordandwand.controller;
 
-import com.university.project.legendsofswordandwand.model.Campaign;
+import com.university.project.legendsofswordandwand.dto.response.CampaignViewInfo;
+import com.university.project.legendsofswordandwand.dto.response.CompleteCampaignInfo;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.model.enums.RoomType;
 import com.university.project.legendsofswordandwand.service.ICampaignService;
+import com.university.project.legendsofswordandwand.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class CampaignController {
 
   private final ICampaignService campaignService;
+  private final IUserService userService;
 
   @GetMapping("/new")
   public String newCampaignPage(Authentication authentication) {
@@ -53,7 +56,7 @@ public class CampaignController {
       return "campaign/new-campaign";
     }
 
-    return "redirect:/dashboard";
+    return "redirect:/campaign";
   }
 
   @GetMapping
@@ -62,12 +65,10 @@ public class CampaignController {
 
     try {
 
-      Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
-      model.addAttribute("campaign", campaign);
-      model.addAttribute("party", campaign.getParty());
-      model.addAttribute("heroes", campaign.getParty().getHeroes());
-      model.addAttribute("currentRoom", campaign.getCurrentRoom());
-      model.addAttribute("gold", campaign.getParty().getGold());
+      CampaignViewInfo data = campaignService.getCampaignViewData(authentication.getName());
+      model.addAttribute("heroes", data.heroes());
+      model.addAttribute("currentRoom", data.currentRoom());
+      model.addAttribute("gold", data.gold());
     } catch (Exception e) {
 
       return "redirect:/dashboard";
@@ -112,19 +113,13 @@ public class CampaignController {
 
     try {
 
-      Campaign campaign = campaignService.getMostRecentCompletedCampaign(authentication.getName());
-      model.addAttribute("campaign", campaign);
-      model.addAttribute("score", campaign.getScore());
-      model.addAttribute("heroes", campaign.getParty().getHeroes());
-      model.addAttribute("gold", campaign.getParty().getGold());
-      model.addAttribute("campaignId", campaign.getId());
-
-      long savedCount =
-          campaign.getParty().getOwner().getParties().stream().filter(p -> p.isSaved()).count();
-      model.addAttribute("partyFull", savedCount >= 5);
-      model.addAttribute(
-          "savedParties",
-          campaign.getOwner().getParties().stream().filter(p -> p.isSaved()).toList());
+      CompleteCampaignInfo data = campaignService.getCompletionData(authentication.getName());
+      model.addAttribute("campaignId", data.campaignId());
+      model.addAttribute("score", data.score());
+      model.addAttribute("gold", data.gold());
+      model.addAttribute("heroes", data.heroes());
+      model.addAttribute("partyFull", data.partyFull());
+      model.addAttribute("savedParties", data.savedParties());
     } catch (Exception e) {
       return "redirect:/dashboard";
     }
@@ -140,11 +135,7 @@ public class CampaignController {
 
     try {
 
-      Long userId =
-          campaignService
-              .getMostRecentCompletedCampaign(authentication.getName())
-              .getOwner()
-              .getId();
+      Long userId = userService.getUserIdByUsername(authentication.getName());
       campaignService.savePartyFromCampaign(campaignId, userId);
     } catch (Exception e) {
 
@@ -165,11 +156,7 @@ public class CampaignController {
 
     try {
 
-      Long userId =
-          campaignService
-              .getMostRecentCompletedCampaign(authentication.getName())
-              .getOwner()
-              .getId();
+      Long userId = userService.getUserIdByUsername(authentication.getName());
       campaignService.replacePartyFromCampaign(campaignId, userId, replacePartyId);
     } catch (Exception e) {
     }
