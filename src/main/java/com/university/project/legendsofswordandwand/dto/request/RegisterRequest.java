@@ -4,7 +4,7 @@ import lombok.*;
 
 @Setter
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequest {
 

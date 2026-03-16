@@ -1,5 +1,6 @@
 package com.university.project.legendsofswordandwand.model;
 
+import com.university.project.legendsofswordandwand.model.enums.RoomType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,4 +45,9 @@ public class Campaign {
   @Setter
   @Builder.Default
   private int score = 0;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "last_room_type", nullable = true)
+  @Setter
+  private RoomType lastRoomType;
 }

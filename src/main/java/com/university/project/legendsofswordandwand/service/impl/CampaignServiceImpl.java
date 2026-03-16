@@ -5,6 +5,7 @@ import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
+import com.university.project.legendsofswordandwand.model.enums.RoomType;
 import com.university.project.legendsofswordandwand.repository.CampaignRepository;
 import com.university.project.legendsofswordandwand.repository.PartyRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
@@ -12,6 +13,8 @@ import com.university.project.legendsofswordandwand.service.ICampaignService;
 import com.university.project.legendsofswordandwand.service.IHeroService;
 import com.university.project.legendsofswordandwand.service.IPartyService;
 import java.util.List;
+import java.util.Random;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +28,57 @@ public class CampaignServiceImpl implements ICampaignService {
   private final IHeroService heroService;
   private final IPartyService partyService;
   private final PartyRepository partyRepository;
+  private final Random random = new Random();
 
   @Override
   public boolean hasActiveCampaign(Long userId) {
     return campaignRepository.existsActiveCampaignByOwnerId(userId);
+  }
+
+  @Override
+  public Campaign getActiveCampaign(String username) {
+    return campaignRepository
+            .findActiveCampaignByUsername(username)
+            .orElseThrow(() -> new RuntimeException("No active campaign found"));
+  }
+
+  @Override
+  public RoomType enterNextRoom(String username) {
+
+    Campaign campaign = getActiveCampaign(username);
+
+    if (campaign.getCurrentRoom() >= 30)
+      throw new RuntimeException("Campaign is already complete");
+
+    int cumulativeLevel = campaign.getParty().getCumulativeLevel();
+    int battleChance = Math.min(90, 60 + (cumulativeLevel / 10) * 3);
+    RoomType roomType = random.nextInt(100) < battleChance ? RoomType.BATTLE : RoomType.INN;
+
+    campaign.setCurrentRoom(campaign.getCurrentRoom() + 1);
+    campaign.setLastRoomType(roomType);
+    campaignRepository.save(campaign);
+
+    return roomType;
+  }
+
+  @Override
+  public Campaign exitCampaign(String username) {
+
+    Campaign campaign = getActiveCampaign(username);
+    return campaignRepository.save(campaign);
+  }
+
+  @Override
+  public int calculateScore(Campaign campaign) {
+
+    int heroScore =
+            campaign.getParty().getHeroes().stream().mapToInt(h -> h.getLevel() * 100).sum();
+    int goldScore = campaign.getParty().getGold() * 10;
+    int score = heroScore + goldScore;
+
+    campaign.setScore(score);
+    campaignRepository.save(campaign);
+    return score;
   }
 
   @Override
@@ -96,5 +146,28 @@ public class CampaignServiceImpl implements ICampaignService {
     userRepository.save(user);
 
     savePartyFromCampaign(campaignId, userId);
+  }
+
+  @Override
+  public Campaign completeCampaign(String username) {
+
+    Campaign campaign = getActiveCampaign(username);
+    calculateScore(campaign);
+    campaign.setActive(false);
+    return campaignRepository.save(campaign);
+  }
+
+  public boolean isCampaignComplete(String username) {
+
+    Campaign campaign = getActiveCampaign(username);
+    return campaign.getCurrentRoom() >= 30;
+  }
+
+  @Override
+  public Campaign getMostRecentCompletedCampaign(String username) {
+
+    return campaignRepository.findCompletedByOwnerUsername(username).stream()
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No completed campaign found"));
   }
 }
