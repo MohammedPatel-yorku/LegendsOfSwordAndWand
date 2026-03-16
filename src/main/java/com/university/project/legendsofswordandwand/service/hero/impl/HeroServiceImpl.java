@@ -1,12 +1,13 @@
-package com.university.project.legendsofswordandwand.service.impl;
+package com.university.project.legendsofswordandwand.service.hero.impl;
 
 import com.university.project.legendsofswordandwand.battle.HeroStatCalculator;
+import com.university.project.legendsofswordandwand.battle.HybridClassResolver;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.repository.HeroRepository;
 import com.university.project.legendsofswordandwand.repository.PartyRepository;
-import com.university.project.legendsofswordandwand.service.IHeroService;
+import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import jakarta.transaction.Transactional;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +17,12 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class HeroServiceImpl implements IHeroService {
+class HeroServiceImpl implements IHeroService {
 
   private final HeroRepository heroRepository;
   private final PartyRepository partyRepository;
   private final HeroStatCalculator heroStatCalculator;
+  private final HybridClassResolver hybridClassResolver;
 
   /**
    * Creates a new base stat (Level 1, 100 HP, 10 Attack) Hero for requesting Party.
@@ -73,8 +75,7 @@ public class HeroServiceImpl implements IHeroService {
         && getClassLevel(hero, chosenClass) == 5) {
       hero.setSecondaryClass(chosenClass);
       hero.setHybrid(true);
-      hero.setHybridClass(
-          heroStatCalculator.resolveHybridClass(hero.getPrimaryClass(), chosenClass));
+      hero.setHybridClass(hybridClassResolver.resolve(hero.getPrimaryClass(), chosenClass));
     }
 
     heroStatCalculator.applyLevelUp(hero, effectiveChoice);

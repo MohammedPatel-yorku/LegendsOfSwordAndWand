@@ -4,8 +4,9 @@ import com.university.project.legendsofswordandwand.dto.response.CampaignViewInf
 import com.university.project.legendsofswordandwand.dto.response.CompleteCampaignInfo;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.model.enums.RoomType;
-import com.university.project.legendsofswordandwand.service.ICampaignService;
-import com.university.project.legendsofswordandwand.service.IUserService;
+import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
+import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
+import com.university.project.legendsofswordandwand.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class CampaignController {
 
   private final ICampaignService campaignService;
+  private final ICampaignProgressService campaignProgressService;
   private final IUserService userService;
 
   @GetMapping("/new")
@@ -65,7 +67,7 @@ public class CampaignController {
 
     try {
 
-      CampaignViewInfo data = campaignService.getCampaignViewData(authentication.getName());
+      CampaignViewInfo data = campaignProgressService.getCampaignViewData(authentication.getName());
       model.addAttribute("heroes", data.heroes());
       model.addAttribute("currentRoom", data.currentRoom());
       model.addAttribute("gold", data.gold());
@@ -84,7 +86,7 @@ public class CampaignController {
 
     try {
 
-      RoomType room = campaignService.enterNextRoom(authentication.getName());
+      RoomType room = campaignProgressService.enterNextRoom(authentication.getName());
       return room == RoomType.BATTLE ? "redirect:/battle" : "redirect:/inn";
     } catch (Exception e) {
 
@@ -113,7 +115,8 @@ public class CampaignController {
 
     try {
 
-      CompleteCampaignInfo data = campaignService.getCompletionData(authentication.getName());
+      CompleteCampaignInfo data =
+          campaignProgressService.getCompletionData(authentication.getName());
       model.addAttribute("campaignId", data.campaignId());
       model.addAttribute("score", data.score());
       model.addAttribute("gold", data.gold());

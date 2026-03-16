@@ -1,23 +1,23 @@
-package com.university.project.legendsofswordandwand.service.impl;
+package com.university.project.legendsofswordandwand.service.user.impl;
 
 import com.university.project.legendsofswordandwand.dto.response.ProfileInfo;
 import com.university.project.legendsofswordandwand.dto.response.ProfileInfo.*;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;
-import com.university.project.legendsofswordandwand.repository.CampaignRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
-import com.university.project.legendsofswordandwand.service.IProfileService;
+import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
+import com.university.project.legendsofswordandwand.service.user.IProfileService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class ProfileServiceImpl implements IProfileService {
+class ProfileServiceImpl implements IProfileService {
 
   private final UserRepository userRepository;
-  private final CampaignRepository campaignRepository;
+  private final ICampaignProgressService campaignProgressService;
 
   @Override
   public ProfileInfo getProfile(String username) {
@@ -30,9 +30,7 @@ public class ProfileServiceImpl implements IProfileService {
         user.getParties().stream().filter(Party::isSaved).map(this::toPartyInfo).toList();
 
     List<CampaignResultInfo> campaignResults =
-        campaignRepository.findAllByOwnerIdOrderByScoreDesc(user.getId()).stream()
-            .map(c -> new CampaignResultInfo(c.getScore(), c.getCurrentRoom(), c.isActive()))
-            .toList();
+        campaignProgressService.getCampaignResultsForUser(user.getId());
 
     return new ProfileInfo(
         user.getUsername(), user.getPvpWins(), user.getPvpLosses(), partyInfoList, campaignResults);

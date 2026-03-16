@@ -1,11 +1,11 @@
-package com.university.project.legendsofswordandwand.service.impl;
+package com.university.project.legendsofswordandwand.service.user.impl;
 
 import com.university.project.legendsofswordandwand.dto.response.DashboardInfo;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.repository.CampaignRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
-import com.university.project.legendsofswordandwand.service.IUserService;
+import com.university.project.legendsofswordandwand.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements IUserService {
+class UserServiceImpl implements IUserService {
 
   private final UserRepository userRepository;
   private final CampaignRepository campaignRepository;

@@ -1,4 +1,4 @@
-package com.university.project.legendsofswordandwand.service;
+package com.university.project.legendsofswordandwand.service.pvp;
 
 public interface IPvPService {
 

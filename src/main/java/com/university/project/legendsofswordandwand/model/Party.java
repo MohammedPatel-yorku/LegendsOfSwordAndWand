@@ -41,6 +41,13 @@ public class Party {
     return heroes.stream().mapToInt(Hero::getLevel).sum();
   }
 
+  public int calculateScore() {
+
+    int heroScore = heroes.stream().mapToInt(h -> h.getLevel() * 100).sum();
+    int goldScore = gold * 10;
+    return heroScore + goldScore;
+  }
+
   @Builder
   public Party(User owner) {
     this.owner = owner;

@@ -1,7 +1,7 @@
 package com.university.project.legendsofswordandwand.controller;
 
 import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
-import com.university.project.legendsofswordandwand.service.IAuthService;
+import com.university.project.legendsofswordandwand.service.auth.IAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

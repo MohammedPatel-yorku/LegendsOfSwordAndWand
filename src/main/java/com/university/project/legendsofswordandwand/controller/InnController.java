@@ -1,8 +1,9 @@
 package com.university.project.legendsofswordandwand.controller;
 
 import com.university.project.legendsofswordandwand.model.Campaign;
-import com.university.project.legendsofswordandwand.service.ICampaignService;
-import com.university.project.legendsofswordandwand.service.IInnService;
+import com.university.project.legendsofswordandwand.service.battle.IInnService;
+import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
+import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,7 @@ public class InnController {
 
   private final IInnService innService;
   private final ICampaignService campaignService;
+  private final ICampaignProgressService campaignProgressService;
 
   @GetMapping
   public String innPage(Authentication authentication, Model model) {

@@ -7,7 +7,7 @@ import static org.mockito.Mockito.*;
 
 import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
-import com.university.project.legendsofswordandwand.service.impl.AuthServiceImpl;
+import com.university.project.legendsofswordandwand.service.auth.impl.AuthServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

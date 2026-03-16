@@ -1,8 +1,8 @@
-package com.university.project.legendsofswordandwand.service.impl;
+package com.university.project.legendsofswordandwand.service.inventory.impl;
 
 import com.university.project.legendsofswordandwand.model.Inventory;
 import com.university.project.legendsofswordandwand.repository.InventoryRepository;
-import com.university.project.legendsofswordandwand.service.IInventoryService;
+import com.university.project.legendsofswordandwand.service.inventory.IInventoryService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 /** InventoryService handles business logic for Inventory objects. */
 @Service
 @RequiredArgsConstructor
-public class InventoryServiceImpl implements IInventoryService {
+class InventoryServiceImpl implements IInventoryService {
 
   private final InventoryRepository inventoryRepository;
 

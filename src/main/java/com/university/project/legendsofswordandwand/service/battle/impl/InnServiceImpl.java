@@ -1,13 +1,13 @@
-package com.university.project.legendsofswordandwand.service.impl;
+package com.university.project.legendsofswordandwand.service.battle.impl;
 
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Item;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.repository.ItemRepository;
-import com.university.project.legendsofswordandwand.service.IHeroService;
-import com.university.project.legendsofswordandwand.service.IInnService;
-import com.university.project.legendsofswordandwand.service.IPartyService;
+import com.university.project.legendsofswordandwand.service.battle.IInnService;
+import com.university.project.legendsofswordandwand.service.hero.IHeroService;
+import com.university.project.legendsofswordandwand.service.party.IPartyManagementService;
 import jakarta.transaction.Transactional;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
@@ -17,16 +17,16 @@ import org.springframework.stereotype.Service;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class InnServiceImpl implements IInnService {
+class InnServiceImpl implements IInnService {
 
-  private final IPartyService partyService;
+  private final IPartyManagementService partyManagementService;
   private final ItemRepository itemRepository;
   private final Random random = new Random();
   private final IHeroService heroService;
 
   @Override
   public void loadInnView(Long campaignId) {
-    partyService.reviveAndHealParty(campaignId);
+    partyManagementService.reviveAndHealParty(campaignId);
   }
 
   @Override
@@ -53,7 +53,7 @@ public class InnServiceImpl implements IInnService {
   @Override
   public List<Hero> getAvailableRecruits(Long campaignId) {
 
-    Party party = partyService.getActiveParty(campaignId);
+    Party party = partyManagementService.getActiveParty(campaignId);
 
     if (party.getHeroes().size() >= 5) return Collections.emptyList();
 
@@ -83,20 +83,20 @@ public class InnServiceImpl implements IInnService {
   @Override
   public boolean purchaseItem(Long campaignId, Long itemId) {
 
-    Party party = partyService.getActiveParty(campaignId);
+    Party party = partyManagementService.getActiveParty(campaignId);
     Item item =
         itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Item not found"));
 
     if (party.getGold() < item.getCost()) return false;
 
-    partyService.updateGold(party.getId(), item.getCost());
+    partyManagementService.deductGold(party.getId(), item.getCost());
     return true;
   }
 
   @Override
   public boolean recruitHero(Long campaignId, Long heroId) {
 
-    Party party = partyService.getActiveParty(campaignId);
+    Party party = partyManagementService.getActiveParty(campaignId);
     if (party.getHeroes().size() >= 5) throw new RuntimeException("Party is full");
 
     Hero hero =
@@ -105,8 +105,8 @@ public class InnServiceImpl implements IInnService {
     int cost = hero.getLevel() == 1 ? 0 : hero.getLevel() * 200;
     if (party.getGold() < cost) throw new RuntimeException("Not enough gold");
 
-    partyService.addHeroToParty(party.getId(), hero.getId());
-    partyService.updateGold(party.getId(), cost);
+    partyManagementService.addHeroToParty(party.getId(), hero.getId());
+    partyManagementService.deductGold(party.getId(), cost);
     return true;
   }
 

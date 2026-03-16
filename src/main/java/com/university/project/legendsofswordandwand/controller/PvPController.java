@@ -1,7 +1,7 @@
 package com.university.project.legendsofswordandwand.controller;
 
-import com.university.project.legendsofswordandwand.service.IBattleService;
-import com.university.project.legendsofswordandwand.service.IPvPService;
+import com.university.project.legendsofswordandwand.service.battle.IBattleService;
+import com.university.project.legendsofswordandwand.service.pvp.IPvPService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

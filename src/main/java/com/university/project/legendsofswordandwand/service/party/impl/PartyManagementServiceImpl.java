@@ -1,39 +1,23 @@
-package com.university.project.legendsofswordandwand.service.impl;
+package com.university.project.legendsofswordandwand.service.party.impl;
 
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
-import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.repository.CampaignRepository;
 import com.university.project.legendsofswordandwand.repository.PartyRepository;
-import com.university.project.legendsofswordandwand.repository.UserRepository;
-import com.university.project.legendsofswordandwand.service.IHeroService;
-import com.university.project.legendsofswordandwand.service.IPartyService;
+import com.university.project.legendsofswordandwand.service.hero.IHeroService;
+import com.university.project.legendsofswordandwand.service.party.IPartyManagementService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/** Party Object Service class. */
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class PartyServiceImpl implements IPartyService {
+class PartyManagementServiceImpl implements IPartyManagementService {
 
   private final PartyRepository partyRepository;
-  private final UserRepository userRepository;
   private final CampaignRepository campaignRepository;
   private final IHeroService heroService;
-
-  /** Creates a new Party for User to use in a newly created Campaign. */
-  @Override
-  public Party createPartyForUser(Long userId) {
-    User owner =
-        userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User Not Found"));
-
-    Party party = Party.builder().owner(owner).build();
-
-    owner.getParties().add(party);
-    return partyRepository.save(party);
-  }
 
   /** Returns the active party for a given campaign. */
   @Override
@@ -63,25 +47,26 @@ public class PartyServiceImpl implements IPartyService {
   }
 
   @Override
-  public void deleteParty(Long partyId) {
+  public void deductGold(Long partyId, int amount) {
 
     Party party =
         partyRepository
             .findById(partyId)
             .orElseThrow(() -> new RuntimeException("Party not found"));
 
-    partyRepository.delete(party);
+    party.setGold(party.getGold() - amount);
+    partyRepository.save(party);
   }
 
   @Override
-  public void updateGold(Long partyId, int cost) {
+  public void addGold(Long partyId, int amount) {
 
     Party party =
         partyRepository
             .findById(partyId)
             .orElseThrow(() -> new RuntimeException("Party not found"));
 
-    party.setGold(party.getGold() - cost);
+    party.setGold(party.getGold() + amount);
     partyRepository.save(party);
   }
 

@@ -1,4 +1,4 @@
-package com.university.project.legendsofswordandwand.service;
+package com.university.project.legendsofswordandwand.service.auth;
 
 import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.model.User;
