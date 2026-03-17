@@ -1,0 +1,98 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+title Send a PvP Battle Invitation
+
+actor User
+
+boundary PvPController
+control PvPService
+control UserService
+control PartyService
+control BattleService
+database PvPRepository
+database LeagueRepository
+
+actor Enemy
+
+== Send Invitation ==
+User -> PvPController: sendInvite(enemyUsername, selectedPartyId)
+activate PvPController
+PvPController -> PvPService: createInvitation(userId, enemyUsername, selectedPartyId)
+activate PvPService
+
+
+PvPService -> UserService: findByUsername(enemyUsername)
+activate UserService
+
+alt Player Does Not Exist
+    UserService --> PvPService: null
+    PvPService --> PvPController: error("User not found")
+
+else Player Found
+    UserService --> PvPService: enemyUser
+    deactivate UserService
+
+    PvPService -> PartyService: hasSavedParty(enemyId)
+    activate PartyService
+
+    alt Enemy Has Saved Party
+        PartyService --> PvPService: true
+
+        PvPService -> PvPRepository: save(invitation)
+        activate PvPRepository
+        PvPRepository --> PvPService: Invitation Saved
+        deactivate PvPRepository
+        PvPService --> PvPController: success
+
+    else Enemy Has No Saved Party
+        PartyService --> PvPService: false
+        deactivate PartyService
+
+        PvPService --> PvPController: error("Enemy has no saved party")
+        deactivate PvPService
+
+    end
+
+end
+
+PvPController --> User: Display Invitation Result
+deactivate PvPController
+
+== Accept Invitation ==
+Enemy -> PvPController: acceptInvite(inviteId)
+activate PvPController
+
+PvPController -> PvPService: acceptInvitation(inviteId)
+activate PvPService
+
+PvPService -> PvPRepository: updateStatus(inviteId, ACCEPTED)
+activate PvPRepository
+PvPRepository --> PvPService: updated
+deactivate PvPRepository
+
+PvPService -> PartyService: getSavedParties(userId, opponentId)
+activate PartyService
+PartyService --> PvPService: userParty, opponentParty
+deactivate PartyService
+
+PvPService -> BattleService: startBattle(userParty, opponentParty)
+activate BattleService
+BattleService --> PvPService: Battle Result
+deactivate BattleService
+
+PvPService -> LeagueRepository: updateStandings(battleResult)
+activate LeagueRepository
+LeagueRepository --> PvPService: Standings Updated
+deactivate LeagueRepository
+
+PvPService --> PvPController: return Battle Result
+deactivate PvPService
+
+PvPController --> Enemy: Show Battle Result
+PvPController -> User: Show Battle Result
+deactivate PvPController
+
+@enduml

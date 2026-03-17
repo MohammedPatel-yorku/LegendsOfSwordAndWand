@@ -3,6 +3,8 @@
 
 autonumber
 
+title Use Case 2 - Start PvE Campaign
+
 actor User
 boundary CampaignController
 control CampaignService
@@ -11,6 +13,12 @@ database PartyRepository
 control HeroService
 database HeroRepository
 database CampaignRepository
+control InventoryService
+database InventoryRepository
+control UserService
+database UserRepository
+
+==Start New Campaign==
 
 User -> CampaignController: Start new PvE Campaign
 activate CampaignController
@@ -44,5 +52,130 @@ CampaignService --> CampaignController: Campaign started
 deactivate CampaignService
 CampaignController --> User: Show campaign view
 deactivate CampaignController
+
+==Check Party and Inventory Status==
+
+User -> CampaignController: Check Party and Inventory Status
+activate CampaignController
+
+CampaignController -> PartyService: getPartyStatus(partyId)
+activate PartyService
+PartyService -> PartyRepository: findById(partyId)
+activate PartyRepository
+
+PartyRepository --> PartyService: return party
+deactivate PartyRepository
+PartyService --> CampaignController: return partyStatus
+deactivate PartyService
+
+CampaignController -> InventoryService: getInventoryStatus(inventoryId)
+activate InventoryService
+InventoryService -> InventoryRepository: findById(inventoryId)
+activate InventoryRepository
+
+InventoryRepository --> InventoryService: return inventory
+deactivate InventoryRepository
+InventoryService --> CampaignController: return inventoryStatus
+deactivate InventoryService
+
+CampaignController --> User: Show Party and Inventory Status
+deactivate CampaignController
+
+==Visit Next Room==
+
+User -> CampaignController: Visit Next Room
+activate CampaignController
+CampaignController -> CampaignService: visitNextRoom(campaignId)
+activate CampaignService
+
+alt Inn Room
+    CampaignService --> CampaignController: return innRoom
+    note left of CampaignController: See Use Case 4 - Interact With Inn
+
+else Battle Room
+    CampaignService --> CampaignController: return battleRoom
+    deactivate CampaignService
+    deactivate CampaignController
+    note left of CampaignController: See Use Case 3 - Single Battle
+
+end
+
+==Passed Final Room==
+
+User -> CampaignController: Visit Next Room
+activate CampaignController
+CampaignController -> CampaignService: visitNextRoom(campaignId)
+activate CampaignService
+
+CampaignService -> CampaignRepository: delete(campaign)
+activate CampaignRepository
+CampaignRepository --> CampaignService: Campaign deleted
+deactivate CampaignRepository
+
+CampaignService -> UserService: update(score)
+activate UserService
+UserService -> UserRepository: save()
+activate UserRepository
+UserRepository --> UserService: Score Saved
+deactivate UserRepository
+UserService --> CampaignService: Score Updated
+deactivate UserService
+
+CampaignService --> CampaignController: return score
+deactivate CampaignService
+CampaignController --> User: Show User Profile View
+
+CampaignController -> User: Save Party?
+
+alt 5 Parties Saved
+    alt Yes
+        User --> CampaignController: Yes
+        CampaignController -> User: Choose a Party to Replace
+        User --> CampaignController: Party Chosen
+
+        CampaignController -> CampaignService: replaceParty(partyId, partyToReplaceId)
+        activate CampaignService
+
+        CampaignService -> PartyRepository: delete(partyToReplaceId)
+        activate PartyRepository
+        PartyRepository --> CampaignService: Party Deleted
+        CampaignService -> PartyRepository: save(partyId)
+        PartyRepository --> CampaignService: Party Saved
+        deactivate PartyRepository
+
+        CampaignService --> CampaignController: Party Replaced
+        deactivate CampaignService
+        CampaignController --> User: Show Main Menu View
+
+    else No
+        User --> CampaignController: No
+        CampaignController --> User: Show Main Menu View
+
+    end
+
+    else Less Than 5 Parties Saved
+        alt Yes
+            User --> CampaignController: Yes
+
+            CampaignController -> CampaignService: saveParty(partyId)
+            activate CampaignService
+            CampaignService -> PartyRepository: save(party)
+            activate PartyRepository
+
+            PartyRepository --> CampaignService: Party Saved
+            deactivate PartyRepository
+            CampaignService --> CampaignController: Party Saved
+            deactivate CampaignService
+
+            CampaignController --> User: Show Main Menu View
+
+        else No
+            User --> CampaignController: No
+            CampaignController --> User: Show Main Menu View
+            deactivate CampaignController
+
+        end
+
+end
 
 @enduml

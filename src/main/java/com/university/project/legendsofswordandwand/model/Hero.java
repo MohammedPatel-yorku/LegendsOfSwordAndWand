@@ -1,6 +1,7 @@
 package com.university.project.legendsofswordandwand.model;
 
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
+import com.university.project.legendsofswordandwand.model.enums.HybridClass;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,47 +11,106 @@ import lombok.*;
  *
  * <p>A Hero
  */
-
 @Entity
 @Table(name = "heroes")
-@Data // Use @Data to generate all Getters, Setters, and Required Methods
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Hero {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String name;
+  @Column(nullable = false)
+  private String name;
 
-    @Column(name = "hero_class", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private HeroClass heroClass;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "starting_class", nullable = false)
+  private HeroClass startingClass;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private int level = 1;
+  @Column(nullable = false)
+  @Setter
+  private int level = 1;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private int health = 100;
+  @Column(nullable = false)
+  @Setter
+  private int orderLevels = 0;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private int attack = 5;
+  @Column(nullable = false)
+  @Setter
+  private int chaosLevels = 0;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private int defense = 5;
+  @Column(nullable = false)
+  @Setter
+  private int warriorLevels = 0;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private int mana = 50;
+  @Column(nullable = false)
+  @Setter
+  private int mageLevels = 0;
 
-    @ManyToOne
-    @JoinColumn(name = "party_id")
-    private Party party;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "primary_class", nullable = true)
+  @Setter
+  private HeroClass primaryClass;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "secondary_class", nullable = true)
+  @Setter
+  private HeroClass secondaryClass;
+
+  @Column(name = "is_hybrid", nullable = false)
+  @Setter
+  private boolean isHybrid = false;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "hybrid_class", nullable = true)
+  @Setter
+  private HybridClass hybridClass;
+
+  @Column(nullable = false)
+  @Setter
+  private int health = 100;
+
+  @Column(name = "max_health", nullable = false)
+  @Setter
+  private int maxHealth = 100;
+
+  @Column(nullable = false)
+  @Setter
+  private int attack = 5;
+
+  @Column(nullable = false)
+  @Setter
+  private int defense = 5;
+
+  @Column(nullable = false)
+  @Setter
+  private int mana = 50;
+
+  @Column(name = "max_mana", nullable = false)
+  @Setter
+  private int maxMana = 50;
+
+  @Column(nullable = false)
+  @Setter
+  private int experience = 0;
+
+  @Column(name = "experience_to_next_level", nullable = false)
+  @Setter
+  private int experienceToNextLevel = 575;
+
+  @ManyToOne
+  @JoinColumn(name = "party_id")
+  private Party party;
+
+  @Column(nullable = false)
+  @Setter
+  private boolean temporary = false;
+
+  @Builder
+  public Hero(String name, HeroClass startingClass, Party party) {
+    this.name = name;
+    this.startingClass = startingClass;
+    this.party = party;
+  }
 }

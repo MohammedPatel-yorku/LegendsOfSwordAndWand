@@ -1,0 +1,29 @@
+/* ── Reset & Base ────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    background-color: var(--bg-deepest);
+    background-image:
+            radial-gradient(ellipse at 20% 10%, rgba(139,26,26,0.08) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 90%, rgba(139,105,20,0.06) 0%, transparent 50%),
+            url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23110d0f'/%3E%3Ccircle cx='1' cy='1' r='0.5' fill='%23221820' opacity='0.4'/%3E%3C/svg%3E");
+    color: var(--text-primary);
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* ── Scrollbar ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-deepest); }
+::-webkit-scrollbar-thumb { background: var(--border-gold); border-radius: 3px; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 500px) {
+    .card { padding: 2rem 1.2rem; }
+    .class-grid { grid-template-columns: 1fr 1fr; }
+    .dashboard-grid { grid-template-columns: 1fr 1fr; }
+}
