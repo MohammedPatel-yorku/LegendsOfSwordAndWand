@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<!-- With the use of AI -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Result — Legends of Sword and Wand</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <div class="card wide">
+        <div class="card-ornament tl"></div>
+        <div class="card-ornament tr"></div>
+        <div class="card-ornament bl"></div>
+        <div class="card-ornament br"></div>
+
+        <div th:replace="~{fragments/navbar :: userbar}"></div>
+
+        <div class="battle-result-banner">
+          <h1 th:class="${status?.name() == 'PLAYER_WIN'} ? 'result-win' : 'result-lose'"
+              th:text="${status?.name() == 'PLAYER_WIN'} ? '✦ Victory ✦' : '✦ Defeated ✦'">Result</h1>
+          <p class="subtitle"
+             th:text="${status?.name() == 'PLAYER_WIN'} ? 'Your party prevails! XP and gold awarded.' : 'Defeated. 30% XP and 10% gold lost.'">
+          </p>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="divider">Your Party</div>
+        <div class="party-panel" style="margin-bottom:1.5rem;">
+          <div th:each="unit : ${playerUnits}" class="hero-card">
+            <div class="hero-card-top">
+              <span class="hero-name" th:text="${unit.hero.name}">Hero</span>
+              <span th:class="'hero-class-badge ' + ${unit.hero.startingClass}"
+                    th:text="${unit.hero.startingClass}">Class</span>
+            </div>
+            <div class="hero-level">
+              Lv <span th:text="${unit.hero.level}">1</span>
+              &nbsp;·&nbsp;
+              <span th:if="${!unit.alive}" style="color:var(--crimson-bright);">Fallen</span>
+              <span th:unless="${!unit.alive}"
+                    th:text="${unit.hero.health} + ' HP remaining'">HP</span>
+            </div>
+            <div class="stat-bar-row">
+              <div class="stat-bar">
+                <div class="stat-bar-fill hp"
+                     th:style="'width:' + ${unit.hero.maxHealth > 0 ? unit.hero.health * 100 / unit.hero.maxHealth : 0} + '%'"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <form th:action="@{/battle/continue}" method="post">
+          <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+          <button type="submit" class="btn btn-primary btn-full">
+            <span th:text="${campaignDone} ? '✦ Complete Campaign' : '➜ Return to Dungeon'">Continue</span>
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </body>
+</html>

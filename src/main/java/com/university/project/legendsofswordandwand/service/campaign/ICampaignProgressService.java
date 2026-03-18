@@ -20,4 +20,6 @@ public interface ICampaignProgressService {
   CompleteCampaignInfo getCompletionData(String username);
 
   CampaignViewInfo getCampaignViewData(String username);
+
+  void clearRoomPending(String username);
 }

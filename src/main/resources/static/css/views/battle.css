@@ -1,0 +1,161 @@
+/* ── Battle View ────────────────────────────────────────── */
+.battle-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.battle-side-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-secondary);
+    margin-bottom: 0.6rem;
+}
+
+.unit-card {
+    background: var(--bg-deepest);
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-md);
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.5rem;
+    transition: border-color var(--transition);
+}
+
+.unit-card.active-unit {
+    border-color: var(--gold-bright);
+    box-shadow: 0 0 12px rgba(212,160,23,0.25);
+}
+
+.unit-card.dead { opacity: 0.35; }
+.unit-card.enemy  { border-left: 3px solid var(--crimson); }
+.unit-card.player { border-left: 3px solid var(--gold-muted); }
+
+.unit-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.unit-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.unit-level {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+}
+
+.stunned-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    color: #a070d0;
+    border: 1px solid #a070d060;
+    border-radius: 99px;
+    padding: 0.1rem 0.4rem;
+    margin-left: 0.4rem;
+}
+
+/* Turn indicator */
+.turn-indicator {
+    text-align: center;
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+}
+
+.turn-indicator.player-turn {
+    background: rgba(212,160,23,0.1);
+    border: 1px solid var(--gold-muted);
+    color: var(--gold-bright);
+}
+
+.turn-indicator.enemy-turn {
+    background: rgba(139,26,26,0.1);
+    border: 1px solid var(--crimson);
+    color: #e87070;
+}
+
+/* Action panel */
+.action-panel {
+    background: var(--bg-raised);
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+}
+
+.action-panel-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--gold-bright);
+    margin-bottom: 1rem;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+}
+
+.btn-action {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+}
+
+.target-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+}
+
+.target-btn {
+    background: var(--bg-deepest);
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: all var(--transition);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.target-btn:hover {
+    border-color: var(--crimson-bright);
+    color: var(--crimson-bright);
+}
+
+/* Result screen */
+.battle-result-banner {
+    text-align: center;
+    padding: 2rem 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.result-win  { color: var(--gold-bright); text-shadow: var(--glow-gold); }
+.result-lose { color: var(--crimson-bright); text-shadow: var(--glow-red); }
+
+@media (max-width: 600px) {
+    .battle-layout    { grid-template-columns: 1fr; }
+    .action-buttons   { grid-template-columns: 1fr; }
+}
