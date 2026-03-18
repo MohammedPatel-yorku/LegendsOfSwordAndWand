@@ -1,10 +1,12 @@
 package com.university.project.legendsofswordandwand.service.campaign.impl;
 
 import com.university.project.legendsofswordandwand.model.Campaign;
+import com.university.project.legendsofswordandwand.model.Inventory;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.User;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.repository.CampaignRepository;
+import com.university.project.legendsofswordandwand.repository.ItemRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
 import com.university.project.legendsofswordandwand.service.hero.IHeroService;
@@ -25,6 +27,7 @@ class CampaignServiceImpl implements ICampaignService {
   private final IHeroService heroService;
   private final IPartyService partyService;
   private final Random random = new Random();
+  private final ItemRepository itemRepository;
 
   @Override
   public boolean hasActiveCampaign(Long userId) {
@@ -105,10 +108,31 @@ class CampaignServiceImpl implements ICampaignService {
   }
 
   @Override
+  public int getPartyCumulativeLevel(String username) {
+
+    Campaign campaign = getActiveCampaign(username);
+    return campaign.getParty().getCumulativeLevel();
+  }
+
+  @Override
   public Campaign completeCampaign(String username) {
 
     Campaign campaign = getActiveCampaign(username);
-    campaign.setScore(campaign.getParty().calculateScore());
+
+    int baseScore = campaign.getParty().calculateScore();
+
+    int itemScore = 0;
+    Inventory inventory = campaign.getParty().getInventory();
+    if (inventory != null) {
+
+      itemScore = inventory.getItemIds().stream()
+              .mapToInt(id -> itemRepository.findById(id)
+                      .map(item -> (item.getCost() / 2) * 10)
+                      .orElse(0))
+              .sum();
+    }
+
+    campaign.setScore(baseScore + itemScore);
     campaign.setActive(false);
     return campaignRepository.save(campaign);
   }

@@ -137,6 +137,47 @@
 
                     </div>
 
+                    <div th:if="${inventoryItems != null and !#lists.isEmpty(inventoryItems)}"
+                         style="margin-top:1.5rem;">
+                        <div class="party-panel-header">
+                            <span class="party-panel-title">Inventory</span>
+                        </div>
+                        <div th:each="item : ${inventoryItems}"
+                             style="display:flex; align-items:center; justify-content:space-between;
+                padding:0.6rem 0.8rem; background:var(--bg-raised);
+                border:1px solid var(--border-dim); border-radius:var(--radius-sm);
+                margin-bottom:0.4rem;">
+                            <div>
+                                <div style="font-family:'Cinzel',serif; font-size:0.75rem;
+                        color:var(--text-primary);" th:text="${item.name}">Item</div>
+                                <div style="font-size:0.65rem; color:var(--text-secondary);">
+                                    <span th:if="${item.revives}">Revive + Full HP + Full MP</span>
+                                    <span th:unless="${item.revives}">
+                    <span th:if="${item.hpRestore > 0}" th:text="'+' + ${item.hpRestore} + ' HP'"></span>
+                    <span th:if="${item.hpRestore > 0 and item.manaRestore > 0}"> · </span>
+                    <span th:if="${item.manaRestore > 0}" th:text="'+' + ${item.manaRestore} + ' MP'"></span>
+                </span>
+                                </div>
+                            </div>
+                            <form th:action="@{/campaign/use-item}" method="post"
+                                  style="display:flex; gap:0.4rem; align-items:center;">
+                                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                                <input type="hidden" name="itemId" th:value="${item.id}"/>
+                                <select name="heroId"
+                                        style="background:var(--bg-card); color:var(--text-primary);
+                                        border:1px solid var(--border-dim); border-radius:var(--radius-sm);
+                                        padding:0.3rem 0.5rem; font-size:0.7rem;">
+                                    <option th:each="hero : ${heroes}"
+                                            th:value="${hero.id}"
+                                            th:text="${hero.name} + ' (' + ${hero.health} + '/' + ${hero.maxHealth} + ' HP)'">
+                                    </option>
+                                </select>
+                                <button type="submit" class="btn btn-primary"
+                                        style="font-size:0.65rem; padding:0.3rem 0.6rem;">Use</button>
+                            </form>
+                        </div>
+                    </div>
+
                 </div>
 
             </div>

@@ -115,6 +115,12 @@ class HeroServiceImpl implements IHeroService {
     return heroRepository.save(hero);
   }
 
+  @Override
+  public void delete(Long heroId) {
+
+    heroRepository.deleteById(heroId);
+  }
+
   private void incrementClassLevel(Hero hero, HeroClass heroClass) {
 
     switch (heroClass) {

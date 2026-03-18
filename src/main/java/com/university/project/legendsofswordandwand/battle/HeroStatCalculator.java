@@ -28,13 +28,13 @@ public class HeroStatCalculator {
       applyClassBonus(hero, heroClass);
     }
 
-    hero.setExperienceToNextLevel(calculateExpThreshold(hero.getLevel() + 1));
+    hero.setExperienceToNextLevel(calculateExpThreshold(hero.getLevel()));
   }
 
   private int calculateExpThreshold(int level) {
 
-    if (level <= 1) return 0;
-    return calculateExpThreshold(level - 1) + 500 + 75 * level + 20 * level * level;
+    if (level <= 1) return 425;
+    return calculateExpThreshold(level - 1) + 350 + 75 * (level + 1) + 20 * (level + 1) * (level + 1);
   }
 
   private void applyBaseGain(Hero hero) {

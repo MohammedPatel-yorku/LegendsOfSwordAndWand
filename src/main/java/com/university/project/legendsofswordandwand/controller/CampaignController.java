@@ -2,16 +2,19 @@ package com.university.project.legendsofswordandwand.controller;
 
 import com.university.project.legendsofswordandwand.dto.response.CampaignViewInfo;
 import com.university.project.legendsofswordandwand.dto.response.CompleteCampaignInfo;
+import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.model.enums.RoomType;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
+import com.university.project.legendsofswordandwand.service.inventory.IInventoryService;
 import com.university.project.legendsofswordandwand.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /** Rest Controller class mapped with '/campaign' to handle campaign requests. */
 @Controller
@@ -22,6 +25,7 @@ public class CampaignController {
   private final ICampaignService campaignService;
   private final ICampaignProgressService campaignProgressService;
   private final IUserService userService;
+  private final IInventoryService inventoryService;
 
   @GetMapping("/new")
   public String newCampaignPage(Authentication authentication) {
@@ -67,7 +71,9 @@ public class CampaignController {
 
     try {
 
+      Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
       CampaignViewInfo data = campaignProgressService.getCampaignViewData(authentication.getName());
+      model.addAttribute("inventoryItems", inventoryService.getPartyInventoryItems(campaign.getId()));
       model.addAttribute("heroes", data.heroes());
       model.addAttribute("currentRoom", data.currentRoom());
       model.addAttribute("gold", data.gold());
@@ -106,6 +112,22 @@ public class CampaignController {
     }
 
     return "redirect:/dashboard";
+  }
+
+  @PostMapping("/use-item")
+  public String useItem(Authentication authentication,
+                        @RequestParam Long heroId,
+                        @RequestParam Long itemId,
+                        RedirectAttributes redirectAttributes) {
+    if (authentication == null) return "redirect:/login";
+    try {
+      Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
+      inventoryService.useItem(campaign.getId(), heroId, itemId);
+      redirectAttributes.addFlashAttribute("message", "Item used.");
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute("error", e.getMessage());
+    }
+    return "redirect:/campaign";
   }
 
   @GetMapping("/complete")
