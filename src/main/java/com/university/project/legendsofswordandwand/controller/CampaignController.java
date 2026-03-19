@@ -114,6 +114,15 @@ public class CampaignController {
     return "redirect:/dashboard";
   }
 
+  @PostMapping("/abandon")
+  public String abandonCampaign(Authentication authentication) {
+    if (authentication == null) return "redirect:/login";
+    try {
+      campaignService.abandonCampaign(authentication.getName());
+    } catch (Exception ignored) {}
+    return "redirect:/dashboard";
+  }
+
   @PostMapping("/use-item")
   public String useItem(Authentication authentication,
                         @RequestParam Long heroId,

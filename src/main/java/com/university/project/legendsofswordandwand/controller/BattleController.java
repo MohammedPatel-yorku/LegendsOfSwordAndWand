@@ -41,10 +41,16 @@ public class BattleController {
                 var campaign = campaignService.getActiveCampaign(authentication.getName());
                 int cumulativeLevel = campaignService.getPartyCumulativeLevel(authentication.getName());
                 state = battleService.initializePvEBattle(campaign.getId(), cumulativeLevel);
+
                 // Auto-process any enemy turns that come first
-                while (!state.isOver() && !state.isPlayerTurn()) {
+                int safetyLimit = 50;
+                while (!state.isOver() && !state.isPlayerTurn() && safetyLimit-- > 0) {
                     state = battleService.executeEnemyTurn(state);
                 }
+                if (!state.isOver() && !state.isPlayerTurn()) {
+                    state.setStatus(battleService.checkBattleStatus(state));
+                }
+
                 session.setAttribute(SESSION_KEY, state);
             }
         } catch (Exception e) {

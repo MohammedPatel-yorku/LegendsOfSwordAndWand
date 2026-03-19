@@ -235,6 +235,8 @@ class BattleServiceImpl implements IBattleService {
 
   private void refillTurnQueue(BattleState state) {
 
+    state.getTurnQueue().clear();
+
     List<BattleUnit> living = new ArrayList<>();
     living.addAll(state.getLivingPlayerHeroes());
     living.addAll(state.getLivingEnemyHeroes());

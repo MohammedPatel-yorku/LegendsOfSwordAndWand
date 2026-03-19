@@ -45,7 +45,6 @@ class CampaignServiceImpl implements ICampaignService {
   public Campaign exitCampaign(String username) {
 
     Campaign campaign = getActiveCampaign(username);
-    campaign.setActive(false);
     return campaignRepository.save(campaign);
   }
 
@@ -113,6 +112,14 @@ class CampaignServiceImpl implements ICampaignService {
 
     Campaign campaign = getActiveCampaign(username);
     return campaign.getParty().getCumulativeLevel();
+  }
+
+  @Override
+  public void abandonCampaign(String username) {
+
+    Campaign campaign = getActiveCampaign(username);
+    campaign.setActive(false);
+    campaignRepository.save(campaign);
   }
 
   @Override

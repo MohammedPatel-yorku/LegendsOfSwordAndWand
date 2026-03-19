@@ -23,7 +23,6 @@ public class BattleState implements Serializable {
     public void log(String message) {
 
         battleLog.add(message);
-        if (battleLog.size() > 20) battleLog.remove(0);
     }
 
     private Map<Long, Integer> shields = new HashMap<>();

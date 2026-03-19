@@ -58,7 +58,7 @@
           </button>
         </form>
 
-        <form th:if="${status?.name() == 'PLAYER_LOSE'}" th:action="@{/campaign/exit}" method="post">
+        <form th:if="${status?.name() == 'PLAYER_LOSE'}" th:action="@{/campaign/abandon}" method="post">
           <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
           <button type="submit" class="btn btn-ghost btn-full">✕ Abandon Campaign</button>
         </form>

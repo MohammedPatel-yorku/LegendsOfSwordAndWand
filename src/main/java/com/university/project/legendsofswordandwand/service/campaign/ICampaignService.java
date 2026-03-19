@@ -22,4 +22,6 @@ public interface ICampaignService {
   void replacePartyFromCampaign(Long campaignId, Long userId, Long partyIdToReplace);
 
   int getPartyCumulativeLevel(String username);
+
+  void abandonCampaign(String username);
 }
