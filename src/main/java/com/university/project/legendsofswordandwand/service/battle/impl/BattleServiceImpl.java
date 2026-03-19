@@ -203,7 +203,7 @@ class BattleServiceImpl implements IBattleService {
     List<BattleUnit> living = state.getLivingPlayerHeroes();
     if (living.isEmpty()) return Map.of("xpEach", 0, "gold", 0, "recipients", List.of());
 
-    int totalXp = state.getEnemyUnits().stream().mapToInt(u -> 75 * u.getHero().getLevel()).sum();
+    int totalXp = state.getEnemyUnits().stream().mapToInt(u -> 50 * u.getHero().getLevel()).sum();
     int xpEach = totalXp / living.size();
     int remainder = totalXp % living.size();
 
@@ -215,8 +215,10 @@ class BattleServiceImpl implements IBattleService {
     }
 
     int gold = state.getEnemyUnits().stream().mapToInt(u -> 75 * u.getHero().getLevel()).sum();
-    Party party = partyManagementService.getActiveParty(state.getCampaignId());
-    partyManagementService.addGold(party.getId(), gold);
+    if (state.getCampaignId() != null) {
+      Party party = partyManagementService.getActiveParty(state.getCampaignId());
+      partyManagementService.addGold(party.getId(), gold);
+    }
 
     state
         .getPlayerUnits()
@@ -244,8 +246,14 @@ class BattleServiceImpl implements IBattleService {
         .getPlayerUnits()
         .forEach(
             u -> {
-              int penalty = (int) (u.getHero().getExperience() * 0.30);
-              int newXp = Math.max(0, u.getHero().getExperience() - penalty);
+              int prevThreshold =
+                  u.getHero().getExperienceToNextLevel()
+                      - (500
+                          + 75 * u.getHero().getLevel()
+                          + 20 * u.getHero().getLevel() * u.getHero().getLevel());
+              int xpInCurrentLevel = Math.max(0, u.getHero().getExperience() - prevThreshold);
+              int penalty = (int) (xpInCurrentLevel * 0.30);
+              int newXp = Math.max(prevThreshold, u.getHero().getExperience() - penalty);
               // Load fresh entity and update
               heroService
                   .findById(u.getHero().getId())
@@ -258,8 +266,10 @@ class BattleServiceImpl implements IBattleService {
                       });
             });
 
-    Party party = partyManagementService.getActiveParty(state.getCampaignId());
-    partyManagementService.deductGold(party.getId(), (int) (party.getGold() * 0.10));
+    if (state.getCampaignId() != null) {
+      Party party = partyManagementService.getActiveParty(state.getCampaignId());
+      partyManagementService.deductGold(party.getId(), (int) (party.getGold() * 0.10));
+    }
   }
 
   private void executeAttack(BattleUnit attacker, BattleUnit defender, BattleState state) {

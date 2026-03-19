@@ -77,7 +77,9 @@
                                         <div class="hero-class" th:text="${hero.heroClass()}">CLASS</div>
                                     </div>
                                     <div class="hero-stat" th:text="${hero.level()}">1</div>
-                                    <div class="hero-stat" th:text="${hero.health()}">100</div>
+                                    <div class="hero-stat"
+                                         th:text="${hero.health() <= 0 ? 'Dead' : hero.health()}"
+                                         th:style="${hero.health() <= 0 ? 'color: var(--crimson-bright);' : ''}">100</div>
                                     <div class="hero-stat" th:text="${hero.attack()}">5</div>
                                     <div class="hero-stat" th:text="${hero.defense()}">5</div>
                                     <div class="hero-stat" th:text="${hero.mana()}">50</div>

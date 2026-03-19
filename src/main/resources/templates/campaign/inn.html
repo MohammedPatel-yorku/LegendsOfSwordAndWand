@@ -95,6 +95,59 @@
                 </div>
             </div>
 
+            <!-- Level Up Panel -->
+            <div th:if="${levelUpHeroes != null and !#lists.isEmpty(levelUpHeroes)}"
+                 style="margin-bottom:1.5rem;">
+                <div class="divider">Level Up Available!</div>
+                <div th:each="hero : ${levelUpHeroes}"
+                     style="background:var(--bg-raised); border:1px solid var(--gold-muted);
+                border-radius:var(--radius-md); padding:1rem 1.2rem; margin-bottom:0.8rem;">
+                    <div style="font-family:'Cinzel',serif; font-size:0.85rem; color:var(--gold-bright);
+                    margin-bottom:0.8rem;">
+                        ✦ <span th:text="${hero.name}">Hero</span> is ready to level up!
+                        <span style="font-size:0.7rem; color:var(--text-secondary);">
+                (Lv <span th:text="${hero.level}">1</span>
+                → <span th:text="${hero.level + 1}">2</span>)
+            </span>
+                    </div>
+                    <form th:action="@{/campaign/level-up}" method="post"
+                          style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        <input type="hidden" name="heroId" th:value="${hero.id}"/>
+                        <input type="hidden" name="returnTo" value="inn"/>
+                        <select th:if="${!hero.hybrid}" name="heroClass"
+                                style="background:var(--bg-card); color:var(--text-primary);
+                           border:1px solid var(--border-dim); border-radius:var(--radius-sm);
+                           padding:0.4rem 0.6rem; font-family:'Cinzel',serif;
+                           font-size:0.75rem; flex:1;">
+                            <option th:each="cls : ${allHeroClasses}"
+                                    th:value="${cls}"
+                                    th:text="${cls}"
+                                    th:selected="${cls == hero.startingClass}">
+                            </option>
+                        </select>
+                        <input th:if="${hero.hybrid}" type="hidden" name="heroClass"
+                               th:value="${hero.primaryClass}"/>
+                        <span th:if="${hero.hybrid}"
+                              style="font-size:0.75rem; color:var(--text-secondary); flex:1;">
+                Class locked as
+                <span th:text="${hero.hybridClass}" style="color:var(--gold-bright);"></span>
+            </span>
+                        <button type="submit" class="btn btn-primary" style="white-space:nowrap;">
+                            ✦ Level Up
+                        </button>
+                    </form>
+                    <div th:if="${!hero.hybrid}"
+                         style="margin-top:0.6rem; font-size:0.65rem; color:var(--text-muted);
+                    font-family:'Cinzel',serif; display:flex; gap:1rem; flex-wrap:wrap;">
+                        <span>ORDER: +5 MP, +2 DEF</span>
+                        <span>CHAOS: +3 ATK, +5 HP</span>
+                        <span>WARRIOR: +2 ATK, +3 DEF</span>
+                        <span>MAGE: +5 MP, +1 ATK</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- RIGHT: shop + recruits + continue -->
             <div style="display:flex; flex-direction:column; gap:1.5rem;">
 
@@ -155,7 +208,7 @@
                             <button type="submit"
                                     th:disabled="${permanentHeroCount >= 5}"
                                     th:class="${permanentHeroCount < 5} ? 'btn btn-primary btn-full' : 'btn btn-ghost btn-full'"
-                                    th:text="${recruit.level == 1} ? 'Recruit — Free' : 'Recruit — ' + ${recruit.level * 200} + ' g'">
+                                    th:text="${recruit.level == 1} ? 'Recruit — Free' : 'Recruit — ' + ${(recruit.level - 1) * 200} + ' g'">
                                 Recruit
                             </button>
                         </form>

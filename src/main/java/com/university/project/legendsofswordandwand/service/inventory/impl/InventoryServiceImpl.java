@@ -26,30 +26,6 @@ class InventoryServiceImpl implements IInventoryService {
   private final ItemRepository itemRepository;
 
   /**
-   * Get all items in the inventory for a specific party.
-   *
-   * @param partyId ID of the party
-   * @return List of Inventory objects
-   */
-  @Override
-  public List<Inventory> getInventoryByParty(Long partyId) {
-    return inventoryRepository.findByPartyId(partyId);
-  }
-
-  /**
-   * Purchase an item for the party belonging to the given campaign.
-   *
-   * @param campaignId ID of the campaign
-   * @param itemId ID of the item to purchase
-   * @return true if purchase is successful
-   */
-  @Override
-  public boolean purchaseItem(Long campaignId, Long itemId) {
-
-    return true;
-  }
-
-  /**
    * Save or update an inventory in the database.
    *
    * @param inventory Inventory object to save

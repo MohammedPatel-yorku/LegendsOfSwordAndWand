@@ -301,11 +301,11 @@
 
         if (!state.playerTurn) {
             panel.innerHTML = `
-            <div style="text-align:center;">
-                <p style="font-family:'Cinzel',serif;color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
-                    The enemy contemplates their move...
-                </p>
-            </div>`;
+        <div style="text-align:center;">
+            <p style="font-family:'Cinzel',serif;color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
+                The enemy contemplates their move...
+            </p>
+        </div>`;
             if (!state.over && !isProcessing) {
                 setTimeout(() => {
                     if (!state.over && !isProcessing) sendAction({action:'WAIT'});
@@ -318,19 +318,34 @@
         if (!actor) { panel.innerHTML = ''; return; }
 
         const effectiveClass = actor.primaryClass || actor.startingClass;
+        const hybrid = actor.hybridClass || '';
         const livingEnemies = state.enemyUnits.filter(u => u.alive);
 
         let html = `<div class="action-panel-title">${actor.name} — Choose Action</div>`;
-
         html += `<div class="action-buttons">`;
         html += btn('ghost', '🛡 Defend', `sendAction({action:'DEFEND'})`);
         html += btn('ghost', '⏳ Wait', `sendAction({action:'WAIT'})`);
-        if (effectiveClass === 'ORDER' && actor.mana >= 25)
-            html += btn('primary', '✦ Protect', `sendAction({action:'CAST',abilityIndex:0})`);
-        if (effectiveClass === 'ORDER' && actor.mana >= 35)
-            html += btn('primary', '✦ Heal', `sendAction({action:'CAST',abilityIndex:1})`);
-        if (effectiveClass === 'MAGE' && actor.mana >= 80)
-            html += btn('primary', '✦ Replenish', `sendAction({action:'CAST',abilityIndex:0})`);
+
+        // ORDER abilities — Heretic gets FireShield instead of Protect
+        if (effectiveClass === 'ORDER') {
+            const protectCost = 25;
+            if (actor.mana >= protectCost) {
+                if (hybrid === 'HERETIC')
+                    html += btn('primary', '🔥 Fire Shield', `sendAction({action:'CAST',abilityIndex:0})`);
+                else
+                    html += btn('primary', '✦ Protect', `sendAction({action:'CAST',abilityIndex:0})`);
+            }
+            if (actor.mana >= 35)
+                html += btn('primary', '✦ Heal', `sendAction({action:'CAST',abilityIndex:1})`);
+        }
+
+        // MAGE abilities — Wizard pays 40 instead of 80
+        if (effectiveClass === 'MAGE') {
+            const replenishCost = (hybrid === 'WIZARD') ? 40 : 80;
+            if (actor.mana >= replenishCost)
+                html += btn('primary', '✦ Replenish', `sendAction({action:'CAST',abilityIndex:0})`);
+        }
+
         html += `</div>`;
 
         if (livingEnemies.length > 0) {

@@ -3,8 +3,10 @@ package com.university.project.legendsofswordandwand.controller;
 import com.university.project.legendsofswordandwand.battle.BattleState;
 import com.university.project.legendsofswordandwand.battle.BattleUnit;
 import com.university.project.legendsofswordandwand.battle.HeroSnapshot;
+import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.enums.ActionType;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
+import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.service.battle.IBattleService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
@@ -13,6 +15,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -126,6 +129,18 @@ public class BattleController {
         session.setAttribute("rewardsGiven", true);
       }
 
+      if (state.getStatus() == BattleStatus.PLAYER_WIN) {
+        List<Hero> levelUpHeroes =
+            state.getPlayerUnits().stream()
+                .filter(u -> u.isAlive() && u.getHero().getId() != null)
+                .filter(u -> heroService.isLevelUpPending(u.getHero().getId()))
+                .map(u -> heroService.findById(u.getHero().getId()).orElse(null))
+                .filter(Objects::nonNull)
+                .toList();
+        model.addAttribute("levelUpHeroes", levelUpHeroes);
+        model.addAttribute("allHeroClasses", HeroClass.values());
+      }
+
       model.addAttribute("status", state.getStatus());
       model.addAttribute("playerUnits", state.getPlayerUnits());
       model.addAttribute("enemyUnits", state.getEnemyUnits());
@@ -197,6 +212,7 @@ public class BattleController {
     map.put(
         "startingClass", h.getStartingClass() != null ? h.getStartingClass().name() : "WARRIOR");
     map.put("primaryClass", h.getPrimaryClass() != null ? h.getPrimaryClass().name() : "");
+    map.put("hybridClass", h.getHybridClass() != null ? h.getHybridClass().name() : "");
     return map;
   }
 }

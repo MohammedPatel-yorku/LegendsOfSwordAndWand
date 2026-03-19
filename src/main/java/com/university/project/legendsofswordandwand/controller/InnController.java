@@ -2,6 +2,7 @@ package com.university.project.legendsofswordandwand.controller;
 
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.Hero;
+import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.service.battle.IInnService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
@@ -74,6 +75,13 @@ public class InnController {
       model.addAttribute("shopItems", innService.getShopItems());
       model.addAttribute("availableRecruits", recruits);
       model.addAttribute("permanentHeroCount", permanentHeroCount);
+      List<Hero> levelUpHeroes =
+          campaign.getParty().getHeroes().stream()
+              .filter(h -> !h.isTemporary())
+              .filter(h -> heroService.isLevelUpPending(h.getId()))
+              .toList();
+      model.addAttribute("levelUpHeroes", levelUpHeroes);
+      model.addAttribute("allHeroClasses", HeroClass.values());
     } catch (Exception e) {
       return "redirect:/campaign";
     }

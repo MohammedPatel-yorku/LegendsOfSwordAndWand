@@ -46,10 +46,10 @@
 
 .hero-row {
     display: grid;
-    grid-template-columns: 1fr auto auto auto auto auto;
-    gap: 0.4rem 0.8rem;
+    grid-template-columns: 2fr 40px 48px 40px 40px 40px;
+    gap: 0.4rem 0;
     align-items: center;
-    padding: 0.4rem 0;
+    padding: 0.5rem 0;
     border-top: 1px solid var(--border-dim);
     font-size: 0.85rem;
 }
@@ -60,8 +60,8 @@
 
 .stat-header {
     display: grid;
-    grid-template-columns: 1fr auto auto auto auto auto;
-    gap: 0.4rem 0.8rem;
+    grid-template-columns: 2fr 40px 48px 40px 40px 40px;
+    gap: 0.4rem 0;
     font-size: 0.65rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
