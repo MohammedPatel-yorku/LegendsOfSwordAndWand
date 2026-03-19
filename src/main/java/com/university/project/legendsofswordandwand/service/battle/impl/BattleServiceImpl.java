@@ -12,6 +12,7 @@ import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import com.university.project.legendsofswordandwand.service.party.IPartyManagementService;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -109,11 +110,8 @@ class BattleServiceImpl implements IBattleService {
     }
 
     List<BattleUnit> targets = state.getLivingPlayerHeroes();
-    if (!targets.isEmpty() && random.nextInt(100) < 90) {
-      BattleUnit weakest = targets.stream()
-              .min((a, b) -> Integer.compare(a.getHero().getHealth(), b.getHero().getHealth()))
-              .orElse(targets.get(0));
-      executeAttack(actor, weakest, state);
+    if (!targets.isEmpty()) {
+      decideEnemyAction(actor, targets, state);
     } else {
       executeDefend(actor.getHero());
       state.log("  " + actor.getHero().getName() + " defends");
@@ -122,6 +120,62 @@ class BattleServiceImpl implements IBattleService {
     state.setStatus(checkBattleStatus(state));
     if (!state.isOver()) advanceTurn(state);
     return state;
+  }
+
+  private void decideEnemyAction(BattleUnit actor, List<BattleUnit> targets, BattleState state) {
+    String name = actor.getHero().getName();
+
+    switch (name) {
+      case "Skeleton", "Witch", "Shadow" -> {
+        // Glass cannon — always attack the weakest
+        BattleUnit target = targets.stream()
+                .min(Comparator.comparingInt(u -> u.getHero().getHealth()))
+                .orElse(targets.get(0));
+        executeAttack(actor, target, state);
+      }
+      case "Orc", "Dark Knight" -> {
+        // Brute — always attack the highest attack hero (biggest threat)
+        BattleUnit target = targets.stream()
+                .max(Comparator.comparingInt(u -> u.getHero().getAttack()))
+                .orElse(targets.get(0));
+        executeAttack(actor, target, state);
+      }
+      case "Goblin", "Vampire" -> {
+        // Swift — 75% attack lowest defense, 25% wait
+        if (random.nextInt(100) < 75) {
+          BattleUnit target = targets.stream()
+                  .min(Comparator.comparingInt(u -> u.getHero().getDefense()))
+                  .orElse(targets.get(0));
+          executeAttack(actor, target, state);
+        } else {
+          state.getTurnQueue().addLast(actor.getBattleId());
+          state.log("  " + actor.getHero().getName() + " waits");
+        }
+      }
+      case "Troll" -> {
+        // Tank — defends if below 50% HP, otherwise attacks hero with most HP
+        boolean hurt = actor.getHero().getHealth() < actor.getHero().getMaxHealth() / 2;
+        if (hurt && random.nextInt(100) < 60) {
+          executeDefend(actor.getHero());
+          state.log("  " + actor.getHero().getName() + " defends");
+        } else {
+          BattleUnit target = targets.stream()
+                  .max(Comparator.comparingInt(u -> u.getHero().getHealth()))
+                  .orElse(targets.get(0));
+          executeAttack(actor, target, state);
+        }
+      }
+      default -> {
+        // Balanced (Bandit, Wyvern) — 85% attack random target
+        if (random.nextInt(100) < 85) {
+          BattleUnit target = targets.get(random.nextInt(targets.size()));
+          executeAttack(actor, target, state);
+        } else {
+          executeDefend(actor.getHero());
+          state.log("  " + actor.getHero().getName() + " defends");
+        }
+      }
+    }
   }
 
   @Override
