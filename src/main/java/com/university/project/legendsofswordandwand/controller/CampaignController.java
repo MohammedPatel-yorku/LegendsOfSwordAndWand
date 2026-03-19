@@ -106,14 +106,22 @@ public class CampaignController {
   }
 
   @PostMapping("/exit")
-  public String exitCampaign(Authentication authentication) {
+  public String exitCampaign(Authentication authentication, RedirectAttributes redirectAttributes) {
 
     if (authentication == null) return "redirect:/login";
 
     try {
+      Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
+
+      if (campaign.isRoomPending() && campaign.getLastRoomType() == RoomType.BATTLE) {
+        redirectAttributes.addFlashAttribute("error", "You cannot exit during a battle.");
+        return "redirect:/campaign";
+      }
 
       campaignService.exitCampaign(authentication.getName());
-    } catch (Exception ignored) {
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute("error", e.getMessage());
+      return "redirect:/campaign";
     }
 
     return "redirect:/dashboard";

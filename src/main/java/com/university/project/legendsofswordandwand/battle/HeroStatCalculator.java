@@ -37,12 +37,8 @@ public class HeroStatCalculator {
   }
 
   private int calculateExpThreshold(int level) {
-
-    if (level <= 1) return 425;
-    return calculateExpThreshold(level - 1)
-        + 350
-        + 75 * (level + 1)
-        + 20 * (level + 1) * (level + 1);
+    if (level <= 1) return 500 + 75 + 20; // Exp(1) = 0 + 500 + 75*1 + 20*1 = 595
+    return calculateExpThreshold(level - 1) + 500 + 75 * level + 20 * level * level;
   }
 
   private void applyBaseGain(Hero hero) {

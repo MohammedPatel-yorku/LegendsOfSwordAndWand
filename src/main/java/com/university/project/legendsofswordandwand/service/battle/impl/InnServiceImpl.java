@@ -143,7 +143,7 @@ class InnServiceImpl implements IInnService {
     Hero hero =
         heroService.findById(heroId).orElseThrow(() -> new RuntimeException("Hero not found"));
 
-    int cost = hero.getLevel() == 1 ? 0 : hero.getLevel() * 200;
+    int cost = hero.getLevel() == 1 ? 0 : (hero.getLevel() - 1) * 200;
     if (party.getGold() < cost) throw new RuntimeException("Not enough gold");
 
     // Mark permanent before saving so they survive next inn visit cleanup

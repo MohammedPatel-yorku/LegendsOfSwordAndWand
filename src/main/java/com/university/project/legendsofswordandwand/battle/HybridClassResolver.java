@@ -12,6 +12,15 @@ public class HybridClassResolver {
     HeroClass a = primary.ordinal() <= secondary.ordinal() ? primary : secondary;
     HeroClass b = primary.ordinal() <= secondary.ordinal() ? secondary : primary;
 
+    if (a == b) {
+      return switch (a) {
+        case ORDER -> HybridClass.PRIEST;
+        case CHAOS -> HybridClass.INVOKER;
+        case WARRIOR -> HybridClass.KNIGHT;
+        case MAGE -> HybridClass.WIZARD;
+      };
+    }
+
     if (a == HeroClass.ORDER && b == HeroClass.CHAOS) return HybridClass.HERETIC;
     if (a == HeroClass.ORDER && b == HeroClass.WARRIOR) return HybridClass.PALADIN;
     if (a == HeroClass.ORDER && b == HeroClass.MAGE) return HybridClass.PROPHET;

@@ -71,7 +71,6 @@ class CampaignServiceImpl implements ICampaignService {
         userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
     long savedCount = user.getParties().stream().filter(Party::isSaved).count();
-
     if (savedCount >= 5)
       throw new RuntimeException("Already have 5 saved parties - replace one first");
 
@@ -79,6 +78,14 @@ class CampaignServiceImpl implements ICampaignService {
         campaignRepository
             .findById(campaignId)
             .orElseThrow(() -> new RuntimeException("Campaign not found"));
+
+    campaign.getParty().getHeroes().stream()
+        .filter(h -> !h.isTemporary())
+        .forEach(
+            h -> {
+              h.setHealth(h.getMaxHealth());
+              h.setMana(h.getMaxMana());
+            });
 
     campaign.getParty().setSaved(true);
     campaign.setActive(false);

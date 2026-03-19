@@ -73,7 +73,6 @@ class HeroServiceImpl implements IHeroService {
 
     if (!hero.isHybrid()
         && hero.getPrimaryClass() != null
-        && hero.getPrimaryClass() != chosenClass
         && getClassLevel(hero, chosenClass) == 5) {
       hero.setSecondaryClass(chosenClass);
       hero.setHybrid(true);

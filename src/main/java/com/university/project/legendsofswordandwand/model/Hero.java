@@ -97,7 +97,7 @@ public class Hero {
 
   @Column(name = "experience_to_next_level", nullable = false)
   @Setter
-  private int experienceToNextLevel = 575;
+  private int experienceToNextLevel = 595;
 
   @ManyToOne
   @JoinColumn(name = "party_id")
