@@ -2,7 +2,6 @@ package com.university.project.legendsofswordandwand.service.inventory;
 
 import com.university.project.legendsofswordandwand.model.Inventory;
 import com.university.project.legendsofswordandwand.model.Item;
-
 import java.util.List;
 
 public interface IInventoryService {

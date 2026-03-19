@@ -115,9 +115,9 @@ class CampaignServiceImpl implements ICampaignService {
   public void abandonCampaign(String username) {
     Campaign campaign = getActiveCampaign(username);
     campaign.getParty().getHeroes().stream()
-            .filter(Hero::isTemporary)
-            .toList()
-            .forEach(h -> heroRepository.deleteById(h.getId()));
+        .filter(Hero::isTemporary)
+        .toList()
+        .forEach(h -> heroRepository.deleteById(h.getId()));
     campaign.setActive(false);
     campaignRepository.save(campaign);
   }
@@ -133,17 +133,18 @@ class CampaignServiceImpl implements ICampaignService {
     Inventory inventory = campaign.getParty().getInventory();
     if (inventory != null) {
 
-      itemScore = inventory.getItemIds().stream()
-              .mapToInt(id -> itemRepository.findById(id)
-                      .map(item -> (item.getCost() / 2) * 10)
-                      .orElse(0))
+      itemScore =
+          inventory.getItemIds().stream()
+              .mapToInt(
+                  id ->
+                      itemRepository.findById(id).map(item -> (item.getCost() / 2) * 10).orElse(0))
               .sum();
     }
 
     campaign.getParty().getHeroes().stream()
-            .filter(Hero::isTemporary)
-            .toList()
-            .forEach(h -> heroRepository.deleteById(h.getId()));
+        .filter(Hero::isTemporary)
+        .toList()
+        .forEach(h -> heroRepository.deleteById(h.getId()));
 
     campaign.setScore(baseScore + itemScore);
     campaign.setActive(false);

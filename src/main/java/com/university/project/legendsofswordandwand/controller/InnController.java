@@ -52,7 +52,8 @@ public class InnController {
         recruits = freshRecruits;
       } else {
         // Reload from DB — filter out any already recruited
-        recruits = recruitIds.stream()
+        recruits =
+            recruitIds.stream()
                 .map(id -> heroService.findById(id).orElse(null))
                 .filter(h -> h != null && h.isTemporary())
                 .toList();
@@ -61,12 +62,13 @@ public class InnController {
       // Refresh campaign after potential heal
       campaign = campaignService.getActiveCampaign(authentication.getName());
 
-      long permanentHeroCount = campaign.getParty().getHeroes().stream()
-              .filter(h -> !h.isTemporary()).count();
+      long permanentHeroCount =
+          campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).count();
 
       model.addAttribute("healSummary", session.getAttribute("healSummary"));
-      model.addAttribute("heroes", campaign.getParty().getHeroes().stream()
-              .filter(h -> !h.isTemporary()).toList());
+      model.addAttribute(
+          "heroes",
+          campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).toList());
       model.addAttribute("gold", campaign.getParty().getGold());
       model.addAttribute("currentRoom", campaign.getCurrentRoom());
       model.addAttribute("shopItems", innService.getShopItems());
@@ -79,9 +81,10 @@ public class InnController {
   }
 
   @PostMapping("/buy")
-  public String buyItem(Authentication authentication,
-                        @RequestParam Long itemId,
-                        RedirectAttributes redirectAttributes) {
+  public String buyItem(
+      Authentication authentication,
+      @RequestParam Long itemId,
+      RedirectAttributes redirectAttributes) {
     if (authentication == null) return "redirect:/login";
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
@@ -95,10 +98,11 @@ public class InnController {
   }
 
   @PostMapping("/recruit")
-  public String recruitHero(Authentication authentication,
-                            @RequestParam Long heroId,
-                            HttpSession session,
-                            RedirectAttributes redirectAttributes) {
+  public String recruitHero(
+      Authentication authentication,
+      @RequestParam Long heroId,
+      HttpSession session,
+      RedirectAttributes redirectAttributes) {
     if (authentication == null) return "redirect:/login";
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
@@ -137,7 +141,8 @@ public class InnController {
       } else {
         campaignProgressService.clearRoomPending(authentication.getName());
       }
-    } catch (Exception ignored) {}
+    } catch (Exception ignored) {
+    }
     return "redirect:/campaign";
   }
 }

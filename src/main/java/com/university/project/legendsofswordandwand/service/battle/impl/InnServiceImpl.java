@@ -36,9 +36,16 @@ class InnServiceImpl implements IInnService {
   public List<Item> getShopItems() {
     List<Item> items = itemRepository.findAll();
     if (items.isEmpty()) {
-      items = itemRepository.saveAll(Arrays.asList(
-              Item.bread(), Item.cheese(), Item.steak(),
-              Item.water(), Item.juice(), Item.wine(), Item.elixir()));
+      items =
+          itemRepository.saveAll(
+              Arrays.asList(
+                  Item.bread(),
+                  Item.cheese(),
+                  Item.steak(),
+                  Item.water(),
+                  Item.juice(),
+                  Item.wine(),
+                  Item.elixir()));
     }
     return items;
   }
@@ -50,54 +57,58 @@ class InnServiceImpl implements IInnService {
     Party party = partyManagementService.getActiveParty(campaignId);
 
     // Spec: recruits only available in first 10 rooms
-    Campaign campaign = campaignRepository.findById(campaignId)
+    Campaign campaign =
+        campaignRepository
+            .findById(campaignId)
             .orElseThrow(() -> new RuntimeException("Campaign not found"));
     if (campaign.getCurrentRoom() > 10) return Collections.emptyList();
 
-    long permanentCount = party.getHeroes().stream()
-            .filter(h -> !h.isTemporary())
-            .count();
+    long permanentCount = party.getHeroes().stream().filter(h -> !h.isTemporary()).count();
     if (permanentCount >= 5) return Collections.emptyList();
 
     int count = 1 + random.nextInt(3);
     HeroClass[] classes = HeroClass.values();
 
-    List<Hero> recruits = java.util.stream.IntStream.range(0, count)
-            .mapToObj(i -> {
-              HeroClass cls = classes[random.nextInt(classes.length)];
-              // Spec: random level between 1-4
-              int level = 1 + random.nextInt(4);
+    List<Hero> recruits =
+        java.util.stream.IntStream.range(0, count)
+            .mapToObj(
+                i -> {
+                  HeroClass cls = classes[random.nextInt(classes.length)];
+                  // Spec: random level between 1-4
+                  int level = 1 + random.nextInt(4);
 
-              Hero h = Hero.builder()
-                      .name(generateRecruitName())
-                      .startingClass(cls)
-                      .party(party)
-                      .build();
+                  Hero h =
+                      Hero.builder()
+                          .name(generateRecruitName())
+                          .startingClass(cls)
+                          .party(party)
+                          .build();
 
-              switch (cls) {
-                case ORDER   -> h.setOrderLevels(level);
-                case CHAOS   -> h.setChaosLevels(level);
-                case WARRIOR -> h.setWarriorLevels(level);
-                case MAGE    -> h.setMageLevels(level);
-              }
+                  switch (cls) {
+                    case ORDER -> h.setOrderLevels(level);
+                    case CHAOS -> h.setChaosLevels(level);
+                    case WARRIOR -> h.setWarriorLevels(level);
+                    case MAGE -> h.setMageLevels(level);
+                  }
 
-              // Apply base level gains for levels 2-4
-              for (int lvl = 1; lvl < level; lvl++) {
-                heroStatCalculator.applyLevelUp(h, cls);
-              }
+                  // Apply base level gains for levels 2-4
+                  for (int lvl = 1; lvl < level; lvl++) {
+                    heroStatCalculator.applyLevelUp(h, cls);
+                  }
 
-              // Apply class bonus for level 1
-              heroStatCalculator.applyClassBonusOnly(h, cls);
+                  // Apply class bonus for level 1
+                  heroStatCalculator.applyClassBonusOnly(h, cls);
 
-              h.setLevel(level);
-              return h;
-            })
+                  h.setLevel(level);
+                  return h;
+                })
             .toList();
 
-    recruits.forEach(h -> {
-      h.setTemporary(true);
-      heroService.save(h);
-    });
+    recruits.forEach(
+        h -> {
+          h.setTemporary(true);
+          heroService.save(h);
+        });
 
     return recruits;
   }
@@ -105,8 +116,8 @@ class InnServiceImpl implements IInnService {
   @Override
   public boolean purchaseItem(Long campaignId, Long itemId) {
     Party party = partyManagementService.getActiveParty(campaignId);
-    Item item = itemRepository.findById(itemId)
-            .orElseThrow(() -> new RuntimeException("Item not found"));
+    Item item =
+        itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Item not found"));
 
     if (party.getGold() < item.getCost()) return false;
 
@@ -126,13 +137,11 @@ class InnServiceImpl implements IInnService {
   public boolean recruitHero(Long campaignId, Long heroId) {
     Party party = partyManagementService.getActiveParty(campaignId);
 
-    long permanentCount = party.getHeroes().stream()
-            .filter(h -> !h.isTemporary())
-            .count();
+    long permanentCount = party.getHeroes().stream().filter(h -> !h.isTemporary()).count();
     if (permanentCount >= 5) throw new RuntimeException("Party is full");
 
-    Hero hero = heroService.findById(heroId)
-            .orElseThrow(() -> new RuntimeException("Hero not found"));
+    Hero hero =
+        heroService.findById(heroId).orElseThrow(() -> new RuntimeException("Hero not found"));
 
     int cost = hero.getLevel() == 1 ? 0 : hero.getLevel() * 200;
     if (party.getGold() < cost) throw new RuntimeException("Not enough gold");
@@ -148,16 +157,14 @@ class InnServiceImpl implements IInnService {
   @Override
   public void cleanupTemporaryRecruits(Long campaignId) {
     Party party = partyManagementService.getActiveParty(campaignId);
-    List<Hero> temps = party.getHeroes().stream()
-            .filter(Hero::isTemporary)
-            .toList();
+    List<Hero> temps = party.getHeroes().stream().filter(Hero::isTemporary).toList();
     temps.forEach(h -> heroService.delete(h.getId()));
   }
 
   private String generateRecruitName() {
     String[] names = {
-            "Aldric", "Seraphine", "Corvus", "Mira", "Theron",
-            "Isolde", "Gareth", "Lyra", "Dorian", "Elara"
+      "Aldric", "Seraphine", "Corvus", "Mira", "Theron",
+      "Isolde", "Gareth", "Lyra", "Dorian", "Elara"
     };
     return names[random.nextInt(names.length)];
   }

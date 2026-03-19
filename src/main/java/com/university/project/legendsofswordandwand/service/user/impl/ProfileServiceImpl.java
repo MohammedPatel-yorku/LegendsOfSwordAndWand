@@ -11,7 +11,6 @@ import com.university.project.legendsofswordandwand.repository.CampaignRepositor
 import com.university.project.legendsofswordandwand.repository.UserRepository;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
 import com.university.project.legendsofswordandwand.service.user.IProfileService;
-
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -43,9 +42,8 @@ class ProfileServiceImpl implements IProfileService {
   }
 
   private PartyInfo toPartyInfo(Party party) {
-    List<HeroInfo> heroInfoList = party.getHeroes().stream()
-            .filter(h -> !h.isTemporary())
-            .map(this::toHeroInfo).toList();
+    List<HeroInfo> heroInfoList =
+        party.getHeroes().stream().filter(h -> !h.isTemporary()).map(this::toHeroInfo).toList();
     return new PartyInfo(party.getId(), party.getGold(), party.getCumulativeLevel(), heroInfoList);
   }
 
@@ -62,27 +60,26 @@ class ProfileServiceImpl implements IProfileService {
 
   @Override
   public List<HallOfFameEntry> getHallOfFame() {
-    List<Campaign> top = campaignRepository.findTopScores().stream()
-            .limit(20)
-            .toList();
+    List<Campaign> top = campaignRepository.findTopScores().stream().limit(20).toList();
 
     List<HallOfFameEntry> entries = new ArrayList<>();
     for (int i = 0; i < top.size(); i++) {
       Campaign c = top.get(i);
-      long heroCount = c.getParty().getHeroes().stream()
-              .filter(h -> !h.isTemporary()).count();
-      int cumulativeLevel = c.getParty().getHeroes().stream()
+      long heroCount = c.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).count();
+      int cumulativeLevel =
+          c.getParty().getHeroes().stream()
               .filter(h -> !h.isTemporary())
-              .mapToInt(Hero::getLevel).sum();
-      entries.add(new HallOfFameEntry(
+              .mapToInt(Hero::getLevel)
+              .sum();
+      entries.add(
+          new HallOfFameEntry(
               i + 1,
               c.getOwner().getUsername(),
               c.getScore(),
               c.getCurrentRoom(),
               (int) heroCount,
               cumulativeLevel,
-              c.getParty().getGold()
-      ));
+              c.getParty().getGold()));
     }
     return entries;
   }

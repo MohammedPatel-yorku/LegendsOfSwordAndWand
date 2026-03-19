@@ -3,7 +3,6 @@ package com.university.project.legendsofswordandwand.service.battle;
 import com.university.project.legendsofswordandwand.battle.BattleState;
 import com.university.project.legendsofswordandwand.model.enums.ActionType;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
-
 import java.util.Map;
 
 public interface IBattleService {
@@ -11,7 +10,7 @@ public interface IBattleService {
   BattleState initializePvEBattle(Long campaignId, int playerCumulativeLevel);
 
   BattleState executePlayerAction(
-          BattleState state, ActionType actionType, Long targetBattleId, Integer abilityIndex);
+      BattleState state, ActionType actionType, Long targetBattleId, Integer abilityIndex);
 
   BattleState executeEnemyTurn(BattleState state);
 

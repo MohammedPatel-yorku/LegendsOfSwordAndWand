@@ -38,9 +38,7 @@ class UserServiceImpl implements IUserService {
     if (hasParty) {
 
       Party latest = user.getParties().get(user.getParties().size() - 1);
-      partySize = (int) latest.getHeroes().stream()
-              .filter(h -> !h.isTemporary())
-              .count();
+      partySize = (int) latest.getHeroes().stream().filter(h -> !h.isTemporary()).count();
       cumulativeLevel = latest.getCumulativeLevel();
       gold = latest.getGold();
     }

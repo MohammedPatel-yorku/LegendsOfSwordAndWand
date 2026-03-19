@@ -9,42 +9,40 @@ import com.university.project.legendsofswordandwand.battle.ability.order.Protect
 import com.university.project.legendsofswordandwand.battle.ability.warrior.BerserkerAbility;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.model.enums.HybridClass;
-import org.springframework.stereotype.Component;
-
 import java.util.Random;
+import org.springframework.stereotype.Component;
 
 @Component
 public class AbilityFactory {
 
-    private final Random random = new Random();
+  private final Random random = new Random();
 
-    public Ability resolve(HeroClass heroClass, HybridClass hybridClass, int abilityIndex) {
+  public Ability resolve(HeroClass heroClass, HybridClass hybridClass, int abilityIndex) {
 
-        return switch (heroClass) {
+    return switch (heroClass) {
+      case ORDER -> resolveOrder(hybridClass, abilityIndex);
+      case CHAOS -> resolveChaos(hybridClass, abilityIndex);
+      case WARRIOR -> new BerserkerAbility(hybridClass, random);
+      case MAGE -> new ReplenishAbility(hybridClass);
+    };
+  }
 
-            case ORDER    -> resolveOrder(hybridClass, abilityIndex);
-            case CHAOS    -> resolveChaos(hybridClass, abilityIndex);
-            case WARRIOR  -> new BerserkerAbility(hybridClass, random);
-            case MAGE     -> new ReplenishAbility(hybridClass);
-        };
+  private Ability resolveOrder(HybridClass hybridClass, int abilityIndex) {
+
+    if (abilityIndex == 0) {
+
+      return hybridClass == HybridClass.HERETIC
+          ? new FireShieldAbility()
+          : new ProtectAbility(hybridClass);
     }
 
-    private Ability resolveOrder(HybridClass hybridClass, int abilityIndex) {
+    return new HealAbility(hybridClass);
+  }
 
-        if (abilityIndex == 0) {
+  private Ability resolveChaos(HybridClass hybridClass, int abilityIndex) {
 
-            return hybridClass == HybridClass.HERETIC
-                    ? new FireShieldAbility()
-                    : new ProtectAbility(hybridClass);
-        }
-
-        return new HealAbility(hybridClass);
-    }
-
-    private Ability resolveChaos(HybridClass hybridClass, int abilityIndex) {
-
-        return abilityIndex == 0
-                ? new FireballAbility(hybridClass)
-                : new ChainLightningAbility(hybridClass, random);
-    }
+    return abilityIndex == 0
+        ? new FireballAbility(hybridClass)
+        : new ChainLightningAbility(hybridClass, random);
+  }
 }

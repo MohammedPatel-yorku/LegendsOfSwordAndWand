@@ -8,12 +8,10 @@ import com.university.project.legendsofswordandwand.repository.InventoryReposito
 import com.university.project.legendsofswordandwand.repository.ItemRepository;
 import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import com.university.project.legendsofswordandwand.service.inventory.IInventoryService;
-
+import com.university.project.legendsofswordandwand.service.party.IPartyManagementService;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-
-import com.university.project.legendsofswordandwand.service.party.IPartyManagementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -68,9 +66,9 @@ class InventoryServiceImpl implements IInventoryService {
     Inventory inventory = party.getInventory();
     if (inventory == null) return Collections.emptyList();
     return inventory.getItemIds().stream()
-            .map(id -> itemRepository.findById(id).orElse(null))
-            .filter(Objects::nonNull)
-            .toList();
+        .map(id -> itemRepository.findById(id).orElse(null))
+        .filter(Objects::nonNull)
+        .toList();
   }
 
   @Override
@@ -80,10 +78,10 @@ class InventoryServiceImpl implements IInventoryService {
     if (inventory == null || !inventory.getItemIds().contains(itemId))
       throw new RuntimeException("Item not in inventory");
 
-    Hero hero = heroService.findById(heroId)
-            .orElseThrow(() -> new RuntimeException("Hero not found"));
-    Item item = itemRepository.findById(itemId)
-            .orElseThrow(() -> new RuntimeException("Item not found"));
+    Hero hero =
+        heroService.findById(heroId).orElseThrow(() -> new RuntimeException("Hero not found"));
+    Item item =
+        itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Item not found"));
 
     if (item.isRevives()) {
       hero.setHealth(hero.getMaxHealth());
@@ -94,7 +92,7 @@ class InventoryServiceImpl implements IInventoryService {
     }
     heroService.save(hero);
 
-    inventory.getItemIds().remove(itemId);  // remove one instance
+    inventory.getItemIds().remove(itemId); // remove one instance
     inventoryRepository.save(inventory);
     return true;
   }

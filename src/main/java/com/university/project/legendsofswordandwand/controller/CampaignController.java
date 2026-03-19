@@ -73,15 +73,16 @@ public class CampaignController {
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
       CampaignViewInfo data = campaignProgressService.getCampaignViewData(authentication.getName());
-      model.addAttribute("inventoryItems", inventoryService.getPartyInventoryItems(campaign.getId()));
+      model.addAttribute(
+          "inventoryItems", inventoryService.getPartyInventoryItems(campaign.getId()));
       model.addAttribute("heroes", data.heroes());
       model.addAttribute("currentRoom", data.currentRoom());
       model.addAttribute("gold", data.gold());
 
       // Level up panel
-      model.addAttribute("levelUpHeroes", data.heroes().stream()
-              .filter(h -> heroService.isLevelUpPending(h.getId()))
-              .toList());
+      model.addAttribute(
+          "levelUpHeroes",
+          data.heroes().stream().filter(h -> heroService.isLevelUpPending(h.getId())).toList());
       model.addAttribute("allHeroClasses", HeroClass.values());
     } catch (Exception e) {
       return "redirect:/dashboard";
@@ -123,15 +124,17 @@ public class CampaignController {
     if (authentication == null) return "redirect:/login";
     try {
       campaignService.abandonCampaign(authentication.getName());
-    } catch (Exception ignored) {}
+    } catch (Exception ignored) {
+    }
     return "redirect:/dashboard";
   }
 
   @PostMapping("/use-item")
-  public String useItem(Authentication authentication,
-                        @RequestParam Long heroId,
-                        @RequestParam Long itemId,
-                        RedirectAttributes redirectAttributes) {
+  public String useItem(
+      Authentication authentication,
+      @RequestParam Long heroId,
+      @RequestParam Long itemId,
+      RedirectAttributes redirectAttributes) {
     if (authentication == null) return "redirect:/login";
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
@@ -144,11 +147,12 @@ public class CampaignController {
   }
 
   @PostMapping("/level-up")
-  public String levelUp(Authentication authentication,
-                        @RequestParam Long heroId,
-                        @RequestParam HeroClass heroClass,
-                        @RequestParam(defaultValue = "campaign") String returnTo,
-                        RedirectAttributes redirectAttributes) {
+  public String levelUp(
+      Authentication authentication,
+      @RequestParam Long heroId,
+      @RequestParam HeroClass heroClass,
+      @RequestParam(defaultValue = "campaign") String returnTo,
+      RedirectAttributes redirectAttributes) {
     if (authentication == null) return "redirect:/login";
     try {
       heroService.levelUp(heroId, heroClass);

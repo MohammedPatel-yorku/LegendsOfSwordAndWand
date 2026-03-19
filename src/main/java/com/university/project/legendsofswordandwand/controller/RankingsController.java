@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class RankingsController {
 
-    private final IProfileService profileService;
+  private final IProfileService profileService;
 
-    @GetMapping
-    public String rankingsPage(Authentication authentication, Model model) {
-        if (authentication == null) return "redirect:/login";
-        model.addAttribute("entries", profileService.getHallOfFame());
-        model.addAttribute("username", authentication.getName());
-        return "rankings";
-    }
+  @GetMapping
+  public String rankingsPage(Authentication authentication, Model model) {
+    if (authentication == null) return "redirect:/login";
+    model.addAttribute("entries", profileService.getHallOfFame());
+    model.addAttribute("username", authentication.getName());
+    return "rankings";
+  }
 }
