@@ -1,7 +1,6 @@
 package com.university.project.legendsofswordandwand.service.party;
 
 import com.university.project.legendsofswordandwand.model.Party;
-
 import java.util.List;
 
 public interface IPartyManagementService {

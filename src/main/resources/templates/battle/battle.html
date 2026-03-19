@@ -78,43 +78,43 @@
      *   playerTurn: boolean,
      *   activeUnitBattleId: number,
      *   battleLog: string[],
-     *   playerUnits: Array<{battleId:number, enemy:boolean, alive:boolean, name:string, level:number, health:number, maxHealth:number, mana:number, maxMana:number, startingClass:string, primaryClass:string}>,
-     *   enemyUnits: Array<{battleId:number, enemy:boolean, alive:boolean, name:string, level:number, health:number, maxHealth:number, mana:number, maxMana:number, startingClass:string, primaryClass:string}>
+     *   playerUnits: Array<{
+     *     battleId: number,
+     *     enemy: boolean,
+     *     alive: boolean,
+     *     name: string,
+     *     level: number,
+     *     health: number,
+     *     maxHealth: number,
+     *     mana: number,
+     *     maxMana: number,
+     *     attack: number,
+     *     defense: number,
+     *     startingClass: string,
+     *     primaryClass: string
+     *   }>,
+     *   enemyUnits: Array<{
+     *     battleId: number,
+     *     enemy: boolean,
+     *     alive: boolean,
+     *     name: string,
+     *     level: number,
+     *     health: number,
+     *     maxHealth: number,
+     *     mana: number,
+     *     maxMana: number,
+     *     attack: number,
+     *     defense: number,
+     *     startingClass: string,
+     *     primaryClass: string
+     *   }>
      * }} BattleStateDto
      */
 
     /** @type {BattleStateDto|null} */
-
     let state = null;
-
     let prevState = null;
-
-    function applyAnimations() {
-        if (!prevState) return;
-
-        const allPrev = [...prevState.playerUnits, ...prevState.enemyUnits];
-        const allCurr = [...state.playerUnits, ...state.enemyUnits];
-
-        allCurr.forEach(curr => {
-            const prev = allPrev.find(p => String(p.battleId) === String(curr.battleId));
-            if (!prev) return;
-            if (curr.health < prev.health) {
-                const el = document.querySelector(`[data-id="${curr.battleId}"]`);
-                if (el) {
-                    el.classList.remove('flash-damage', 'flash-heal');
-                    void el.offsetWidth; // force reflow to restart animation
-                    el.classList.add('flash-damage');
-                }
-            } else if (curr.health > prev.health) {
-                const el = document.querySelector(`[data-id="${curr.battleId}"]`);
-                if (el) {
-                    el.classList.remove('flash-damage', 'flash-heal');
-                    void el.offsetWidth;
-                    el.classList.add('flash-heal');
-                }
-            }
-        });
-    }
+    let isProcessing = false;  // lock to prevent concurrent actions
 
     // ── Fetch helpers ──────────────────────────────────────────────────────
 
@@ -122,34 +122,90 @@
         const res = await fetch('/battle/state');
         if (!res.ok) { window.location.href = '/campaign'; return; }
         state = await res.json();
+        logCursor = state.battleLog.length;  // sync cursor to current log length on load
         render();
     }
 
     async function sendAction(params) {
+        if (isProcessing) return;
+        isProcessing = true;
         setActionsDisabled(true);
-        const body = new URLSearchParams(params);
-        const res = await fetch('/battle/action', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                [CSRF_HEADER]: CSRF_TOKEN
-            },
-            body: body.toString()
-        });
-        const data = await res.json();
-        if (!res.ok) {
-            showError(data.error || 'Something went wrong');
-            setActionsDisabled(false);
-            return;
-        }
-        state = data;
-        render();
-        if (state.over) {
-            setTimeout(() => window.location.href = '/battle/result', 1200);
+
+        const cursorBefore = logCursor;  // snapshot cursor before request
+
+        try {
+            const body = new URLSearchParams(params);
+            const res = await fetch('/battle/action', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [CSRF_HEADER]: CSRF_TOKEN
+                },
+                body: body.toString()
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                showError(data.error || 'Something went wrong');
+                return;
+            }
+            state = data;
+            renderTurnIndicator();
+            await replayLog(cursorBefore);
+        } catch (e) {
+            showError('Request failed');
+        } finally {
+            isProcessing = false;
         }
     }
 
     // ── Rendering ──────────────────────────────────────────────────────────
+
+    async function replayLog(cursorBefore) {
+        const newEntries = state.battleLog.slice(cursorBefore);
+        logCursor = state.battleLog.length;  // advance cursor to end
+
+        const logEl = document.getElementById('battle-log');
+        logEl.style.display = 'block';
+
+        if (newEntries.length === 0) {
+            renderUnits('player-units', state.playerUnits, false);
+            renderUnits('enemy-units', state.enemyUnits, true);
+            applyAnimations();
+            prevState = state;
+            renderTurnIndicator();
+            renderActions();
+            setActionsDisabled(false);
+            if (state.over) setTimeout(() => window.location.href = '/battle/result', 1200);
+            return;
+        }
+
+        for (const entry of newEntries) {
+            renderUnits('player-units', state.playerUnits, false);
+            renderUnits('enemy-units', state.enemyUnits, true);
+            applyAnimations();
+            prevState = state;
+
+            const div = document.createElement('div');
+            div.textContent = entry;
+            if (!entry.startsWith('►') && !entry.startsWith('  ')) {
+                div.style.color = 'var(--crimson-bright)';
+            }
+            logEl.appendChild(div);
+            // Keep DOM trimmed to last 20 visible lines only
+            while (logEl.children.length > 20) logEl.removeChild(logEl.firstChild);
+            logEl.scrollTop = logEl.scrollHeight;
+
+            await delay(350);
+        }
+
+        renderTurnIndicator();
+        renderActions();
+        setActionsDisabled(false);
+
+        if (state.over) {
+            setTimeout(() => window.location.href = '/battle/result', 1200);
+        }
+    }
 
     function render() {
         hideError();
@@ -161,6 +217,32 @@
         renderLog();
         renderActions();
         setActionsDisabled(false);
+        if (state.over) setTimeout(() => window.location.href = '/battle/result', 1200);
+    }
+
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function applyAnimations() {
+        if (!prevState) return;
+        const allPrev = [...prevState.playerUnits, ...prevState.enemyUnits];
+        const allCurr = [...state.playerUnits, ...state.enemyUnits];
+        allCurr.forEach(curr => {
+            const prev = allPrev.find(p => String(p.battleId) === String(curr.battleId));
+            if (!prev) return;
+            const el = document.querySelector(`[data-id="${curr.battleId}"]`);
+            if (!el) return;
+            if (curr.health < prev.health) {
+                el.classList.remove('flash-damage', 'flash-heal');
+                void el.offsetWidth;
+                el.classList.add('flash-damage');
+            } else if (curr.health > prev.health) {
+                el.classList.remove('flash-damage', 'flash-heal');
+                void el.offsetWidth;
+                el.classList.add('flash-heal');
+            }
+        });
     }
 
     function renderUnits(containerId, units, isEnemy) {
@@ -173,21 +255,26 @@
             const activeClass = isActive ? ' active-unit' : '';
             const side = isEnemy ? 'enemy' : 'player';
             return `
-                <div class="unit-card ${side}${deadClass}${activeClass}" data-id="${u.battleId}">
-                    <div class="unit-card-header">
-                        <span class="unit-name">${u.name}</span>
-                        <span class="unit-level">Lv ${u.level}</span>
-                    </div>
-                    <div class="stat-bar-row">
-                        <div class="stat-bar-label"><span>HP</span><span>${u.health}/${u.maxHealth}</span></div>
-                        <div class="stat-bar"><div class="stat-bar-fill hp" style="width:${hpPct}%"></div></div>
-                    </div>
-                    ${!isEnemy ? `
-                    <div class="stat-bar-row" style="margin-top:0.3rem;">
-                        <div class="stat-bar-label"><span>MP</span><span>${u.mana}/${u.maxMana}</span></div>
-                        <div class="stat-bar"><div class="stat-bar-fill mana" style="width:${mpPct}%"></div></div>
-                    </div>` : ''}
-                </div>`;
+            <div class="unit-card ${side}${deadClass}${activeClass}" data-id="${u.battleId}">
+                <div class="unit-card-header">
+                    <span class="unit-name">${u.name}</span>
+                    <span class="unit-level">Lv ${u.level}</span>
+                </div>
+                <div class="stat-bar-row">
+                    <div class="stat-bar-label"><span>HP</span><span>${u.health} / ${u.maxHealth}</span></div>
+                    <div class="stat-bar"><div class="stat-bar-fill hp" style="width:${hpPct}%"></div></div>
+                </div>
+                ${!isEnemy ? `
+                <div class="stat-bar-row">
+                    <div class="stat-bar-label"><span>MP</span><span>${u.mana} / ${u.maxMana}</span></div>
+                    <div class="stat-bar"><div class="stat-bar-fill mana" style="width:${mpPct}%"></div></div>
+                </div>` : ''}
+                <div style="margin-top:0.4rem; font-family:'Cinzel',serif; font-size:0.7rem;
+                            color:var(--text-secondary); display:flex; gap:1rem;">
+                    <span>⚔ ${u.attack} ATK</span>
+                    <span>🛡 ${u.defense} DEF</span>
+                </div>
+            </div>`;
         }).join('');
     }
 
@@ -214,14 +301,16 @@
 
         if (!state.playerTurn) {
             panel.innerHTML = `
-                <div style="text-align:center;">
-                    <p style="font-family:'Cinzel',serif;color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
-                        The enemy contemplates their move...
-                    </p>
-                    <button class="btn btn-ghost" onclick="sendAction({action:'WAIT'})">Continue</button>
-                </div>`;
-            // Auto-advance enemy turn after short delay
-            setTimeout(() => sendAction({action:'WAIT'}), 2000);
+            <div style="text-align:center;">
+                <p style="font-family:'Cinzel',serif;color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
+                    The enemy contemplates their move...
+                </p>
+            </div>`;
+            if (!state.over && !isProcessing) {
+                setTimeout(() => {
+                    if (!state.over && !isProcessing) sendAction({action:'WAIT'});
+                }, 800);
+            }
             return;
         }
 
@@ -233,7 +322,6 @@
 
         let html = `<div class="action-panel-title">${actor.name} — Choose Action</div>`;
 
-        // Non-targeted actions
         html += `<div class="action-buttons">`;
         html += btn('ghost', '🛡 Defend', `sendAction({action:'DEFEND'})`);
         html += btn('ghost', '⏳ Wait', `sendAction({action:'WAIT'})`);
@@ -245,7 +333,6 @@
             html += btn('primary', '✦ Replenish', `sendAction({action:'CAST',abilityIndex:0})`);
         html += `</div>`;
 
-        // Target-based actions
         if (livingEnemies.length > 0) {
             html += `<div class="target-list"><div class="battle-side-label">Select Target</div>`;
             livingEnemies.forEach(enemy => {
@@ -275,10 +362,10 @@
 
     function targetBtn(label, sub, onclick) {
         return `
-            <button class="target-btn" onclick="${onclick}" style="margin-bottom:0.3rem;width:100%;">
-                <span>${label}</span>
-                ${sub ? `<span style="color:var(--text-muted);font-size:0.6rem;">${sub}</span>` : ''}
-            </button>`;
+        <button class="target-btn" onclick="${onclick}" style="margin-bottom:0.3rem;width:100%;">
+            <span>${label}</span>
+            ${sub ? `<span style="color:var(--text-muted);font-size:0.6rem;">${sub}</span>` : ''}
+        </button>`;
     }
 
     function setActionsDisabled(disabled) {

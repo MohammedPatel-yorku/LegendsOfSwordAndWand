@@ -64,14 +64,13 @@ class CampaignProgressServiceImpl implements ICampaignProgressService {
   @Override
   public CampaignViewInfo getCampaignViewData(String username) {
     Campaign campaign = campaignService.getActiveCampaign(username);
-    List<Hero> permanentHeroes = campaign.getParty().getHeroes().stream()
-            .filter(h -> !h.isTemporary())
-            .toList();
+    List<Hero> permanentHeroes =
+        campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).toList();
     return new CampaignViewInfo(
-            campaign.getId(),
-            campaign.getCurrentRoom(),
-            campaign.getParty().getGold(),
-            permanentHeroes);
+        campaign.getId(),
+        campaign.getCurrentRoom(),
+        campaign.getParty().getGold(),
+        permanentHeroes);
   }
 
   @Override
@@ -94,7 +93,7 @@ class CampaignProgressServiceImpl implements ICampaignProgressService {
         campaign.getId(),
         campaign.getScore(),
         campaign.getParty().getGold(),
-        campaign.getParty().getHeroes(),
+        campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).toList(),
         savedParties.size() >= 5,
         savedParties);
   }

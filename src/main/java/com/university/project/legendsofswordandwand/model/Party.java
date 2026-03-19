@@ -41,15 +41,12 @@ public class Party {
   private Inventory inventory;
 
   public int getCumulativeLevel() {
-    return heroes.stream()
-            .filter(h -> !h.isTemporary())
-            .mapToInt(Hero::getLevel).sum();
+    return heroes.stream().filter(h -> !h.isTemporary()).mapToInt(Hero::getLevel).sum();
   }
 
   public int calculateScore() {
-    int heroScore = heroes.stream()
-            .filter(h -> !h.isTemporary())
-            .mapToInt(h -> h.getLevel() * 100).sum();
+    int heroScore =
+        heroes.stream().filter(h -> !h.isTemporary()).mapToInt(h -> h.getLevel() * 100).sum();
     int goldScore = gold * 10;
     return heroScore + goldScore;
   }

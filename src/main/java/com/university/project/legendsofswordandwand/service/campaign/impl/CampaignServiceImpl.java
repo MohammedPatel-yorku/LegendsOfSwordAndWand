@@ -1,18 +1,15 @@
 package com.university.project.legendsofswordandwand.service.campaign.impl;
 
-import com.university.project.legendsofswordandwand.model.Campaign;
-import com.university.project.legendsofswordandwand.model.Inventory;
-import com.university.project.legendsofswordandwand.model.Party;
-import com.university.project.legendsofswordandwand.model.User;
+import com.university.project.legendsofswordandwand.model.*;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.repository.CampaignRepository;
+import com.university.project.legendsofswordandwand.repository.HeroRepository;
 import com.university.project.legendsofswordandwand.repository.ItemRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
 import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import com.university.project.legendsofswordandwand.service.party.IPartyService;
 import jakarta.transaction.Transactional;
-import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +23,8 @@ class CampaignServiceImpl implements ICampaignService {
   private final UserRepository userRepository;
   private final IHeroService heroService;
   private final IPartyService partyService;
-  private final Random random = new Random();
   private final ItemRepository itemRepository;
+  private final HeroRepository heroRepository;
 
   @Override
   public boolean hasActiveCampaign(Long userId) {
@@ -115,6 +112,17 @@ class CampaignServiceImpl implements ICampaignService {
   }
 
   @Override
+  public void abandonCampaign(String username) {
+    Campaign campaign = getActiveCampaign(username);
+    campaign.getParty().getHeroes().stream()
+        .filter(Hero::isTemporary)
+        .toList()
+        .forEach(h -> heroRepository.deleteById(h.getId()));
+    campaign.setActive(false);
+    campaignRepository.save(campaign);
+  }
+
+  @Override
   public Campaign completeCampaign(String username) {
 
     Campaign campaign = getActiveCampaign(username);
@@ -125,12 +133,18 @@ class CampaignServiceImpl implements ICampaignService {
     Inventory inventory = campaign.getParty().getInventory();
     if (inventory != null) {
 
-      itemScore = inventory.getItemIds().stream()
-              .mapToInt(id -> itemRepository.findById(id)
-                      .map(item -> (item.getCost() / 2) * 10)
-                      .orElse(0))
+      itemScore =
+          inventory.getItemIds().stream()
+              .mapToInt(
+                  id ->
+                      itemRepository.findById(id).map(item -> (item.getCost() / 2) * 10).orElse(0))
               .sum();
     }
+
+    campaign.getParty().getHeroes().stream()
+        .filter(Hero::isTemporary)
+        .toList()
+        .forEach(h -> heroRepository.deleteById(h.getId()));
 
     campaign.setScore(baseScore + itemScore);
     campaign.setActive(false);
