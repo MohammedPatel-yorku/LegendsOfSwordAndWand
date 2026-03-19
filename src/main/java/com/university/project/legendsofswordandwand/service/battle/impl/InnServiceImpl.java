@@ -59,11 +59,22 @@ class InnServiceImpl implements IInnService {
     HeroClass[] classes = HeroClass.values();
 
     List<Hero> recruits = java.util.stream.IntStream.range(0, count)
-            .mapToObj(i -> Hero.builder()
-                    .name(generateRecruitName())
-                    .startingClass(classes[random.nextInt(classes.length)])
-                    .party(party)
-                    .build())
+            .mapToObj(i -> {
+              HeroClass cls = classes[random.nextInt(classes.length)];
+              Hero h = Hero.builder()
+                      .name(generateRecruitName())
+                      .startingClass(cls)
+                      .party(party)
+                      .build();
+              // Set class level so ability resolution works correctly
+              switch (cls) {
+                case ORDER   -> h.setOrderLevels(1);
+                case CHAOS   -> h.setChaosLevels(1);
+                case WARRIOR -> h.setWarriorLevels(1);
+                case MAGE    -> h.setMageLevels(1);
+              }
+              return h;
+            })
             .toList();
 
     recruits.forEach(h -> {

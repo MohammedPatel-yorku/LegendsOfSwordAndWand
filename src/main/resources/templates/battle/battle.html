@@ -116,6 +116,50 @@
         });
     }
 
+    async function replayLog(prevLog) {
+        const newEntries = state.battleLog.slice(prevLog.length);
+        if (newEntries.length === 0) {
+            renderActions();
+            setActionsDisabled(false);
+            return;
+        }
+
+        const logEl = document.getElementById('battle-log');
+        logEl.style.display = 'block';
+
+        for (const entry of newEntries) {
+            // Update units visually for this log entry
+            renderUnits('player-units', state.playerUnits, false);
+            renderUnits('enemy-units', state.enemyUnits, true);
+            applyAnimations();
+            prevState = state;
+
+            // Append the log entry
+            const div = document.createElement('div');
+            div.textContent = entry;
+            // Highlight enemy actions differently
+            if (!entry.startsWith('►') && !entry.startsWith('  ')) {
+                div.style.color = 'var(--crimson-bright)';
+            }
+            logEl.appendChild(div);
+            logEl.scrollTop = logEl.scrollHeight;
+
+            await delay(350);
+        }
+
+        renderTurnIndicator();
+        renderActions();
+        setActionsDisabled(false);
+
+        if (state.over) {
+            setTimeout(() => window.location.href = '/battle/result', 1200);
+        }
+    }
+
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     // ── Fetch helpers ──────────────────────────────────────────────────────
 
     async function fetchState() {
@@ -125,8 +169,26 @@
         render();
     }
 
+    function render() {
+        hideError();
+        renderUnits('player-units', state.playerUnits, false);
+        renderUnits('enemy-units', state.enemyUnits, true);
+        applyAnimations();
+        prevState = state;
+        renderTurnIndicator();
+        renderLog();
+        renderActions();
+        setActionsDisabled(false);
+
+        if (state.over) {
+            setTimeout(() => window.location.href = '/battle/result', 1200);
+        }
+    }
+
     async function sendAction(params) {
         setActionsDisabled(true);
+        const prevLog = state ? [...state.battleLog] : [];
+
         const body = new URLSearchParams(params);
         const res = await fetch('/battle/action', {
             method: 'POST',
@@ -142,25 +204,14 @@
             setActionsDisabled(false);
             return;
         }
+
         state = data;
-        render();
-        if (state.over) {
-            setTimeout(() => window.location.href = '/battle/result', 1200);
-        }
-    }
 
-    // ── Rendering ──────────────────────────────────────────────────────────
-
-    function render() {
-        hideError();
-        renderUnits('player-units', state.playerUnits, false);
-        renderUnits('enemy-units', state.enemyUnits, true);
-        applyAnimations();
-        prevState = state;
+        // Update turn indicator immediately so player sees their action was registered
         renderTurnIndicator();
-        renderLog();
-        renderActions();
-        setActionsDisabled(false);
+
+        // Replay log entries one by one with delay
+        await replayLog(prevLog);
     }
 
     function renderUnits(containerId, units, isEnemy) {
@@ -214,14 +265,14 @@
 
         if (!state.playerTurn) {
             panel.innerHTML = `
-                <div style="text-align:center;">
-                    <p style="font-family:'Cinzel',serif;color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
-                        The enemy contemplates their move...
-                    </p>
-                    <button class="btn btn-ghost" onclick="sendAction({action:'WAIT'})">Continue</button>
-                </div>`;
-            // Auto-advance enemy turn after short delay
-            setTimeout(() => sendAction({action:'WAIT'}), 2000);
+        <div style="text-align:center;">
+            <p style="font-family:'Cinzel',serif;color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
+                The enemy contemplates their move...
+            </p>
+        </div>`;
+            if (!state.over) {
+                setTimeout(() => { if (!state.over) sendAction({action:'WAIT'}); }, 800);
+            }
             return;
         }
 

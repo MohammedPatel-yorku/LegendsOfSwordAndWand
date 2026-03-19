@@ -45,6 +45,7 @@ class CampaignServiceImpl implements ICampaignService {
   public Campaign exitCampaign(String username) {
 
     Campaign campaign = getActiveCampaign(username);
+    campaign.setActive(false);
     return campaignRepository.save(campaign);
   }
 

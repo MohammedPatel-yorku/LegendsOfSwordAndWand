@@ -5,7 +5,10 @@ import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.service.battle.IInnService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
+import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import jakarta.servlet.http.HttpSession;
+
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -22,6 +25,7 @@ public class InnController {
   private static final String RECRUITS_KEY = "innRecruits";
 
   private final IInnService innService;
+  private final IHeroService heroService;
   private final ICampaignService campaignService;
   private final ICampaignProgressService campaignProgressService;
 
@@ -39,9 +43,21 @@ public class InnController {
       // Generate recruits once per inn visit
       @SuppressWarnings("unchecked")
       List<Hero> recruits = (List<Hero>) session.getAttribute(RECRUITS_KEY);
+      // In innPage GET, change session storage:
       if (recruits == null) {
-        recruits = innService.getAvailableRecruits(campaign.getId());
-        session.setAttribute(RECRUITS_KEY, recruits);
+        List<Hero> freshRecruits = innService.getAvailableRecruits(campaign.getId());
+        // Store IDs only to avoid stale entity issues
+        List<Long> recruitIds = freshRecruits.stream().map(Hero::getId).toList();
+        session.setAttribute(RECRUITS_KEY, recruitIds);
+        recruits = freshRecruits;
+      } else {
+        // Reload from DB using stored IDs to get fresh state
+        @SuppressWarnings("unchecked")
+        List<Long> recruitIds = (List<Long>) session.getAttribute(RECRUITS_KEY);
+        recruits = recruitIds.stream()
+                .map(id -> heroService.findById(id).orElse(null))
+                .filter(h -> h != null && h.isTemporary())  // only show if still temporary
+                .toList();
       }
 
       // Refresh campaign so hero HP/mana reflects the heal
@@ -95,12 +111,12 @@ public class InnController {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
       innService.recruitHero(campaign.getId(), heroId);
 
-      // Remove from session list so they don't show as available anymore
       @SuppressWarnings("unchecked")
-      List<Hero> recruits = (List<Hero>) session.getAttribute(RECRUITS_KEY);
-      if (recruits != null) {
-        recruits.removeIf(h -> h.getId().equals(heroId));
-        session.setAttribute(RECRUITS_KEY, recruits);
+      List<Long> recruitIds = (List<Long>) session.getAttribute(RECRUITS_KEY);
+      if (recruitIds != null) {
+        recruitIds = new ArrayList<>(recruitIds);
+        recruitIds.remove(heroId);
+        session.setAttribute(RECRUITS_KEY, recruitIds);
       }
 
       redirectAttributes.addFlashAttribute("message", "Hero recruited!");
