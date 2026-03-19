@@ -35,7 +35,11 @@ public class ChainLightningAbility implements Ability {
         double falloff = (hybridClass == HybridClass.INVOKER) ? 0.50 : 0.25;
 
         int baseDamage = AbilityHelper.calculateDamage(caster, target);
+        int hpBefore = target.getHero().getHealth();
         AbilityHelper.applyDamage(caster.getHero(), target, baseDamage, state);
+        int actual = hpBefore - target.getHero().getHealth();
+        state.log("  ⚡ Chain Lightning hits " + target.getHero().getName()
+                + " for " + actual + " dmg → " + target.getHero().getHealth() + " HP left");
 
         List<BattleUnit> rest = new ArrayList<>(enemies);
         rest.remove(target);
@@ -43,10 +47,13 @@ public class ChainLightningAbility implements Ability {
 
         double current = baseDamage;
         for (BattleUnit next : rest) {
-
             current *= falloff;
-            if (current < 1) break;
-            AbilityHelper.applyDamage(caster.getHero(), next, (int) current, state);
+            int chainDmg = Math.max(1, (int) current);  // always at least 1
+            int hpBeforeChain = next.getHero().getHealth();
+            AbilityHelper.applyDamage(caster.getHero(), next, chainDmg, state);
+            int actualChain = hpBeforeChain - next.getHero().getHealth();
+            state.log("  ⚡ ...chains to " + next.getHero().getName()
+                    + " for " + actualChain + " dmg → " + next.getHero().getHealth() + " HP left");
         }
     }
 }

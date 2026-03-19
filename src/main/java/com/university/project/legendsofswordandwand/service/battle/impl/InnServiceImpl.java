@@ -1,10 +1,9 @@
 package com.university.project.legendsofswordandwand.service.battle.impl;
 
-import com.university.project.legendsofswordandwand.model.Hero;
-import com.university.project.legendsofswordandwand.model.Inventory;
-import com.university.project.legendsofswordandwand.model.Item;
-import com.university.project.legendsofswordandwand.model.Party;
+import com.university.project.legendsofswordandwand.battle.HeroStatCalculator;
+import com.university.project.legendsofswordandwand.model.*;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
+import com.university.project.legendsofswordandwand.repository.CampaignRepository;
 import com.university.project.legendsofswordandwand.repository.InventoryRepository;
 import com.university.project.legendsofswordandwand.repository.ItemRepository;
 import com.university.project.legendsofswordandwand.service.battle.IInnService;
@@ -25,6 +24,8 @@ class InnServiceImpl implements IInnService {
   private final Random random = new Random();
   private final IHeroService heroService;
   private final InventoryRepository inventoryRepository;
+  private final HeroStatCalculator heroStatCalculator;
+  private final CampaignRepository campaignRepository;
 
   @Override
   public List<String> loadInnView(Long campaignId) {
@@ -44,15 +45,18 @@ class InnServiceImpl implements IInnService {
 
   @Override
   public List<Hero> getAvailableRecruits(Long campaignId) {
-    // Clean up any leftover temps first
     cleanupTemporaryRecruits(campaignId);
 
     Party party = partyManagementService.getActiveParty(campaignId);
 
+    // Spec: recruits only available in first 10 rooms
+    Campaign campaign = campaignRepository.findById(campaignId)
+            .orElseThrow(() -> new RuntimeException("Campaign not found"));
+    if (campaign.getCurrentRoom() > 10) return Collections.emptyList();
+
     long permanentCount = party.getHeroes().stream()
             .filter(h -> !h.isTemporary())
             .count();
-
     if (permanentCount >= 5) return Collections.emptyList();
 
     int count = 1 + random.nextInt(3);
@@ -61,18 +65,31 @@ class InnServiceImpl implements IInnService {
     List<Hero> recruits = java.util.stream.IntStream.range(0, count)
             .mapToObj(i -> {
               HeroClass cls = classes[random.nextInt(classes.length)];
+              // Spec: random level between 1-4
+              int level = 1 + random.nextInt(4);
+
               Hero h = Hero.builder()
                       .name(generateRecruitName())
                       .startingClass(cls)
                       .party(party)
                       .build();
-              // Set class level so ability resolution works correctly
+
               switch (cls) {
-                case ORDER   -> h.setOrderLevels(1);
-                case CHAOS   -> h.setChaosLevels(1);
-                case WARRIOR -> h.setWarriorLevels(1);
-                case MAGE    -> h.setMageLevels(1);
+                case ORDER   -> h.setOrderLevels(level);
+                case CHAOS   -> h.setChaosLevels(level);
+                case WARRIOR -> h.setWarriorLevels(level);
+                case MAGE    -> h.setMageLevels(level);
               }
+
+              // Apply base level gains for levels 2-4
+              for (int lvl = 1; lvl < level; lvl++) {
+                heroStatCalculator.applyLevelUp(h, cls);
+              }
+
+              // Apply class bonus for level 1
+              heroStatCalculator.applyClassBonusOnly(h, cls);
+
+              h.setLevel(level);
               return h;
             })
             .toList();

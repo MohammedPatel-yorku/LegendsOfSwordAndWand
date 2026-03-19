@@ -29,12 +29,12 @@ public class EnemyGenerator {
      *   BRUTE         — high attack, medium defense, high HP (threatening)
      */
     private enum Archetype {
-        //                    name           atkBase atkScale defBase defScale hpBase hpScale
-        GLASS_CANNON("glass cannon",         8,      2,       1,      0,       45,    10),
-        TANK        ("tank",                 4,      1,       5,      2,       90,    20),
-        BALANCED    ("balanced",             6,      2,       2,      1,       60,    15),
-        SWIFT       ("swift",                7,      2,       1,      1,       55,    12),
-        BRUTE       ("brute",                7,      2,       3,      1,       75,    18);
+
+        GLASS_CANNON("glass cannon",         7,      3,       0,      0,       35,    12),
+        TANK        ("tank",                 3,      2,       5,      3,       90,    25),
+        BALANCED    ("balanced",             6,      3,       1,      1,       50,    18),
+        SWIFT       ("swift",                7,      3,       0,      1,       45,    15),
+        BRUTE       ("brute",                7,      3,       3,      1,       60,    22);
 
         final String label;
         final int atkBase, atkScale, defBase, defScale, hpBase, hpScale;
@@ -80,12 +80,11 @@ public class EnemyGenerator {
 
         int count = 1 + random.nextInt(Math.min(5, playerPartySize + 1));
 
-        int maxCumulativeLevel = Math.max(count, playerCumulativeLevel);
-        int rawMin = maxCumulativeLevel - 10;
-        int minCumulativeLevel = Math.max(count, rawMin);
-        maxCumulativeLevel = Math.max(minCumulativeLevel, maxCumulativeLevel);
-        int targetCumulativeLevel = minCumulativeLevel
-                + random.nextInt(maxCumulativeLevel - minCumulativeLevel + 1);
+        int target = Math.max(playerCumulativeLevel + (playerCumulativeLevel / 5), count);
+        int variance = Math.max(1, target / 5);
+        int minTarget = Math.max(count, target - variance);
+        int maxTarget = target + variance;
+        int targetCumulativeLevel = minTarget + random.nextInt(maxTarget - minTarget + 1);
 
         int[] levels = distributeLevels(count, targetCumulativeLevel);
 
@@ -93,22 +92,33 @@ public class EnemyGenerator {
         for (int i = 0; i < count; i++) {
             enemies.add(buildEnemy(levels[i]));
         }
-
         return enemies;
     }
 
     private int[] distributeLevels(int count, int targetCumulativeLevel) {
         int[] levels = new int[count];
         Arrays.fill(levels, 1);
+
+        // Cap individual level inversely to count
+        int maxIndividualLevel = Math.max(2, 12 - (count * 2));
+
         int remaining = targetCumulativeLevel - count;
-        for (int i = 0; i < remaining; i++) {
-            levels[random.nextInt(count)]++;
+        int attempts = 0;
+        int distributed = 0;
+
+        while (distributed < remaining && attempts < remaining * 3) {
+            int idx = random.nextInt(count);
+            if (levels[idx] < maxIndividualLevel) {
+                levels[idx]++;
+                distributed++;
+            }
+            attempts++;
         }
+
         return levels;
     }
 
     private Hero buildEnemy(int level) {
-
         EnemyType type = EnemyType.values()[random.nextInt(EnemyType.values().length)];
         Archetype a = type.archetype;
 

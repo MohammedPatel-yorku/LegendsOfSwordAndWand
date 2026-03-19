@@ -71,6 +71,46 @@
     const CSRF_TOKEN = /*[[${_csrf.token}]]*/ '';
     const CSRF_HEADER = /*[[${_csrf.headerName}]]*/ 'X-CSRF-TOKEN';
 
+    /**
+     * @typedef {{
+     *   over: boolean,
+     *   status: string,
+     *   playerTurn: boolean,
+     *   activeUnitBattleId: number,
+     *   battleLog: string[],
+     *   playerUnits: Array<{
+     *     battleId: number,
+     *     enemy: boolean,
+     *     alive: boolean,
+     *     name: string,
+     *     level: number,
+     *     health: number,
+     *     maxHealth: number,
+     *     mana: number,
+     *     maxMana: number,
+     *     attack: number,
+     *     defense: number,
+     *     startingClass: string,
+     *     primaryClass: string
+     *   }>,
+     *   enemyUnits: Array<{
+     *     battleId: number,
+     *     enemy: boolean,
+     *     alive: boolean,
+     *     name: string,
+     *     level: number,
+     *     health: number,
+     *     maxHealth: number,
+     *     mana: number,
+     *     maxMana: number,
+     *     attack: number,
+     *     defense: number,
+     *     startingClass: string,
+     *     primaryClass: string
+     *   }>
+     * }} BattleStateDto
+     */
+
     /** @type {BattleStateDto|null} */
     let state = null;
     let prevState = null;
@@ -221,14 +261,19 @@
                     <span class="unit-level">Lv ${u.level}</span>
                 </div>
                 <div class="stat-bar-row">
-                    <div class="stat-bar-label"><span>HP</span><span>${u.health}/${u.maxHealth}</span></div>
+                    <div class="stat-bar-label"><span>HP</span><span>${u.health} / ${u.maxHealth}</span></div>
                     <div class="stat-bar"><div class="stat-bar-fill hp" style="width:${hpPct}%"></div></div>
                 </div>
                 ${!isEnemy ? `
-                <div class="stat-bar-row" style="margin-top:0.3rem;">
-                    <div class="stat-bar-label"><span>MP</span><span>${u.mana}/${u.maxMana}</span></div>
+                <div class="stat-bar-row">
+                    <div class="stat-bar-label"><span>MP</span><span>${u.mana} / ${u.maxMana}</span></div>
                     <div class="stat-bar"><div class="stat-bar-fill mana" style="width:${mpPct}%"></div></div>
                 </div>` : ''}
+                <div style="margin-top:0.4rem; font-family:'Cinzel',serif; font-size:0.7rem;
+                            color:var(--text-secondary); display:flex; gap:1rem;">
+                    <span>⚔ ${u.attack} ATK</span>
+                    <span>🛡 ${u.defense} DEF</span>
+                </div>
             </div>`;
         }).join('');
     }

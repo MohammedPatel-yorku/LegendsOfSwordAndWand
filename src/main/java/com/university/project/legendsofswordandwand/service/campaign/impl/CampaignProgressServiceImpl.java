@@ -94,7 +94,9 @@ class CampaignProgressServiceImpl implements ICampaignProgressService {
         campaign.getId(),
         campaign.getScore(),
         campaign.getParty().getGold(),
-        campaign.getParty().getHeroes(),
+        campaign.getParty().getHeroes().stream()
+                .filter(h -> !h.isTemporary())
+                .toList(),
         savedParties.size() >= 5,
         savedParties);
   }

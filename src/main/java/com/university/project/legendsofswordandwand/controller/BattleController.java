@@ -8,9 +8,10 @@ import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
 import com.university.project.legendsofswordandwand.service.battle.IBattleService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
+import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import jakarta.servlet.http.HttpSession;
-
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +26,12 @@ import org.springframework.web.bind.annotation.*;
 public class BattleController {
 
     private static final String SESSION_KEY = "battleState";
+    private static final String LAST_RESULT_KEY = "lastBattleResult";
 
     private final IBattleService battleService;
     private final ICampaignService campaignService;
     private final ICampaignProgressService campaignProgressService;
-
-    // ── Page load ─────────────────────────────────────────────────────────────
+    private final IHeroService heroService;
 
     @GetMapping
     public String battlePage(Authentication authentication, HttpSession session) {
@@ -42,7 +43,6 @@ public class BattleController {
                 int cumulativeLevel = campaignService.getPartyCumulativeLevel(authentication.getName());
                 state = battleService.initializePvEBattle(campaign.getId(), cumulativeLevel);
 
-                // Auto-process any enemy turns that come first
                 int safetyLimit = 50;
                 while (!state.isOver() && !state.isPlayerTurn() && safetyLimit-- > 0) {
                     state = battleService.executeEnemyTurn(state);
@@ -50,7 +50,6 @@ public class BattleController {
                 if (!state.isOver() && !state.isPlayerTurn()) {
                     state.setStatus(battleService.checkBattleStatus(state));
                 }
-
                 session.setAttribute(SESSION_KEY, state);
             }
         } catch (Exception e) {
@@ -58,8 +57,6 @@ public class BattleController {
         }
         return "battle/battle";
     }
-
-    // ── JSON API ───────────────────────────────────────────────────────────────
 
     @GetMapping("/state")
     @ResponseBody
@@ -86,8 +83,13 @@ public class BattleController {
 
         try {
             state = battleService.executePlayerAction(state, action, targetBattleId, abilityIndex);
-            while (!state.isOver() && !state.isPlayerTurn()) {
+
+            int safetyLimit = 50;
+            while (!state.isOver() && !state.isPlayerTurn() && safetyLimit-- > 0) {
                 state = battleService.executeEnemyTurn(state);
+            }
+            if (!state.isOver() && !state.isPlayerTurn()) {
+                state.setStatus(battleService.checkBattleStatus(state));
             }
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -98,56 +100,80 @@ public class BattleController {
         return ResponseEntity.ok(toDto(state));
     }
 
-    // ── Result page (stays Thymeleaf) ─────────────────────────────────────────
-
     @GetMapping("/result")
     public String result(Authentication authentication, Model model, HttpSession session) {
         if (authentication == null) return "redirect:/login";
 
         BattleState state = (BattleState) session.getAttribute(SESSION_KEY);
-        if (state == null) return "redirect:/battle";
+        if (state == null || !state.isOver()) return "redirect:/battle";
 
         try {
-            if (state.getStatus() == BattleStatus.PLAYER_WIN) {
-                battleService.awardBattleRewards(state);
-            } else {
-                battleService.applyBattleLoss(state);
+
+            boolean rewardsAlreadyGiven = Boolean.TRUE.equals(session.getAttribute("rewardsGiven"));
+            if (!rewardsAlreadyGiven && state.getStatus() == BattleStatus.PLAYER_WIN) {
+                Map<String, Object> rewards = battleService.awardBattleRewards(state);
+                model.addAttribute("rewardGold", rewards.get("gold"));
+                model.addAttribute("rewardRecipients", rewards.get("recipients"));
+                session.setAttribute("rewardsGiven", true);
+            } else if (state.getStatus() == BattleStatus.PLAYER_WIN) {
+                // Rewards already given, just show level up panel
+                model.addAttribute("rewardGold", 0);
+                model.addAttribute("rewardRecipients", List.of());
             }
+
+            if (!rewardsAlreadyGiven && state.getStatus() == BattleStatus.PLAYER_LOSE) {
+                battleService.applyBattleLoss(state);
+                session.setAttribute("rewardsGiven", true);
+            }
+
             model.addAttribute("status", state.getStatus());
             model.addAttribute("playerUnits", state.getPlayerUnits());
             model.addAttribute("enemyUnits", state.getEnemyUnits());
             boolean campaignDone = !state.isPvp()
                     && campaignProgressService.isCampaignComplete(authentication.getName());
             model.addAttribute("campaignDone", campaignDone);
+            session.setAttribute(LAST_RESULT_KEY, state.getStatus().name());
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
         }
 
-        session.removeAttribute(SESSION_KEY);
         return "battle/result";
     }
 
     @PostMapping("/continue")
-    public String continueCampaign(Authentication authentication) {
+    public String continueCampaign(Authentication authentication, HttpSession session) {
         if (authentication == null) return "redirect:/login";
+        session.removeAttribute(SESSION_KEY);
+        session.removeAttribute("rewardsGiven");
+
         try {
+            String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
+
             if (campaignProgressService.isCampaignComplete(authentication.getName())) {
+                session.removeAttribute(LAST_RESULT_KEY);
                 campaignService.completeCampaign(authentication.getName());
                 return "redirect:/campaign/complete";
             }
+
+            if ("PLAYER_LOSE".equals(lastResult)) {
+                // Don't clear room pending — player retries this room after the inn
+                // Leave LAST_RESULT_KEY in session so inn/continue knows not to clear pending
+                return "redirect:/inn";
+            }
+
+            session.removeAttribute(LAST_RESULT_KEY);
             campaignProgressService.clearRoomPending(authentication.getName());
         } catch (Exception ignored) {}
         return "redirect:/campaign";
     }
-
-    // ── DTO builder ────────────────────────────────────────────────────────────
 
     private Map<String, Object> toDto(BattleState state) {
         return Map.of(
                 "over", state.isOver(),
                 "status", state.getStatus().name(),
                 "playerTurn", state.isPlayerTurn(),
-                "activeUnitBattleId", state.getActiveUnitBattleId() != null ? state.getActiveUnitBattleId() : -999,
+                "activeUnitBattleId", state.getActiveUnitBattleId() != null
+                        ? state.getActiveUnitBattleId() : -999,
                 "playerUnits", state.getPlayerUnits().stream().map(this::unitDto).toList(),
                 "enemyUnits", state.getEnemyUnits().stream().map(this::unitDto).toList(),
                 "battleLog", state.getBattleLog()
@@ -166,6 +192,8 @@ public class BattleController {
         map.put("maxHealth", h.getMaxHealth());
         map.put("mana", h.getMana());
         map.put("maxMana", h.getMaxMana());
+        map.put("attack", h.getAttack());
+        map.put("defense", h.getDefense());
         map.put("startingClass", h.getStartingClass() != null ? h.getStartingClass().name() : "WARRIOR");
         map.put("primaryClass", h.getPrimaryClass() != null ? h.getPrimaryClass().name() : "");
         return map;

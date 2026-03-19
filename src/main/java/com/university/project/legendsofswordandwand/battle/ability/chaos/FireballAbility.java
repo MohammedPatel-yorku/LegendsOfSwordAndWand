@@ -41,7 +41,12 @@ public class FireballAbility implements Ability {
 
         for (BattleUnit hit : hits) {
             int damage = (int) (AbilityHelper.calculateDamage(caster, hit) * multiplier);
+            int hpBefore = hit.getHero().getHealth();
             AbilityHelper.applyDamage(caster.getHero(), hit, damage, state);
+            int actual = hpBefore - hit.getHero().getHealth();
+
+            state.log("  🔥 Fireball hits " + hit.getHero().getName()
+                    + " for " + actual + " dmg → " + hit.getHero().getHealth() + " HP left");
         }
     }
 }

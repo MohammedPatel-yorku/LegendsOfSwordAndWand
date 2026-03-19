@@ -30,18 +30,22 @@ public class HealAbility implements Ability {
 
         if (hybridClass == HybridClass.PRIEST) {
 
-            allies.forEach(u -> applyHeal(u.getHero(), multiplier));
+            allies.forEach(u -> applyHeal(u.getHero(), multiplier, state));
         } else {
 
             allies.stream()
                     .min(Comparator.comparingInt(unit -> unit.getHero().getHealth()))
-                    .ifPresent(unit -> applyHeal(unit.getHero(), multiplier));
+                    .ifPresent(unit -> applyHeal(unit.getHero(), multiplier, state));
         }
     }
 
-    private void applyHeal(HeroSnapshot hero, double multiplier) {
+    private void applyHeal(HeroSnapshot hero, double multiplier, BattleState state) {
 
         int heal = (int) (hero.getMaxHealth() * 0.25 * multiplier);
+        int before = hero.getHealth();
         hero.setHealth(Math.min(hero.getMaxHealth(), hero.getHealth() + heal));
+        int actual = hero.getHealth() - before;
+        state.log("  ✦ Heal restores " + actual + " HP to " + hero.getName()
+                + " → " + hero.getHealth() + " HP");
     }
 }

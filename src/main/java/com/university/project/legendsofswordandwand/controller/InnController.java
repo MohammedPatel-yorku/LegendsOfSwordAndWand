@@ -7,7 +7,6 @@ import com.university.project.legendsofswordandwand.service.campaign.ICampaignPr
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
 import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import jakarta.servlet.http.HttpSession;
-
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class InnController {
 
   private static final String RECRUITS_KEY = "innRecruits";
+  private static final String LAST_RESULT_KEY = "lastBattleResult";
 
   private final IInnService innService;
   private final IHeroService heroService;
@@ -35,41 +35,34 @@ public class InnController {
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
 
-      // Only heal on first visit, not on every buy/recruit redirect
-      if (session.getAttribute(RECRUITS_KEY) == null) {
-        innService.loadInnView(campaign.getId());
-      }
-
-      // Generate recruits once per inn visit
-      @SuppressWarnings("unchecked")
-      List<Hero> recruits = (List<Hero>) session.getAttribute(RECRUITS_KEY);
-      // In innPage GET, change session storage:
-      if (recruits == null) {
-        List<Hero> freshRecruits = innService.getAvailableRecruits(campaign.getId());
-        // Store IDs only to avoid stale entity issues
-        List<Long> recruitIds = freshRecruits.stream().map(Hero::getId).toList();
-        session.setAttribute(RECRUITS_KEY, recruitIds);
-        recruits = freshRecruits;
-      } else {
-        // Reload from DB using stored IDs to get fresh state
-        @SuppressWarnings("unchecked")
-        List<Long> recruitIds = (List<Long>) session.getAttribute(RECRUITS_KEY);
-        recruits = recruitIds.stream()
-                .map(id -> heroService.findById(id).orElse(null))
-                .filter(h -> h != null && h.isTemporary())  // only show if still temporary
-                .toList();
-      }
-
-      // Refresh campaign so hero HP/mana reflects the heal
-      campaign = campaignService.getActiveCampaign(authentication.getName());
-
-      long permanentHeroCount = campaign.getParty().getHeroes().stream()
-              .filter(h -> !h.isTemporary()).count();
-
+      // Heal only on first arrival, not on every buy/recruit redirect
       if (session.getAttribute(RECRUITS_KEY) == null) {
         List<String> healSummary = innService.loadInnView(campaign.getId());
         session.setAttribute("healSummary", healSummary);
       }
+
+      // Generate recruits once per inn visit, store IDs to avoid stale entities
+      @SuppressWarnings("unchecked")
+      List<Long> recruitIds = (List<Long>) session.getAttribute(RECRUITS_KEY);
+      List<Hero> recruits;
+      if (recruitIds == null) {
+        List<Hero> freshRecruits = innService.getAvailableRecruits(campaign.getId());
+        recruitIds = freshRecruits.stream().map(Hero::getId).toList();
+        session.setAttribute(RECRUITS_KEY, recruitIds);
+        recruits = freshRecruits;
+      } else {
+        // Reload from DB — filter out any already recruited
+        recruits = recruitIds.stream()
+                .map(id -> heroService.findById(id).orElse(null))
+                .filter(h -> h != null && h.isTemporary())
+                .toList();
+      }
+
+      // Refresh campaign after potential heal
+      campaign = campaignService.getActiveCampaign(authentication.getName());
+
+      long permanentHeroCount = campaign.getParty().getHeroes().stream()
+              .filter(h -> !h.isTemporary()).count();
 
       model.addAttribute("healSummary", session.getAttribute("healSummary"));
       model.addAttribute("heroes", campaign.getParty().getHeroes().stream()
@@ -132,8 +125,18 @@ public class InnController {
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
       innService.cleanupTemporaryRecruits(campaign.getId());
-      campaignProgressService.clearRoomPending(authentication.getName());
       session.removeAttribute(RECRUITS_KEY);
+      session.removeAttribute("healSummary");
+
+      String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
+      session.removeAttribute(LAST_RESULT_KEY);
+
+      if ("PLAYER_LOSE".equals(lastResult)) {
+        // Keep room pending so player retries the same battle room
+        // Do NOT call clearRoomPending
+      } else {
+        campaignProgressService.clearRoomPending(authentication.getName());
+      }
     } catch (Exception ignored) {}
     return "redirect:/campaign";
   }

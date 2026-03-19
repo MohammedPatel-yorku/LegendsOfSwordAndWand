@@ -44,6 +44,8 @@ class HeroServiceImpl implements IHeroService {
 
     incrementClassLevel(hero, selectedHeroClass);
 
+    heroStatCalculator.applyClassBonusOnly(hero, selectedHeroClass);
+
     party.getHeroes().add(hero);
     heroRepository.save(hero);
   }

@@ -11,10 +11,9 @@ import com.university.project.legendsofswordandwand.service.battle.IBattleServic
 import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import com.university.project.legendsofswordandwand.service.party.IPartyManagementService;
 import jakarta.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -127,17 +126,19 @@ class BattleServiceImpl implements IBattleService {
 
     switch (name) {
       case "Skeleton", "Witch", "Shadow" -> {
-        // Glass cannon — always attack the weakest
+        // Glass cannon — always attacks weakest, no spread needed (they die fast anyway)
         BattleUnit target = targets.stream()
                 .min(Comparator.comparingInt(u -> u.getHero().getHealth()))
                 .orElse(targets.get(0));
         executeAttack(actor, target, state);
       }
       case "Orc", "Dark Knight" -> {
-        // Brute — always attack the highest attack hero (biggest threat)
-        BattleUnit target = targets.stream()
+        // Brute — 60% attack highest attack hero, 40% pick random to spread pressure
+        BattleUnit target = random.nextInt(100) < 60
+                ? targets.stream()
                 .max(Comparator.comparingInt(u -> u.getHero().getAttack()))
-                .orElse(targets.get(0));
+                .orElse(targets.get(0))
+                : targets.get(random.nextInt(targets.size()));
         executeAttack(actor, target, state);
       }
       case "Goblin", "Vampire" -> {
@@ -153,20 +154,22 @@ class BattleServiceImpl implements IBattleService {
         }
       }
       case "Troll" -> {
-        // Tank — defends if below 50% HP, otherwise attacks hero with most HP
+        // Tank — defends if hurt, otherwise 50% attack highest HP, 50% random
         boolean hurt = actor.getHero().getHealth() < actor.getHero().getMaxHealth() / 2;
         if (hurt && random.nextInt(100) < 60) {
           executeDefend(actor.getHero());
           state.log("  " + actor.getHero().getName() + " defends");
         } else {
-          BattleUnit target = targets.stream()
+          BattleUnit target = random.nextInt(100) < 50
+                  ? targets.stream()
                   .max(Comparator.comparingInt(u -> u.getHero().getHealth()))
-                  .orElse(targets.get(0));
+                  .orElse(targets.get(0))
+                  : targets.get(random.nextInt(targets.size()));
           executeAttack(actor, target, state);
         }
       }
       default -> {
-        // Balanced (Bandit, Wyvern) — 85% attack random target
+        // Balanced (Bandit, Wyvern) — always random target
         if (random.nextInt(100) < 85) {
           BattleUnit target = targets.get(random.nextInt(targets.size()));
           executeAttack(actor, target, state);
@@ -186,18 +189,20 @@ class BattleServiceImpl implements IBattleService {
   }
 
   @Override
-  public void awardBattleRewards(BattleState state) {
+  public Map<String, Object> awardBattleRewards(BattleState state) {
     List<BattleUnit> living = state.getLivingPlayerHeroes();
-    if (living.isEmpty()) return;
+    if (living.isEmpty()) return Map.of("xpEach", 0, "gold", 0, "recipients", List.of());
 
     int totalXp = state.getEnemyUnits().stream()
             .mapToInt(u -> 75 * u.getHero().getLevel()).sum();
     int xpEach = totalXp / living.size();
     int remainder = totalXp % living.size();
-    for (int i = 0; i <living.size(); i++) {
 
+    List<String> recipients = new ArrayList<>();
+    for (int i = 0; i < living.size(); i++) {
       int xp = xpEach + (i == 0 ? remainder : 0);
       heroService.addExperience(living.get(i).getHero().getId(), xp);
+      recipients.add(living.get(i).getHero().getName() + " +" + xp + " XP");
     }
 
     int gold = state.getEnemyUnits().stream()
@@ -210,6 +215,11 @@ class BattleServiceImpl implements IBattleService {
       hero.setMana(u.getHero().getMana());
       heroService.save(hero);
     }));
+
+    Map<String, Object> rewards = new HashMap<>();
+    rewards.put("gold", gold);
+    rewards.put("recipients", recipients);
+    return rewards;
   }
 
   @Override

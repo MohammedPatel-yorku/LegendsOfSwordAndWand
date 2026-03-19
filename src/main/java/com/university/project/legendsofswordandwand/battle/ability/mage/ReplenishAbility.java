@@ -35,6 +35,8 @@ public class ReplenishAbility implements Ability {
             HeroSnapshot hero = ally.getHero();
             int restore = (ally.getBattleId() == caster.getBattleId()) ? selfRestore : allyRestore;
             hero.setMana(Math.min(hero.getMaxMana(), hero.getMana() + restore));
+            state.log("  ✦ Replenish restores " + restore + " MP to " + hero.getName()
+                    + " → " + hero.getMana() + " MP");
         }
     }
 }

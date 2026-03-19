@@ -41,14 +41,22 @@ public class BerserkerAbility implements Ability {
         }
 
         int primaryDamage = AbilityHelper.calculateDamage(caster, target);
+        int hpBefore = target.getHero().getHealth();
         AbilityHelper.applyDamage(casterHero, target, primaryDamage, state);
+        int actual = hpBefore - target.getHero().getHealth();
+        state.log("  ⚔ Berserker hits " + target.getHero().getName()
+                + " for " + actual + " dmg → " + target.getHero().getHealth() + " HP left");
         maybeStun(target, state);
 
         enemies.stream()
                 .filter(unit -> unit.getBattleId() != target.getBattleId())
                 .limit(2)
                 .forEach(unit -> {
+                    int splashBefore = unit.getHero().getHealth();
                     AbilityHelper.applyDamage(casterHero, unit, primaryDamage / 4, state);
+                    int splashActual = splashBefore - unit.getHero().getHealth();
+                    state.log("  ⚔ ...splash hits " + unit.getHero().getName()
+                            + " for " + splashActual + " dmg → " + unit.getHero().getHealth() + " HP left");
                     maybeStun(unit, state);
                 });
     }

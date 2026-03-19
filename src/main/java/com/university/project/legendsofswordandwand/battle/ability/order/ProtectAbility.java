@@ -34,6 +34,7 @@ public class ProtectAbility implements Ability {
             int current = state.getShield(ally.getBattleId());
 
             state.setShield(ally.getBattleId(), Math.max(current, shield));
+            state.log("  ✦ Protect shields " + ally.getHero().getName() + " for " + shield + " HP");
         }
     }
 }

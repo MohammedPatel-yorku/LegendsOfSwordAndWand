@@ -7,6 +7,7 @@ import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.model.enums.RoomType;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
+import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import com.university.project.legendsofswordandwand.service.inventory.IInventoryService;
 import com.university.project.legendsofswordandwand.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class CampaignController {
   private final ICampaignProgressService campaignProgressService;
   private final IUserService userService;
   private final IInventoryService inventoryService;
+  private final IHeroService heroService;
 
   @GetMapping("/new")
   public String newCampaignPage(Authentication authentication) {
@@ -68,20 +70,22 @@ public class CampaignController {
   @GetMapping
   public String campaignPage(Authentication authentication, Model model) {
     if (authentication == null) return "redirect:/login";
-
     try {
-
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
       CampaignViewInfo data = campaignProgressService.getCampaignViewData(authentication.getName());
       model.addAttribute("inventoryItems", inventoryService.getPartyInventoryItems(campaign.getId()));
       model.addAttribute("heroes", data.heroes());
       model.addAttribute("currentRoom", data.currentRoom());
       model.addAttribute("gold", data.gold());
-    } catch (Exception e) {
 
+      // Level up panel
+      model.addAttribute("levelUpHeroes", data.heroes().stream()
+              .filter(h -> heroService.isLevelUpPending(h.getId()))
+              .toList());
+      model.addAttribute("allHeroClasses", HeroClass.values());
+    } catch (Exception e) {
       return "redirect:/dashboard";
     }
-
     return "campaign/campaign";
   }
 
@@ -137,6 +141,22 @@ public class CampaignController {
       redirectAttributes.addFlashAttribute("error", e.getMessage());
     }
     return "redirect:/campaign";
+  }
+
+  @PostMapping("/level-up")
+  public String levelUp(Authentication authentication,
+                        @RequestParam Long heroId,
+                        @RequestParam HeroClass heroClass,
+                        @RequestParam(defaultValue = "campaign") String returnTo,
+                        RedirectAttributes redirectAttributes) {
+    if (authentication == null) return "redirect:/login";
+    try {
+      heroService.levelUp(heroId, heroClass);
+      redirectAttributes.addFlashAttribute("message", "Hero levelled up!");
+    } catch (Exception e) {
+      redirectAttributes.addFlashAttribute("error", e.getMessage());
+    }
+    return "redirect:/" + returnTo;
   }
 
   @GetMapping("/complete")

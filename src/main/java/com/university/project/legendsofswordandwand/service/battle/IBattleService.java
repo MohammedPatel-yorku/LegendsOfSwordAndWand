@@ -4,6 +4,8 @@ import com.university.project.legendsofswordandwand.battle.BattleState;
 import com.university.project.legendsofswordandwand.model.enums.ActionType;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
 
+import java.util.Map;
+
 public interface IBattleService {
 
   BattleState initializePvEBattle(Long campaignId, int playerCumulativeLevel);
@@ -15,7 +17,7 @@ public interface IBattleService {
 
   BattleStatus checkBattleStatus(BattleState state);
 
-  void awardBattleRewards(BattleState state);
+  Map<String, Object> awardBattleRewards(BattleState state);
 
   void applyBattleLoss(BattleState state);
 }
