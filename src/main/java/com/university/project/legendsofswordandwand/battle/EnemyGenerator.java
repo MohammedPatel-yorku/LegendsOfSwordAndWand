@@ -27,10 +27,10 @@ public class EnemyGenerator {
    */
   private enum Archetype {
     GLASS_CANNON("glass cannon", 7, 3, 0, 0, 35, 12),
-    TANK("tank", 3, 2, 5, 3, 90, 25),
-    BALANCED("balanced", 6, 3, 1, 1, 50, 18),
-    SWIFT("swift", 7, 3, 0, 1, 45, 15),
-    BRUTE("brute", 7, 3, 3, 1, 60, 22);
+    TANK        ("tank",         3, 2, 2, 2, 90, 25),
+    BALANCED    ("balanced",     6, 2, 1, 1, 50, 18),
+    SWIFT       ("swift",        7, 3, 0, 1, 45, 15),
+    BRUTE       ("brute",        7, 3, 2, 1, 60, 22);
 
     final String label;
     final int atkBase, atkScale, defBase, defScale, hpBase, hpScale;
