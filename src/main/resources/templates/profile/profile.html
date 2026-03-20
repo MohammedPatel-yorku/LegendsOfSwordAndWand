@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Profile - Legends of Sword and Wand</title>
+        <link rel="stylesheet" th:href="@{/css/main.css}">
+    </head>
+    <body>
+        <div class="page-wrapper" style="justify-content: flex-start; padding-top: 3rem;">
+            <div class="card xl">
+                <div class="card-ornament tl"></div>
+                <div class="card-ornament tr"></div>
+                <div class="card-ornament bl"></div>
+                <div class="card-ornament br"></div>
+
+                <div class="user-bar">
+                    <span class="user-greeting">
+                        ⚔ &nbsp;<span th:text="${profile.username()}">Adventurer</span>
+                    </span>
+                    <a href="/dashboard" class="btn btn-ghost" style="padding: 0.4rem 0.9rem; font-size: 0.7rem">
+                        ← Keep
+                    </a>
+                </div>
+
+                <div class="card-header">
+                    <span class="game-logo">Hall of Records</span>
+                    <p class="subtitle">Your Legend So Far</p>
+                </div>
+
+                <p class="section-title">⚔ PvP Record</p>
+                <div class="pvp-record">
+                    <div>
+                        <div class="pvp-wins" th:text="${profile.pvpWins()}">0</div>
+                        <div class="pvp-label">Wins</div>
+                    </div>
+                    <div>
+                        <div class="pvp-losses" th:text="${profile.pvpLosses()}">0</div>
+                        <div class="pvp-label">Losses</div>
+                    </div>
+                </div>
+
+                <div class="profile-grid">
+                    <div>
+                        <p class="section-title">🛡 Saved Parties</p>
+
+                        <div th:if="${#lists.isEmpty(profile.parties)}" class="empty-state">
+                            No parties saved yet. Complete a campaign to save one.
+                        </div>
+
+                        <div th:each="party : ${profile.parties()}" class="party-block">
+                            <div class="party-meta">
+                                <span>Party #<span th:text="${party.id()}">1</span></span>
+                                <span class="party-gold">
+                                    ✦ <span th:text="${party.gold()}">0</span>g
+                                    &nbsp;·&nbsp;
+                                    Lv <span th:text="${party.cumulativeLevel()}">0</span> total
+                                </span>
+                            </div>
+
+                            <div th:if="${#lists.isEmpty(party.heroes())}" class="empty-state">
+                                No heroes in this party.
+                            </div>
+
+                            <div th:if="${!#lists.isEmpty(party.heroes())}">
+                                <div class="stat-header" style="grid-template-columns: 2fr 40px 48px 40px 40px 40px;">
+                                    <span></span>
+                                    <span>LV</span>
+                                    <span>HP</span>
+                                    <span>ATK</span>
+                                    <span>DEF</span>
+                                    <span>MP</span>
+                                </div>
+                                <div th:each="hero : ${party.heroes()}" class="hero-row">
+                                    <div>
+                                        <div class="hero-name" th:text="${hero.name()}">Hero</div>
+                                        <div class="hero-class"
+                                             th:text="${hero.hybrid()} ? ${hero.hybridClass()} : ${hero.heroClass()}">CLASS</div>
+                                    </div>
+                                    <div class="hero-stat" th:text="${hero.level()}">1</div>
+                                    <div class="hero-stat"
+                                         th:text="${hero.health() <= 0 ? 'Dead' : hero.health()}"
+                                         th:style="${hero.health() <= 0 ? 'color: var(--crimson-bright);' : ''}">100</div>
+                                    <div class="hero-stat" th:text="${hero.attack()}">5</div>
+                                    <div class="hero-stat" th:text="${hero.defense()}">5</div>
+                                    <div class="hero-stat" th:text="${hero.mana()}">50</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="section-title">🗺 Campaign Results</p>
+
+                        <div th:if="${#lists.isEmpty(profile.campaignResults())}" class="empty-state">
+                            No campaigns completed yet.
+                        </div>
+
+                        <div th:each="result : ${profile.campaignResults()}"class="campaign-row">
+                            <div>
+                                <div class="campaign-score">
+                                    <span th:text="${result.score()}">0</span> pts
+                                </div>
+                                <div class="campaign-rooms">
+                                    Room <span th:text="${result.roomsReached()}">0</span>
+                                </div>
+                            </div>
+                            <span th:if="${result.active()}" class="badge-active">In Progress</span>
+                            <span th:if="${!result.active()}" class="badge-complete">Complete</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

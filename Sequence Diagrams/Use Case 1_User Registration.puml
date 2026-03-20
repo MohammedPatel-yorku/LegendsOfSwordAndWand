@@ -1,71 +1,99 @@
 @startuml
-'https://plantuml.com/sequence-diagram
-
+''autonumber each message
 autonumber
 
 skinparam responseMessageBelowArrow true
 
-title Use Case 1 - User Registration and Login
+title Use Case 1 - User Registration and Login (Updated)
 
 actor User
 boundary UserController
-control UserService
+control IUserService
 database UserRepository
+collections PasswordEncoder
 
-==Registration==
+== Registration ==
 
 User -> UserController: Enter username and password
 activate UserController
-UserController -> UserService: registerUser(username, password)
-activate UserService
-UserService -> UserService: validate(username, password)
-alt Successful
-    UserService -> UserService: hashPassword(password)
-    UserService -> UserRepository: save(User)
+
+UserController -> IUserService: registerUser(username, password)
+activate IUserService
+
+IUserService -> IUserService: validate(username, password)
+
+alt Invalid Input
+    IUserService --> UserController: throw new IllegalArgumentException
+
+else Valid Input
+    IUserService -> UserRepository: findByUsername(username)
     activate UserRepository
 
-    UserRepository --> UserService: User saved
-    deactivate UserRepository
-    UserService --> UserController: Registration successful
+    alt Username Already Exists
+        UserRepository --> IUserService: existing user
+        deactivate UserRepository
+        IUserService --> UserController: throw new UsernameAlreadyExistsException
 
-else Failed
-    UserService --> UserController: Registration unsuccessful
+    else Username Available
+        UserRepository --> IUserService: null
+        deactivate UserRepository
 
+        IUserService -> PasswordEncoder: encode(password)
+        activate PasswordEncoder
+        PasswordEncoder --> IUserService: hashedPassword
+        deactivate PasswordEncoder
+
+        IUserService -> UserRepository: save(User)
+        activate UserRepository
+        UserRepository --> IUserService: User saved
+        deactivate UserRepository
+
+        IUserService --> UserController: "Registration successful."
+    end
 end
 
-deactivate UserService
-UserController -> User: Registration result
+deactivate IUserService
+UserController --> User: Display registration message
 deactivate UserController
 
-autonumber
 
-==Login==
+== Login ==
 
 User -> UserController: Enter username and password
 activate UserController
-UserController -> UserService: loginUser(username, password)
-activate UserService
-UserService -> UserRepository: findByUsername(username)
+
+UserController -> IUserService: loginUser(username, password)
+activate IUserService
+
+IUserService -> UserRepository: findByUsername(username)
 activate UserRepository
 
-alt User Exists
-    UserRepository --> UserService: User found
+alt User Not Found
+    UserRepository --> IUserService: null
     deactivate UserRepository
-    UserService -> UserService: verifyPassword(password)
+    IUserService --> UserController: throw new UserNotFoundException
 
-    UserService --> UserController: Login successful
-
-else Doesn't Exist
-    activate UserRepository
-    UserRepository --> UserService: User not found
+else User Found
+    UserRepository --> IUserService: User
     deactivate UserRepository
 
-    UserService --> UserController: Login unsuccessful
-    deactivate UserService
+    IUserService -> PasswordEncoder: matches(password, storedHash)
+    activate PasswordEncoder
 
+    alt Password Incorrect
+        PasswordEncoder --> IUserService: false
+        deactivate PasswordEncoder
+        IUserService --> UserController: throw new IncorrectPasswordException
+
+    else Password Correct
+        PasswordEncoder --> IUserService: true
+        deactivate PasswordEncoder
+        IUserService --> UserController: "Login successful."
+    end
 end
 
-UserController --> User: Login result
+deactivate IUserService
+UserController --> User: Display login message
 deactivate UserController
 
 @enduml

@@ -1,0 +1,48 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+title Hero Component - Class Diagram
+
+enum HeroClass {
+    ORDER
+    CHAOS
+    WARRIOR
+    MAGE
+}
+
+class Hero {
+    - Long id
+    - String name
+    - int level
+    - int attack
+    - int defense
+    - int health
+    - int mana
+    - HeroClass primaryClass
+    - HeroClass secondaryClass
+    + levelUp()
+    + applyClassBonus()
+    + calculateHybrid()
+}
+
+interface IHeroService {
+    + createHero(String name, HeroClass classType): Hero
+    + levelUp(Hero hero)
+}
+
+class HeroService {
+    - HeroRepository heroRepository
+    + createHero(String name, HeroClass classType)
+    +levelUp(Hero hero)
+}
+
+interface HeroRepository {
+    + save(Hero hero)
+    + findById(Long id): Hero
+}
+
+HeroService ..|> IHeroService
+HeroService --> HeroRepository
+HeroRepository --> Hero
+
+@enduml

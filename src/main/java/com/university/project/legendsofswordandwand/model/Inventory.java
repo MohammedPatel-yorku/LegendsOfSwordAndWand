@@ -14,19 +14,23 @@ import lombok.*;
 @Entity
 @Table(name = "inventories")
 @Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Inventory {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne
+  @OneToOne
   @Setter
   @JoinColumn(name = "party_id")
   private Party party;
 
-  @ElementCollection @Builder.Default private List<Long> itemIds = new ArrayList<>();
+  @ElementCollection private List<Long> itemIds = new ArrayList<>();
+
+  @Builder
+  public Inventory(Party party) {
+    this.party = party;
+    this.itemIds = new ArrayList<>();
+  }
 }

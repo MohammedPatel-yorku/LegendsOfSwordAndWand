@@ -1,0 +1,20 @@
+/* ── Alert / Flash Messages ─────────────────────────────── */
+.alert {
+    border-radius: var(--radius-sm);
+    padding: 0.8rem 1rem;
+    margin-bottom: 1.2rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    border-left: 3px solid;
+}
+.alert-error {
+    background: rgba(139,26,26,0.2);
+    border-color: var(--crimson-bright);
+    color: #e87070;
+}
+.alert-success {
+    background: rgba(22,100,22,0.2);
+    border-color: #2e7d32;
+    color: #80c080;
+}

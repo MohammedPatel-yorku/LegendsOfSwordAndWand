@@ -1,0 +1,36 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+title Party Component - Class Diagram
+
+class Party {
+    - Long id
+    - List<Hero> heroes
+    - int gold
+    + addHero(Hero hero)
+    + removeHero(Hero hero)
+    + getCumulativeLevel(): int
+}
+
+interface IPartyService {
+    + createParty(User user): Party
+    + addHeroToParty(Party party, Hero hero)
+}
+
+class PartyService {
+    - PartyRepository partyRepository
+    + createParty(User user)
+    + assHeroToParty(Party party, Hero hero)
+}
+
+interface PartyRepository {
+    + save(Party party)
+    + findById(Long id)
+}
+
+Party --> Hero
+PartyService ..|> IPartyService
+PartyService --> PartyRepository
+PartyRepository --> Party
+
+@enduml

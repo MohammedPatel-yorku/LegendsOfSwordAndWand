@@ -19,4 +19,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
    * @return the matching User or null if no user exists
    */
   Optional<User> findByUsername(String username);
+
+  boolean existsByUsername(String username);
 }

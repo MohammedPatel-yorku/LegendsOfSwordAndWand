@@ -1,0 +1,55 @@
+/* ── Dashboard ───────────────────────────────────────────── */
+.section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 0.8rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border-dim);
+}
+
+.pvp-record {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 0.5rem;
+}
+.pvp-wins   { color: #80c080; font-family: 'Cinzel Decorative', serif; font-size: 1.6rem; }
+.pvp-losses { color: #e07070; font-family: 'Cinzel Decorative', serif; font-size: 1.6rem; }
+.pvp-label  { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+
+.party-block {
+    background: var(--bg-deepest);
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+}
+.party-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+.party-gold { color: var(--gold-bright); }
+
+.campaign-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.8rem;
+    background: var(--bg-deepest);
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+.campaign-score { color: var(--gold-bright); font-family: 'Cinzel Decorative', serif; font-size: 1.1rem; }
+.campaign-rooms { color: var(--text-muted); font-size: 0.8rem; }
+
+.empty-state { color: var(--text-muted); font-style: italic; font-size: 0.9rem; padding: 0.8rem 0; }
+
+.class-icon-map { display: inline; }

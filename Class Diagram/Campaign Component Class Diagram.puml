@@ -1,0 +1,39 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+title Campaign Component - Class Diagram
+
+class Campaign {
+    - Long id
+    - Party party
+    - int roomsVisited
+    - int score
+    + nextRoom()
+    + calculateScore()
+}
+
+interface ICampaignService {
+    + startCampaign(User user, Hero hero)
+    + visitNextRoom(Campaign campaign)
+    + saveProgress(Campaign campaign)
+}
+
+class CampaignService {
+    - CampaignRepository campaignRepository
+    - BattleService battleService
+    + startCampaign(User user, Hero hero)
+    + visitNextRoom(Campaign campaign)
+    + saveProgress(Campaign campaign)
+}
+
+interface CampaignRepository {
+    + save(Campaign campaign)
+    + findById(Long id)
+}
+
+Campaign --> Party
+CampaignService ..|> ICampaignService
+CampaignService --> CampaignRepository
+CampaignService --> BattleService
+
+@enduml

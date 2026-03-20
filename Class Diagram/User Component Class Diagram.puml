@@ -1,0 +1,37 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+title User Component - Class Diagram
+
+class User {
+    - Long id
+    - String username
+    - String password
+    - List<Party> parties
+    + User()
+    + register()
+    + authenticate()
+}
+
+interface IUserService {
+    + register(String username, String password)
+    + login(String username, String password): User
+}
+
+class UserService {
+    - UserRepository userRepository
+    + register(String username, String password)
+    + login(String username, String password)
+}
+
+interface UserRepository {
+    + save(User user)
+    + findByUsername(String username): User
+}
+
+User --> Party
+UserService ..|> IUserService
+UserService --> UserRepository
+UserRepository --> User
+
+@enduml

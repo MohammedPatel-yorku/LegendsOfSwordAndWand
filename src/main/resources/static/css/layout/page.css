@@ -1,0 +1,130 @@
+/* ── Layout ─────────────────────────────────────────────── */
+.page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    position: relative;
+}
+
+/* Decorative corner runes */
+.page-wrapper::before, .page-wrapper::after {
+    content: '⚔';
+    position: fixed;
+    font-size: 6rem;
+    opacity: 0.03;
+    color: var(--gold-bright);
+    pointer-events: none;
+}
+.page-wrapper::before { top: -1rem; left: -1rem; transform: rotate(-30deg); }
+.page-wrapper::after  { bottom: -1rem; right: -1rem; transform: rotate(150deg); }
+
+/* ── Card / Panel ───────────────────────────────────────── */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-gold);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(212,160,23,0.1);
+    position: relative;
+    animation: fadeInUp 0.5s ease both;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(212,160,23,0.04) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+/* Gold corner ornaments */
+.card-ornament {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-color: var(--gold-muted);
+    border-style: solid;
+    opacity: 0.7;
+}
+.card-ornament.tl { top: 8px; left: 8px;  border-width: 2px 0 0 2px; }
+.card-ornament.tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+.card-ornament.bl { bottom: 8px; left: 8px;  border-width: 0 0 2px 2px; }
+.card-ornament.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+.card.wide { max-width: 900px; }
+.card.xl   { max-width: 1300px; padding: 2.5rem 3rem; }
+
+/* ── Card Header ────────────────────────────────────────── */
+.card-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-dim);
+    position: relative;
+}
+
+.card-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 1px;
+    background: var(--gold-bright);
+    box-shadow: var(--glow-gold);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 1rem 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+.divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+}
+
+/* ── User Info Bar ───────────────────────────────────────── */
+.user-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1.2rem;
+    background: var(--bg-raised);
+    border-bottom: 1px solid var(--border-dim);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    margin: -2.5rem -2rem 1.5rem -2rem;
+}
+
+.user-greeting {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+}
+
+.user-greeting span {
+    color: var(--gold-bright);
+    font-weight: 700;
+}
+
+/* ── Footer text ─────────────────────────────────────────── */
+.card-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-dim);
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}

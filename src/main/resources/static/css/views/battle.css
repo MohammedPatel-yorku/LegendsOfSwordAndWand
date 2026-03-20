@@ -1,0 +1,194 @@
+/* ── Battle View ────────────────────────────────────────── */
+.battle-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.battle-side-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.unit-card {
+    background: var(--bg-deepest);
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.6rem;
+    transition: border-color var(--transition);
+}
+
+.unit-card.active-unit {
+    border-color: var(--gold-bright);
+    box-shadow: 0 0 16px rgba(212,160,23,0.3);
+}
+
+.unit-card.dead { opacity: 0.35; }
+.unit-card.enemy  { border-left: 3px solid var(--crimson); }
+.unit-card.player { border-left: 3px solid var(--gold-muted); }
+
+.unit-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+
+.unit-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.unit-level {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.stunned-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    color: #a070d0;
+    border: 1px solid #a070d060;
+    border-radius: 99px;
+    padding: 0.1rem 0.4rem;
+    margin-left: 0.4rem;
+}
+
+/* Stat bars */
+.stat-bar-row {
+    margin-bottom: 0.3rem;
+}
+
+.stat-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    margin-bottom: 0.2rem;
+    font-weight: 600;
+}
+
+.stat-bar {
+    height: 8px;
+    background: var(--bg-raised);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease-in-out;
+}
+
+.stat-bar-fill.hp   { background: linear-gradient(90deg, #8b1a1a, #e74c3c); }
+.stat-bar-fill.mana { background: linear-gradient(90deg, #1a3a8b, #3498db); }
+.stat-bar-fill.xp   { background: linear-gradient(90deg, #5a3a00, #d4a017); }
+
+/* Turn indicator */
+.turn-indicator {
+    text-align: center;
+    padding: 0.8rem;
+    margin-bottom: 1.2rem;
+    border-radius: var(--radius-sm);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+}
+
+.turn-indicator.player-turn {
+    background: rgba(212,160,23,0.12);
+    border: 1px solid var(--gold-muted);
+    color: var(--gold-bright);
+}
+
+.turn-indicator.enemy-turn {
+    background: rgba(139,26,26,0.15);
+    border: 1px solid var(--crimson);
+    color: #e87070;
+}
+
+/* Action panel */
+.action-panel {
+    background: var(--bg-raised);
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-md);
+    padding: 1.4rem;
+}
+
+.action-panel-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--gold-bright);
+    margin-bottom: 1rem;
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+}
+
+.btn-action {
+    padding: 0.7rem 0.8rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+}
+
+.target-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+}
+
+.target-btn {
+    background: var(--bg-deepest);
+    border: 1px solid var(--border-dim);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: all var(--transition);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.target-btn:hover {
+    border-color: var(--crimson-bright);
+    color: var(--crimson-bright);
+}
+
+/* Result screen */
+.battle-result-banner {
+    text-align: center;
+    padding: 2rem 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.result-win  { color: var(--gold-bright); text-shadow: var(--glow-gold); }
+.result-lose { color: var(--crimson-bright); text-shadow: var(--glow-red); }
+
+@media (max-width: 700px) {
+    .battle-layout  { grid-template-columns: 1fr; }
+    .action-buttons { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,36 @@
+/* ── CSS Variables ─────────────────────────────────────── */
+:root {
+    --bg-deepest:   #0a0608;
+    --bg-dark:      #110d0f;
+    --bg-card:      #1a1217;
+    --bg-raised:    #221820;
+
+    --border-gold:  #8b6914;
+    --border-dim:   #3a2a2e;
+
+    --gold-bright:  #d4a017;
+    --gold-light:   #f0c040;
+    --gold-muted:   #8b6914;
+
+    --crimson:      #8b1a1a;
+    --crimson-bright: #c0392b;
+    --crimson-glow: #ff3333;
+
+    --text-primary:   #e8dcc8;
+    --text-secondary: #a08060;
+    --text-muted:     #5a4a3a;
+    --text-gold:      #d4a017;
+
+    --shadow-deep: 0 8px 32px rgba(0,0,0,0.8);
+    --shadow-gold: 0 0 20px rgba(212,160,23,0.3);
+    --shadow-red:  0 0 20px rgba(139,26,26,0.5);
+
+    --glow-gold:   0 0 8px rgba(212,160,23,0.6), 0 0 24px rgba(212,160,23,0.3);
+    --glow-red:    0 0 8px rgba(192,57,43,0.8), 0 0 24px rgba(192,57,43,0.4);
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --transition: 0.25s ease;
+}
