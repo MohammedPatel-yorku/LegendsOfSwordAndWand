@@ -1,7 +1,9 @@
 package com.university.project.legendsofswordandwand.controller;
 
+import com.university.project.legendsofswordandwand.battle.BattleState;
 import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.service.auth.IAuthService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,5 +37,15 @@ public class AuthController {
     }
 
     return "redirect:/login";
+  }
+
+  @PostMapping("/logout-check")
+  public String logoutCheck(HttpSession session, RedirectAttributes redirectAttributes) {
+    BattleState state = (BattleState) session.getAttribute("battleState");
+    if (state != null && !state.isOver()) {
+      redirectAttributes.addFlashAttribute("error", "You cannot log out during a battle.");
+      return "redirect:/battle";
+    }
+    return "redirect:/logout";
   }
 }

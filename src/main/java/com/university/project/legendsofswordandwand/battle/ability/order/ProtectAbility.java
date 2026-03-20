@@ -32,10 +32,13 @@ public class ProtectAbility implements Ability {
     for (BattleUnit ally : allies) {
 
       int shield = (int) (ally.getHero().getMaxHealth() * 0.10 * multiplier);
-      int current = state.getShield(ally.getBattleId());
 
-      state.setShield(ally.getBattleId(), Math.max(current, shield));
-      state.log("  ✦ Protect shields " + ally.getHero().getName() + " for " + shield + " HP");
+      if (state.getShield(ally.getBattleId()) == 0) {
+        state.setShield(ally.getBattleId(), shield);
+        state.log("  ✦ Protect shields " + ally.getHero().getName() + " for " + shield + " HP");
+      } else {
+        state.log("  ✦ Protect has no effect — " + ally.getHero().getName() + " is already shielded");
+      }
     }
   }
 }

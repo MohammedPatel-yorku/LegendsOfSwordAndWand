@@ -23,9 +23,13 @@ public class FireShieldAbility implements Ability {
     for (BattleUnit ally : allies) {
 
       int shield = (int) (ally.getHero().getMaxHealth() * 0.10);
-      int current = Math.abs(state.getShield(ally.getBattleId()));
 
-      state.setShield(ally.getBattleId(), -(Math.max(current, shield)));
+      if (state.getShield(ally.getBattleId()) == 0) {
+        state.setShield(ally.getBattleId(), -shield);
+        state.log("  🔥 Fire Shield shields " + ally.getHero().getName() + " for " + shield + " HP");
+      } else {
+        state.log("  🔥 Fire Shield has no effect — " + ally.getHero().getName() + " is already shielded");
+      }
     }
   }
 }

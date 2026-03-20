@@ -164,7 +164,7 @@ class BattleServiceImpl implements IBattleService {
       }
       case "Troll" -> {
         // Tank — defends if hurt, otherwise 50% attack highest HP, 50% random
-        boolean hurt = actor.getHero().getHealth() < actor.getHero().getMaxHealth() / 2;
+        boolean hurt = actor.getHero().getHealth() < actor.getHero().getMaxHealth() / 4;
         if (hurt && random.nextInt(100) < 40) {
           executeDefend(actor.getHero());
           state.log("  " + actor.getHero().getName() + " defends");
