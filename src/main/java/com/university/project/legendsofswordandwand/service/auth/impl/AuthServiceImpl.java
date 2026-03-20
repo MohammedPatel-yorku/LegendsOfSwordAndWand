@@ -8,26 +8,39 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Default implementation of {@link IAuthService}, handling user registration.
+ */
 @Service
 @RequiredArgsConstructor
 class AuthServiceImpl implements IAuthService {
 
-  private final UserRepository userRepository;
-  private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-  @Override
-  public User register(RegisterRequest request) {
+    /**
+     * Registers a new user with the given credentials.
+     *
+     * <p>The password is encoded using the configured {@link PasswordEncoder} before
+     * being persisted.
+     *
+     * @param request the {@link RegisterRequest} containing the desired username and password
+     * @return the newly created and persisted {@link User}
+     * @throws RuntimeException if the requested username is already taken
+     */
+    @Override
+    public User register(RegisterRequest request) {
 
-    if (userRepository.existsByUsername(request.getUsername())) {
-      throw new RuntimeException("Username already exists");
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        User user =
+                User.builder()
+                        .username(request.getUsername())
+                        .password(passwordEncoder.encode(request.getPassword()))
+                        .build();
+
+        return userRepository.save(user);
     }
-
-    User user =
-        User.builder()
-            .username(request.getUsername())
-            .password(passwordEncoder.encode(request.getPassword()))
-            .build();
-
-    return userRepository.save(user);
-  }
 }
