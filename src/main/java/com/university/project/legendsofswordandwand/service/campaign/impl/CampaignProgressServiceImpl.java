@@ -41,6 +41,7 @@ class CampaignProgressServiceImpl implements ICampaignProgressService {
     campaign.setCurrentRoom(campaign.getCurrentRoom() + 1);
     campaign.setLastRoomType(roomType);
     campaign.setRoomPending(true);
+    if (roomType == RoomType.INN) campaign.setHasVisitedInn(true);
     campaignRepository.save(campaign);
 
     return roomType;

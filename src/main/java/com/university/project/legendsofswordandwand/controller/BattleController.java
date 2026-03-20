@@ -3,6 +3,7 @@ package com.university.project.legendsofswordandwand.controller;
 import com.university.project.legendsofswordandwand.battle.BattleState;
 import com.university.project.legendsofswordandwand.battle.BattleUnit;
 import com.university.project.legendsofswordandwand.battle.HeroSnapshot;
+import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.enums.ActionType;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
@@ -171,9 +172,15 @@ public class BattleController {
       }
 
       if ("PLAYER_LOSE".equals(lastResult)) {
-        // Don't clear room pending — player retries this room after the inn
-        // Leave LAST_RESULT_KEY in session so inn/continue knows not to clear pending
-        return "redirect:/inn";
+        Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
+        if (campaign.isHasVisitedInn()) {
+          return "redirect:/inn";
+        } else {
+          // No inn visited yet — just clear the pending room and return to campaign
+          session.removeAttribute(LAST_RESULT_KEY);
+          campaignService.abandonCampaign(authentication.getName());
+          return "redirect:/dashboard";
+        }
       }
 
       session.removeAttribute(LAST_RESULT_KEY);

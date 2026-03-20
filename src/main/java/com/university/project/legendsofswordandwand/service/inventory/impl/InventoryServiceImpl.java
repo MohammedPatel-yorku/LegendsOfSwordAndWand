@@ -63,6 +63,8 @@ class InventoryServiceImpl implements IInventoryService {
       hero.setHealth(hero.getMaxHealth());
       hero.setMana(hero.getMaxMana());
     } else {
+      if (hero.getHealth() <= 0)
+        throw new RuntimeException(hero.getName() + " is dead and cannot use items. Use an Elixir to revive them first.");
       hero.setHealth(Math.min(hero.getMaxHealth(), hero.getHealth() + item.getHpRestore()));
       hero.setMana(Math.min(hero.getMaxMana(), hero.getMana() + item.getManaRestore()));
     }

@@ -3,6 +3,7 @@ package com.university.project.legendsofswordandwand.controller;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
+import com.university.project.legendsofswordandwand.model.enums.RoomType;
 import com.university.project.legendsofswordandwand.service.battle.IInnService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
@@ -35,6 +36,14 @@ public class InnController {
     if (authentication == null) return "redirect:/login";
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
+
+      String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
+      boolean retreatingAfterLoss = "PLAYER_LOSE".equals(lastResult);
+      boolean innRoomPending = campaign.isRoomPending()
+              && campaign.getLastRoomType() == RoomType.INN;
+      if (!retreatingAfterLoss && !innRoomPending && session.getAttribute(RECRUITS_KEY) == null) {
+        return "redirect:/campaign";
+      }
 
       // Heal only on first arrival, not on every buy/recruit redirect
       if (session.getAttribute(RECRUITS_KEY) == null) {
