@@ -5,6 +5,7 @@ import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.service.auth.IAuthService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +47,8 @@ public class AuthController {
       redirectAttributes.addFlashAttribute("error", "You cannot log out during a battle.");
       return "redirect:/battle";
     }
-    return "redirect:/logout";
+    SecurityContextHolder.clearContext();
+    session.invalidate();
+    return "redirect:/login?logout";
   }
 }
