@@ -51,6 +51,8 @@ class ProfileServiceImpl implements IProfileService {
     return new HeroInfo(
         hero.getName(),
         hero.getPrimaryClass() != null ? hero.getPrimaryClass() : hero.getStartingClass(),
+        hero.getHybridClass(),
+        hero.isHybrid(),
         hero.getLevel(),
         hero.getHealth(),
         hero.getAttack(),

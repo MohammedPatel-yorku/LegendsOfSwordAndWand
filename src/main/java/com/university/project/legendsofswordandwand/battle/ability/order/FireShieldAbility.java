@@ -26,9 +26,13 @@ public class FireShieldAbility implements Ability {
 
       if (state.getShield(ally.getBattleId()) == 0) {
         state.setShield(ally.getBattleId(), -shield);
-        state.log("  🔥 Fire Shield shields " + ally.getHero().getName() + " for " + shield + " HP");
+        state.log(
+            "  🔥 Fire Shield shields " + ally.getHero().getName() + " for " + shield + " HP");
       } else {
-        state.log("  🔥 Fire Shield has no effect — " + ally.getHero().getName() + " is already shielded");
+        state.log(
+            "  🔥 Fire Shield has no effect — "
+                + ally.getHero().getName()
+                + " is already shielded");
       }
     }
   }

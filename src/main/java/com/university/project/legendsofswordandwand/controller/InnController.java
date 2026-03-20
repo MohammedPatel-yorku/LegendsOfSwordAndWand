@@ -39,8 +39,8 @@ public class InnController {
 
       String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
       boolean retreatingAfterLoss = "PLAYER_LOSE".equals(lastResult);
-      boolean innRoomPending = campaign.isRoomPending()
-              && campaign.getLastRoomType() == RoomType.INN;
+      boolean innRoomPending =
+          campaign.isRoomPending() && campaign.getLastRoomType() == RoomType.INN;
       if (!retreatingAfterLoss && !innRoomPending && session.getAttribute(RECRUITS_KEY) == null) {
         return "redirect:/campaign";
       }

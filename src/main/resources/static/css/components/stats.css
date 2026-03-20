@@ -69,3 +69,6 @@
     padding-bottom: 0.3rem;
     font-family: 'Cinzel', serif;
 }
+.stat-header span:not(:first-child) {
+    text-align: center;
+}

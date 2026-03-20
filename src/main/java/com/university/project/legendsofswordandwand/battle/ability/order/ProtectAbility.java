@@ -37,7 +37,8 @@ public class ProtectAbility implements Ability {
         state.setShield(ally.getBattleId(), shield);
         state.log("  ✦ Protect shields " + ally.getHero().getName() + " for " + shield + " HP");
       } else {
-        state.log("  ✦ Protect has no effect — " + ally.getHero().getName() + " is already shielded");
+        state.log(
+            "  ✦ Protect has no effect — " + ally.getHero().getName() + " is already shielded");
       }
     }
   }

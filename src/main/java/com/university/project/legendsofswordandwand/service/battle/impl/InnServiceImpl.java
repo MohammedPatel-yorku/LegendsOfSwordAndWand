@@ -101,8 +101,8 @@ class InnServiceImpl implements IInnService {
 
                   h.setLevel(level);
                   if (level > 1) {
-                    int prevThreshold = h.getExperienceToNextLevel()
-                            - (500 + 75 * level + 20 * level * level);
+                    int prevThreshold =
+                        h.getExperienceToNextLevel() - (500 + 75 * level + 20 * level * level);
                     h.setExperience(Math.max(0, prevThreshold));
                   }
                   return h;
