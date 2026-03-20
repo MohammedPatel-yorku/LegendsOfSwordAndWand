@@ -79,12 +79,24 @@
                 </form>
 
                 <div th:if="${!hero.hybrid}"
-                     style="margin-top:0.5rem; font-size:0.65rem; color:var(--text-muted);
-                                    font-family:'Cinzel',serif; display:flex; gap:1rem; flex-wrap:wrap;">
-                    <span>ORDER: +5 MP, +2 DEF</span>
-                    <span>CHAOS: +3 ATK, +5 HP</span>
-                    <span>WARRIOR: +2 ATK, +3 DEF</span>
-                    <span>MAGE: +5 MP, +1 ATK</span>
+                     style="margin-top:0.6rem; font-size:0.65rem; color:var(--text-muted);
+            font-family:'Cinzel',serif; display:flex; gap:1rem; flex-wrap:wrap;">
+    <span th:style="${hero.primaryClass?.name() == 'ORDER'} ? 'color:var(--gold-bright);' : ''">
+        ORDER (Lv <span th:text="${hero.orderLevels}">0</span>): +5 MP, +2 DEF
+        <span th:if="${hero.orderLevels == 4}"> ★ next level specializes</span>
+    </span>
+                    <span th:style="${hero.primaryClass?.name() == 'CHAOS'} ? 'color:var(--gold-bright);' : ''">
+        CHAOS (Lv <span th:text="${hero.chaosLevels}">0</span>): +3 ATK, +5 HP
+        <span th:if="${hero.chaosLevels == 4}"> ★ next level specializes</span>
+    </span>
+                    <span th:style="${hero.primaryClass?.name() == 'WARRIOR'} ? 'color:var(--gold-bright);' : ''">
+        WARRIOR (Lv <span th:text="${hero.warriorLevels}">0</span>): +2 ATK, +3 DEF
+        <span th:if="${hero.warriorLevels == 4}"> ★ next level specializes</span>
+    </span>
+                    <span th:style="${hero.primaryClass?.name() == 'MAGE'} ? 'color:var(--gold-bright);' : ''">
+        MAGE (Lv <span th:text="${hero.mageLevels}">0</span>): +5 MP, +1 ATK
+        <span th:if="${hero.mageLevels == 4}"> ★ next level specializes</span>
+    </span>
                 </div>
             </div>
         </div>
