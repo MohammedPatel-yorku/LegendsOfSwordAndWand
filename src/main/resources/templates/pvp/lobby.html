@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>PvP Lobby — Legends of Sword and Wand</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="page-wrapper">
+    <div class="card wide">
+        <div class="card-ornament tl"></div>
+        <div class="card-ornament tr"></div>
+        <div class="card-ornament bl"></div>
+        <div class="card-ornament br"></div>
+
+        <div th:replace="~{fragments/navbar :: userbar}"></div>
+
+        <div class="card-header">
+            <span class="game-logo gold-pulse">⚔ PvP Arena</span>
+            <p class="subtitle">Challenge other players to battle</p>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+        <div th:if="${#lists.isEmpty(savedParties)}" class="alert alert-error">
+            You need at least one saved party from a completed PvE campaign to participate in PvP.
+        </div>
+
+        <!-- Send invitation -->
+        <div th:unless="${#lists.isEmpty(savedParties)}">
+            <div class="divider">Challenge a Player</div>
+            <form th:action="@{/pvp/invite}" method="post"
+                  style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                <input type="text" name="enemyUsername" placeholder="Enter exact username"
+                       required
+                       style="flex:1; background:var(--bg-card); color:var(--text-primary);
+                      border:1px solid var(--border-dim); border-radius:var(--radius-sm);
+                      padding:0.5rem 0.8rem; font-family:'Cinzel',serif; font-size:0.8rem;"/>
+                <button type="submit" class="btn btn-primary">⚔ Send Challenge</button>
+            </form>
+        </div>
+
+        <!-- Received invitations -->
+        <div th:unless="${#lists.isEmpty(pendingReceived)}">
+            <div class="divider">Incoming Challenges</div>
+            <div th:each="inv : ${pendingReceived}" style="margin-bottom:0.5rem;">
+                <form th:action="@{/pvp/accept/{id}(id=${inv.id})}" method="post"
+                      style="display:flex; align-items:center; gap:1rem;
+                     padding:0.8rem 1rem; background:var(--bg-raised);
+                     border:1px solid var(--border-dim); border-radius:var(--radius-sm);">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                    <span style="flex:1; font-family:'Cinzel',serif; font-size:0.85rem; color:var(--text-primary);"
+                          th:text="${inv.sender.username} + ' challenges you!'"></span>
+                    <button type="submit" class="btn btn-primary">⚔ Accept</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sent invitations -->
+        <div th:unless="${#lists.isEmpty(pendingSent)}">
+            <div class="divider">Sent Challenges</div>
+            <div th:each="inv : ${pendingSent}"
+                 style="font-family:'Cinzel',serif; font-size:0.8rem;
+                  color:var(--text-secondary); margin-bottom:0.3rem; padding:0.5rem 0;"
+                 th:text="'⏳ Waiting on ' + ${inv.receiver.username} + '...'"></div>
+        </div>
+
+        <div style="margin-top:1.5rem;">
+            <a th:href="@{/dashboard}" class="btn btn-ghost btn-full">← Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

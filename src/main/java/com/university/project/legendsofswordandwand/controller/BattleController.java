@@ -148,6 +148,10 @@ public class BattleController {
       boolean campaignDone =
           !state.isPvp() && campaignProgressService.isCampaignComplete(authentication.getName());
       model.addAttribute("campaignDone", campaignDone);
+      if (state.isPvp() && !rewardsAlreadyGiven) {
+        battleService.updatePvPResult(state);
+        session.setAttribute("rewardsGiven", true);
+      }
       session.setAttribute(LAST_RESULT_KEY, state.getStatus().name());
     } catch (Exception e) {
       model.addAttribute("error", e.getMessage());
@@ -159,8 +163,17 @@ public class BattleController {
   @PostMapping("/continue")
   public String continueCampaign(Authentication authentication, HttpSession session) {
     if (authentication == null) return "redirect:/login";
+
+    BattleState state = (BattleState) session.getAttribute(SESSION_KEY);
+    boolean wasPvp = state != null && state.isPvp();
+
     session.removeAttribute(SESSION_KEY);
     session.removeAttribute("rewardsGiven");
+
+    if (wasPvp) {
+      session.removeAttribute(LAST_RESULT_KEY);
+      return "redirect:/pvp";
+    }
 
     try {
       String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);

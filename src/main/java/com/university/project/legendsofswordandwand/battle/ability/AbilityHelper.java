@@ -18,8 +18,12 @@ public final class AbilityHelper {
     int piercing = raw - absorbed;
     int remaining = absShield - absorbed;
 
-    state.setShield(target.getBattleId(), fireShield ? -remaining : remaining);
     target.getHero().setHealth(Math.max(0, target.getHero().getHealth() - piercing));
+    if (target.getHero().getHealth() <= 0) {
+      state.setShield(target.getBattleId(), 0);
+    } else {
+      state.setShield(target.getBattleId(), fireShield ? -remaining : remaining);
+    }
 
     if (fireShield && absorbed > 0 && attacker != null) {
       int reflected = (int) (absorbed * 0.10);

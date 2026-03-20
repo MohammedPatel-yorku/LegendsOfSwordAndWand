@@ -110,8 +110,7 @@ public class EnemyGenerator {
     int[] levels = new int[count];
     Arrays.fill(levels, 1);
 
-    // Cap individual level inversely to count
-    int maxIndividualLevel = Math.max(2, 12 - (count * 2));
+    int maxIndividualLevel = Math.max(10, targetCumulativeLevel / Math.max(1, count - 1));
 
     int remaining = targetCumulativeLevel - count;
     int attempts = 0;

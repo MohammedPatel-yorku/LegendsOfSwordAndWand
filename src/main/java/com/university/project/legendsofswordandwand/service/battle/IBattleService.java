@@ -9,6 +9,8 @@ public interface IBattleService {
 
   BattleState initializePvEBattle(Long campaignId, int playerCumulativeLevel);
 
+  BattleState initializePvPBattle(Long senderPartyId, Long receiverPartyId, Long invitationId);
+
   BattleState executePlayerAction(
       BattleState state, ActionType actionType, Long targetBattleId, Integer abilityIndex);
 
@@ -19,4 +21,6 @@ public interface IBattleService {
   Map<String, Object> awardBattleRewards(BattleState state);
 
   void applyBattleLoss(BattleState state);
+
+  void updatePvPResult(BattleState state);
 }

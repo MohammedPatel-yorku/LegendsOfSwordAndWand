@@ -2,11 +2,12 @@ package com.university.project.legendsofswordandwand.service.battle.impl;
 
 import com.university.project.legendsofswordandwand.battle.*;
 import com.university.project.legendsofswordandwand.battle.ability.AbilityHelper;
-import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.enums.ActionType;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
 import com.university.project.legendsofswordandwand.model.enums.HybridClass;
+import com.university.project.legendsofswordandwand.repository.PartyRepository;
+import com.university.project.legendsofswordandwand.repository.UserRepository;
 import com.university.project.legendsofswordandwand.service.battle.IBattleService;
 import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import com.university.project.legendsofswordandwand.service.party.IPartyManagementService;
@@ -25,28 +26,35 @@ class BattleServiceImpl implements IBattleService {
   private final EnemyGenerator enemyGenerator;
   private final IHeroService heroService;
   private final IPartyManagementService partyManagementService;
+  private final PartyRepository partyRepository;
+  private final UserRepository userRepository;
   private final Random random = new Random();
 
   @Override
   public BattleState initializePvEBattle(Long campaignId, int playerCumulativeLevel) {
-    Party party = partyManagementService.getActiveParty(campaignId);
-    List<Hero> enemies = enemyGenerator.generate(playerCumulativeLevel, party.getHeroes().size());
-
-    BattleState state = new BattleState();
+    PvEBattleInitializer initializer = new PvEBattleInitializer(
+            campaignId, playerCumulativeLevel, partyManagementService, enemyGenerator);
+    BattleState state = initializer.initialize();
     state.setCampaignId(campaignId);
+    return state;
+  }
 
-    for (Hero hero : party.getHeroes()) {
-      if (hero.isTemporary()) continue; // don't include unchosen recruits
-      state.getPlayerUnits().add(new BattleUnit(hero.getId(), new HeroSnapshot(hero), false));
-    }
+  @Override
+  public BattleState initializePvPBattle(Long senderPartyId, Long receiverPartyId, Long invitationId) {
 
-    long enemyId = -1L;
-    for (Hero enemy : enemies) {
-      state.getEnemyUnits().add(new BattleUnit(enemyId--, new HeroSnapshot(enemy), true));
-    }
+    Party senderParty = partyRepository.findById(senderPartyId)
+            .orElseThrow(() -> new RuntimeException("Sender party not found"));
+    Party receiverParty = partyRepository.findById(receiverPartyId)
+            .orElseThrow(() -> new RuntimeException("Receiver party not found"));
 
-    buildTurnQueue(state);
-    state.setStatus(BattleStatus.IN_PROGRESS);
+    PvPBattleInitializer initializer = new PvPBattleInitializer(
+            senderParty, receiverParty, invitationId, userRepository);
+    BattleState state = initializer.initialize();
+    state.setPvp(true);
+    state.setPvpInvitationId(invitationId);
+    state.setPvpSenderUsername(senderParty.getOwner().getUsername());
+    state.setPvpReceiverUsername(receiverParty.getOwner().getUsername());
+
     return state;
   }
 
@@ -272,25 +280,52 @@ class BattleServiceImpl implements IBattleService {
     }
   }
 
+  @Override
+  public void updatePvPResult(BattleState state) {
+    if (!state.isPvp() || !state.isOver()) return;
+
+    boolean senderWon = state.getStatus() == BattleStatus.PLAYER_WIN;
+
+    String winnerUsername = senderWon
+            ? state.getPvpSenderUsername()
+            : state.getPvpReceiverUsername();
+    String loserUsername = senderWon
+            ? state.getPvpReceiverUsername()
+            : state.getPvpSenderUsername();
+
+    userRepository.findByUsername(winnerUsername).ifPresent(u -> {
+      u.setPvpWins(u.getPvpWins() + 1);
+      userRepository.save(u);
+    });
+
+    userRepository.findByUsername(loserUsername).ifPresent(u -> {
+      u.setPvpLosses(u.getPvpLosses() + 1);
+      userRepository.save(u);
+    });
+  }
+
   private void executeAttack(BattleUnit attacker, BattleUnit defender, BattleState state) {
     int damage =
         damageCalculator.calculateDamage(
             attacker.getHero().getAttack(), defender.getHero().getDefense());
     int hpBefore = defender.getHero().getHealth();
+    int shieldBefore = Math.abs(state.getShield(defender.getBattleId()));
     AbilityHelper.applyDamage(attacker.getHero(), defender, damage, state);
     int actualDamage = hpBefore - defender.getHero().getHealth();
 
     state.log(
-        "  "
-            + attacker.getHero().getName()
-            + " attacks "
-            + defender.getHero().getName()
-            + " for "
-            + damage
-            + " dmg → "
-            + defender.getHero().getHealth()
-            + " HP left"
-            + (actualDamage < damage ? " (shield absorbed " + (damage - actualDamage) + ")" : ""));
+            "  "
+                    + attacker.getHero().getName()
+                    + " attacks "
+                    + defender.getHero().getName()
+                    + " for "
+                    + damage
+                    + " dmg → "
+                    + defender.getHero().getHealth()
+                    + " HP left"
+                    + (shieldBefore > 0 && actualDamage < damage
+                    ? " (shield absorbed " + (damage - actualDamage) + ")"
+                    : ""));
 
     HybridClass hybrid = attacker.getHero().getHybridClass();
     if (hybrid == HybridClass.ROGUE) abilityExecutor.maybeSneak(attacker, defender, state);

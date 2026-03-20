@@ -32,6 +32,11 @@ public class BattleState implements Serializable {
   private BattleStatus status = BattleStatus.IN_PROGRESS;
   private Long campaignId;
   private boolean pvp = false;
+  private Long pvpInvitationId;
+  private String pvpSenderUsername;
+  private String pvpReceiverUsername;
+  private Long pvpSenderPartyId;
+  private Long pvpReceiverPartyId;
 
   public boolean isOver() {
     return status != BattleStatus.IN_PROGRESS;
