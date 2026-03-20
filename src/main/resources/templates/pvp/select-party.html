@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Party — PvP</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="page-wrapper">
+    <div class="card wide">
+        <div class="card-ornament tl"></div>
+        <div class="card-ornament tr"></div>
+        <div class="card-ornament bl"></div>
+        <div class="card-ornament br"></div>
+
+        <div th:replace="~{fragments/navbar :: userbar}"></div>
+
+        <div class="card-header">
+            <span class="game-logo gold-pulse">⚔ Choose Your Party</span>
+            <p class="subtitle" th:text="${step == 2} ? 'Challenger — pick your party' : 'Defender — pick your party'">
+                Pick your party
+            </p>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <div class="divider">Your Saved Parties</div>
+
+        <div th:each="party : ${savedParties}" style="margin-bottom:0.8rem;">
+            <form th:action="@{/pvp/start}" method="post">
+                <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                <input type="hidden" name="inviteId" th:value="${inviteId}"/>
+                <!-- Step 1: receiver picks — senderPartyId comes in step 2 -->
+                <input th:if="${step == 1}" type="hidden" name="receiverPartyId" th:value="${party.id}"/>
+                <input th:if="${step == 1}" type="hidden" name="step" value="2"/>
+                <!-- Step 2: sender picks — receiverPartyId carried from step 1 -->
+                <input th:if="${step == 2}" type="hidden" name="senderPartyId" th:value="${party.id}"/>
+                <input th:if="${step == 2}" type="hidden" name="receiverPartyId" th:value="${receiverPartyId}"/>
+                <input th:if="${step == 2}" type="hidden" name="step" value="3"/>
+
+                <button type="submit" class="btn btn-primary btn-full"
+                        style="text-align:left; padding:1rem 1.2rem;">
+                    <div style="font-family:'Cinzel',serif; font-size:0.85rem; color:var(--gold-bright); margin-bottom:0.3rem;">
+                        Party — Lv <span th:text="${party.cumulativeLevel}">0</span> total
+                        · <span th:text="${party.gold}">0</span>g
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary);">
+            <span th:each="hero, i : ${party.heroes}"
+                  th:if="${!hero.temporary}"
+                  th:text="${hero.name} + ' (Lv ' + ${hero.level} + ')' + (!${i.last} ? ', ' : '')"></span>
+                    </div>
+                </button>
+            </form>
+        </div>
+
+        <a th:href="@{/pvp}" class="btn btn-ghost btn-full" style="margin-top:0.5rem;">← Cancel</a>
+    </div>
+</div>
+</body>
+</html>

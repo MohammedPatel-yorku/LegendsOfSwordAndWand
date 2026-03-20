@@ -27,25 +27,28 @@ public final class AbilityHelper {
      * @param raw      the raw damage amount to apply before shield absorption
      * @param state    the current {@link BattleState}, used for shield tracking
      */
-    public static void applyDamage(
-            HeroSnapshot attacker, BattleUnit target, int raw, BattleState state) {
+  public static void applyDamage(
+      HeroSnapshot attacker, BattleUnit target, int raw, BattleState state) {
+    int shieldValue = state.getShield(target.getBattleId());
+    boolean fireShield = shieldValue < 0;
+    int absShield = Math.abs(shieldValue);
 
-        int shieldValue = state.getShield(target.getBattleId());
-        boolean fireShield = shieldValue < 0;
-        int absShield = Math.abs(shieldValue);
+    int absorbed = Math.min(absShield, raw);
+    int piercing = raw - absorbed;
+    int remaining = absShield - absorbed;
 
-        int absorbed = Math.min(absShield, raw);
-        int piercing = raw - absorbed;
-        int remaining = absShield - absorbed;
-
-        state.setShield(target.getBattleId(), fireShield ? -remaining : remaining);
-        target.getHero().setHealth(Math.max(0, target.getHero().getHealth() - piercing));
-
-        if (fireShield && absorbed > 0 && attacker != null) {
-            int reflected = (int) (absorbed * 0.10);
-            attacker.setHealth(Math.max(0, attacker.getHealth() - reflected));
-        }
+    target.getHero().setHealth(Math.max(0, target.getHero().getHealth() - piercing));
+    if (target.getHero().getHealth() <= 0) {
+      state.setShield(target.getBattleId(), 0);
+    } else {
+      state.setShield(target.getBattleId(), fireShield ? -remaining : remaining);
     }
+
+    if (fireShield && absorbed > 0 && attacker != null) {
+      int reflected = (int) (absorbed * 0.10);
+      attacker.setHealth(Math.max(0, attacker.getHealth() - reflected));
+    }
+  }
 
     /**
      * Calculates the net damage dealt by an attacker to a defender.

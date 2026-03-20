@@ -129,12 +129,12 @@ public class EnemyGenerator {
 
         int[] levels = distributeLevels(count, targetCumulativeLevel);
 
-        List<Hero> enemies = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            enemies.add(buildEnemy(levels[i]));
-        }
-        return enemies;
+    List<Hero> enemies = new ArrayList<>();
+    for (int i = 0; i < count; i++) {
+      enemies.add(buildEnemy(levels[i]));
     }
+    return enemies;
+  }
 
     /**
      * Distributes a target cumulative level across a fixed number of enemies.
@@ -146,27 +146,23 @@ public class EnemyGenerator {
      * @param targetCumulativeLevel the total level sum to approximate
      * @return an array of individual enemy levels
      */
-    private int[] distributeLevels(int count, int targetCumulativeLevel) {
-        int[] levels = new int[count];
-        Arrays.fill(levels, 1);
+  private int[] distributeLevels(int count, int targetCumulativeLevel) {
+    int[] levels = new int[count];
+    Arrays.fill(levels, 1);
 
-        // Cap individual level inversely to count
-        int maxIndividualLevel = Math.max(2, 12 - (count * 2));
+    int maxIndividualLevel = Math.max(10, targetCumulativeLevel / Math.max(1, count - 1));
 
-        int remaining = targetCumulativeLevel - count;
-        int attempts = 0;
-        int distributed = 0;
+    int remaining = targetCumulativeLevel - count;
+    int attempts = 0;
+    int distributed = 0;
 
-        while (distributed < remaining && attempts < remaining * 3) {
-            int idx = random.nextInt(count);
-            if (levels[idx] < maxIndividualLevel) {
-                levels[idx]++;
-                distributed++;
-            }
-            attempts++;
-        }
-
-        return levels;
+    while (distributed < remaining && attempts < remaining * 3) {
+      int idx = random.nextInt(count);
+      if (levels[idx] < maxIndividualLevel) {
+        levels[idx]++;
+        distributed++;
+      }
+      attempts++;
     }
 
     /**

@@ -155,52 +155,57 @@ public class BattleController {
      * @param session        the current {@link HttpSession}
      * @return the logical view name for the result page, or a redirect
      */
-    @GetMapping("/result")
-    public String result(Authentication authentication, Model model, HttpSession session) {
-        if (authentication == null) return "redirect:/login";
+  @GetMapping("/result")
+  public String result(Authentication authentication, Model model, HttpSession session) {
+    if (authentication == null) return "redirect:/login";
 
-        BattleState state = (BattleState) session.getAttribute(SESSION_KEY);
-        if (state == null || !state.isOver()) return "redirect:/battle";
+    BattleState state = (BattleState) session.getAttribute(SESSION_KEY);
+    if (state == null || !state.isOver()) return "redirect:/battle";
 
-        try {
-            boolean rewardsAlreadyGiven = Boolean.TRUE.equals(session.getAttribute("rewardsGiven"));
-            if (!rewardsAlreadyGiven && state.getStatus() == BattleStatus.PLAYER_WIN) {
-                Map<String, Object> rewards = battleService.awardBattleRewards(state);
-                model.addAttribute("rewardGold", rewards.get("gold"));
-                model.addAttribute("rewardRecipients", rewards.get("recipients"));
-                session.setAttribute("rewardsGiven", true);
-            } else if (state.getStatus() == BattleStatus.PLAYER_WIN) {
-                // Rewards already given, just show level up panel
-                model.addAttribute("rewardGold", 0);
-                model.addAttribute("rewardRecipients", List.of());
-            }
+    try {
 
-            if (!rewardsAlreadyGiven && state.getStatus() == BattleStatus.PLAYER_LOSE) {
-                battleService.applyBattleLoss(state);
-                session.setAttribute("rewardsGiven", true);
-            }
+      boolean rewardsAlreadyGiven = Boolean.TRUE.equals(session.getAttribute("rewardsGiven"));
+      if (!rewardsAlreadyGiven && state.getStatus() == BattleStatus.PLAYER_WIN) {
+        Map<String, Object> rewards = battleService.awardBattleRewards(state);
+        model.addAttribute("rewardGold", rewards.get("gold"));
+        model.addAttribute("rewardRecipients", rewards.get("recipients"));
+        session.setAttribute("rewardsGiven", true);
+      } else if (state.getStatus() == BattleStatus.PLAYER_WIN) {
+        // Rewards already given, just show level up panel
+        model.addAttribute("rewardGold", 0);
+        model.addAttribute("rewardRecipients", List.of());
+      }
 
-            if (state.getStatus() == BattleStatus.PLAYER_WIN) {
-                List<Hero> levelUpHeroes =
-                        state.getPlayerUnits().stream()
-                                .filter(u -> u.isAlive() && u.getHero().getId() != null)
-                                .filter(u -> heroService.isLevelUpPending(u.getHero().getId()))
-                                .map(u -> heroService.findById(u.getHero().getId()).orElse(null))
-                                .filter(Objects::nonNull)
-                                .toList();
-                model.addAttribute("levelUpHeroes", levelUpHeroes);
-                model.addAttribute("allHeroClasses", HeroClass.values());
-            }
+      if (!rewardsAlreadyGiven && state.getStatus() == BattleStatus.PLAYER_LOSE) {
+        battleService.applyBattleLoss(state);
+        session.setAttribute("rewardsGiven", true);
+      }
 
-            model.addAttribute("status", state.getStatus());
-            model.addAttribute("playerUnits", state.getPlayerUnits());
-            model.addAttribute("enemyUnits", state.getEnemyUnits());
-            boolean campaignDone =
-                    !state.isPvp() && campaignProgressService.isCampaignComplete(authentication.getName());
-            model.addAttribute("campaignDone", campaignDone);
-            session.setAttribute(LAST_RESULT_KEY, state.getStatus().name());
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
+      if (state.getStatus() == BattleStatus.PLAYER_WIN) {
+        List<Hero> levelUpHeroes =
+            state.getPlayerUnits().stream()
+                .filter(u -> u.isAlive() && u.getHero().getId() != null)
+                .filter(u -> heroService.isLevelUpPending(u.getHero().getId()))
+                .map(u -> heroService.findById(u.getHero().getId()).orElse(null))
+                .filter(Objects::nonNull)
+                .toList();
+        model.addAttribute("levelUpHeroes", levelUpHeroes);
+        model.addAttribute("allHeroClasses", HeroClass.values());
+      }
+
+      model.addAttribute("status", state.getStatus());
+      model.addAttribute("playerUnits", state.getPlayerUnits());
+      model.addAttribute("enemyUnits", state.getEnemyUnits());
+      boolean campaignDone =
+          !state.isPvp() && campaignProgressService.isCampaignComplete(authentication.getName());
+      model.addAttribute("campaignDone", campaignDone);
+      if (state.isPvp() && !rewardsAlreadyGiven) {
+        battleService.updatePvPResult(state);
+        session.setAttribute("rewardsGiven", true);
+      }
+      session.setAttribute(LAST_RESULT_KEY, state.getStatus().name());
+    } catch (Exception e) {
+      model.addAttribute("error", e.getMessage());
         }
 
         return "battle/result";
@@ -218,32 +223,41 @@ public class BattleController {
      * @param session        the current {@link HttpSession}
      * @return a redirect to the appropriate next destination
      */
-    @PostMapping("/continue")
-    public String continueCampaign(Authentication authentication, HttpSession session) {
-        if (authentication == null) return "redirect:/login";
-        session.removeAttribute(SESSION_KEY);
-        session.removeAttribute("rewardsGiven");
+  @PostMapping("/continue")
+  public String continueCampaign(Authentication authentication, HttpSession session) {
+    if (authentication == null) return "redirect:/login";
 
-        try {
-            String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
+    BattleState state = (BattleState) session.getAttribute(SESSION_KEY);
+    boolean wasPvp = state != null && state.isPvp();
 
-            if (campaignProgressService.isCampaignComplete(authentication.getName())) {
-                session.removeAttribute(LAST_RESULT_KEY);
-                campaignService.completeCampaign(authentication.getName());
-                return "redirect:/campaign/complete";
-            }
+    session.removeAttribute(SESSION_KEY);
+    session.removeAttribute("rewardsGiven");
 
-            if ("PLAYER_LOSE".equals(lastResult)) {
-                Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
-                if (campaign.isHasVisitedInn()) {
-                    return "redirect:/inn";
-                } else {
-                    // No inn visited yet — just clear the pending room and return to campaign
-                    session.removeAttribute(LAST_RESULT_KEY);
-                    campaignService.abandonCampaign(authentication.getName());
-                    return "redirect:/dashboard";
-                }
-            }
+    if (wasPvp) {
+      session.removeAttribute(LAST_RESULT_KEY);
+      return "redirect:/pvp";
+    }
+
+    try {
+      String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
+
+      if (campaignProgressService.isCampaignComplete(authentication.getName())) {
+        session.removeAttribute(LAST_RESULT_KEY);
+        campaignService.completeCampaign(authentication.getName());
+        return "redirect:/campaign/complete";
+      }
+
+      if ("PLAYER_LOSE".equals(lastResult)) {
+        Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
+        if (campaign.isHasVisitedInn()) {
+          return "redirect:/inn";
+        } else {
+          // No inn visited yet — just clear the pending room and return to campaign
+          session.removeAttribute(LAST_RESULT_KEY);
+          campaignService.abandonCampaign(authentication.getName());
+          return "redirect:/dashboard";
+        }
+      }
 
             session.removeAttribute(LAST_RESULT_KEY);
             campaignProgressService.clearRoomPending(authentication.getName());

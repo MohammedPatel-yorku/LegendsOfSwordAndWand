@@ -62,6 +62,12 @@ public class BattleState implements Serializable {
     /** Whether this battle is a PvP encounter. */
     private boolean pvp = false;
 
+    private Long pvpInvitationId;
+    private String pvpSenderUsername;
+    private String pvpReceiverUsername;
+    private Long pvpSenderPartyId;
+    private Long pvpReceiverPartyId;
+
     /**
      * Returns {@code true} if the battle has concluded.
      *
