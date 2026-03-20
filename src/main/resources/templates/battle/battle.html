@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<!-- With the use of AI -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle — Legends of Sword and Wand</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        @keyframes flashDamage {
+            0%   { background: rgba(192,57,43,0.6); }
+            100% { background: transparent; }
+        }
+        @keyframes flashHeal {
+            0%   { background: rgba(46,204,113,0.5); }
+            100% { background: transparent; }
+        }
+        .flash-damage { animation: flashDamage 0.5s ease-out; }
+        .flash-heal   { animation: flashHeal 0.5s ease-out; }
+
+        .stat-bar-fill {
+            transition: width 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrapper">
+    <div class="card xl">
+        <div class="card-ornament tl"></div>
+        <div class="card-ornament tr"></div>
+        <div class="card-ornament bl"></div>
+        <div class="card-ornament br"></div>
+
+        <div th:replace="~{fragments/navbar :: userbar}"></div>
+
+        <div class="card-header">
+            <span class="game-logo flicker">⚔ Battle ⚔</span>
+        </div>
+
+        <div id="error-banner" style="display:none;" class="alert alert-error"></div>
+
+        <!-- Turn indicator -->
+        <div id="turn-indicator" class="turn-indicator player-turn">Loading...</div>
+
+        <!-- Battle layout -->
+        <div class="battle-layout">
+            <div>
+                <div class="battle-side-label">Your Party</div>
+                <div id="player-units"></div>
+            </div>
+            <div>
+                <div class="battle-side-label">Enemies</div>
+                <div id="enemy-units"></div>
+            </div>
+        </div>
+
+        <!-- Battle log -->
+        <div id="battle-log"
+             style="margin:1rem 0; padding:0.75rem; background:rgba(0,0,0,0.3);
+                    border:1px solid var(--border-dim); font-family:monospace;
+                    font-size:0.75rem; color:var(--text-secondary);
+                    max-height:150px; overflow-y:auto; display:none;">
+        </div>
+
+        <!-- Action panel -->
+        <div id="action-panel" class="action-panel"></div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const CSRF_TOKEN = /*[[${_csrf.token}]]*/ '';
+    const CSRF_HEADER = /*[[${_csrf.headerName}]]*/ 'X-CSRF-TOKEN';
+
+    /**
+     * @typedef {{
+     *   over: boolean,
+     *   status: string,
+     *   playerTurn: boolean,
+     *   activeUnitBattleId: number,
+     *   battleLog: string[],
+     *   playerUnits: Array<{
+     *     battleId: number,
+     *     enemy: boolean,
+     *     alive: boolean,
+     *     name: string,
+     *     level: number,
+     *     health: number,
+     *     maxHealth: number,
+     *     mana: number,
+     *     maxMana: number,
+     *     attack: number,
+     *     defense: number,
+     *     startingClass: string,
+     *     primaryClass: string
+     *   }>,
+     *   enemyUnits: Array<{
+     *     battleId: number,
+     *     enemy: boolean,
+     *     alive: boolean,
+     *     name: string,
+     *     level: number,
+     *     health: number,
+     *     maxHealth: number,
+     *     mana: number,
+     *     maxMana: number,
+     *     attack: number,
+     *     defense: number,
+     *     startingClass: string,
+     *     primaryClass: string
+     *   }>
+     * }} BattleStateDto
+     */
+
+    /** @type {BattleStateDto|null} */
+    let state = null;
+    let prevState = null;
+    let isProcessing = false;  // lock to prevent concurrent actions
+
+    // ── Fetch helpers ──────────────────────────────────────────────────────
+
+    async function fetchState() {
+        const res = await fetch('/battle/state');
+        if (!res.ok) { window.location.href = '/campaign'; return; }
+        state = await res.json();
+        logCursor = state.battleLog.length;  // sync cursor to current log length on load
+        render();
+    }
+
+    async function sendAction(params) {
+        if (isProcessing) return;
+        isProcessing = true;
+        setActionsDisabled(true);
+
+        const cursorBefore = logCursor;  // snapshot cursor before request
+
+        try {
+            const body = new URLSearchParams(params);
+            const res = await fetch('/battle/action', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [CSRF_HEADER]: CSRF_TOKEN
+                },
+                body: body.toString()
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                showError(data.error || 'Something went wrong');
+                return;
+            }
+            state = data;
+            renderTurnIndicator();
+            await replayLog(cursorBefore);
+        } catch (e) {
+            showError('Request failed');
+        } finally {
+            isProcessing = false;
+        }
+    }
+
+    // ── Rendering ──────────────────────────────────────────────────────────
+
+    async function replayLog(cursorBefore) {
+        const newEntries = state.battleLog.slice(cursorBefore);
+        logCursor = state.battleLog.length;  // advance cursor to end
+
+        const logEl = document.getElementById('battle-log');
+        logEl.style.display = 'block';
+
+        if (newEntries.length === 0) {
+            renderUnits('player-units', state.playerUnits, false);
+            renderUnits('enemy-units', state.enemyUnits, true);
+            applyAnimations();
+            prevState = state;
+            renderTurnIndicator();
+            renderActions();
+            setActionsDisabled(false);
+            if (state.over) setTimeout(() => window.location.href = '/battle/result', 1200);
+            return;
+        }
+
+        for (const entry of newEntries) {
+            renderUnits('player-units', state.playerUnits, false);
+            renderUnits('enemy-units', state.enemyUnits, true);
+            applyAnimations();
+            prevState = state;
+
+            const div = document.createElement('div');
+            div.textContent = entry;
+            if (!entry.startsWith('►') && !entry.startsWith('  ')) {
+                div.style.color = 'var(--crimson-bright)';
+            }
+            logEl.appendChild(div);
+            // Keep DOM trimmed to last 20 visible lines only
+            while (logEl.children.length > 20) logEl.removeChild(logEl.firstChild);
+            logEl.scrollTop = logEl.scrollHeight;
+
+            await delay(350);
+        }
+
+        renderTurnIndicator();
+        renderActions();
+        setActionsDisabled(false);
+
+        if (state.over) {
+            setTimeout(() => window.location.href = '/battle/result', 1200);
+        }
+    }
+
+    function render() {
+        hideError();
+        renderUnits('player-units', state.playerUnits, false);
+        renderUnits('enemy-units', state.enemyUnits, true);
+        applyAnimations();
+        prevState = state;
+        renderTurnIndicator();
+        renderLog();
+        renderActions();
+        setActionsDisabled(false);
+        if (state.over) setTimeout(() => window.location.href = '/battle/result', 1200);
+    }
+
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function applyAnimations() {
+        if (!prevState) return;
+        const allPrev = [...prevState.playerUnits, ...prevState.enemyUnits];
+        const allCurr = [...state.playerUnits, ...state.enemyUnits];
+        allCurr.forEach(curr => {
+            const prev = allPrev.find(p => String(p.battleId) === String(curr.battleId));
+            if (!prev) return;
+            const el = document.querySelector(`[data-id="${curr.battleId}"]`);
+            if (!el) return;
+            if (curr.health < prev.health) {
+                el.classList.remove('flash-damage', 'flash-heal');
+                void el.offsetWidth;
+                el.classList.add('flash-damage');
+            } else if (curr.health > prev.health) {
+                el.classList.remove('flash-damage', 'flash-heal');
+                void el.offsetWidth;
+                el.classList.add('flash-heal');
+            }
+        });
+    }
+
+    function renderUnits(containerId, units, isEnemy) {
+        const el = document.getElementById(containerId);
+        el.innerHTML = units.map(u => {
+            const isActive = String(u.battleId) === String(state.activeUnitBattleId);
+            const hpPct = u.maxHealth > 0 ? Math.max(0, u.health * 100 / u.maxHealth) : 0;
+            const mpPct = u.maxMana > 0 ? Math.max(0, u.mana * 100 / u.maxMana) : 0;
+            const deadClass = !u.alive ? ' dead' : '';
+            const activeClass = isActive ? ' active-unit' : '';
+            const side = isEnemy ? 'enemy' : 'player';
+            return `
+            <div class="unit-card ${side}${deadClass}${activeClass}" data-id="${u.battleId}">
+                <div class="unit-card-header">
+                    <span class="unit-name">${u.name}</span>
+                    <span class="unit-level">Lv ${u.level}</span>
+                </div>
+                <div class="stat-bar-row">
+                    <div class="stat-bar-label"><span>HP</span><span>${u.health} / ${u.maxHealth}</span></div>
+                    <div class="stat-bar"><div class="stat-bar-fill hp" style="width:${hpPct}%"></div></div>
+                </div>
+                ${!isEnemy ? `
+                <div class="stat-bar-row">
+                    <div class="stat-bar-label"><span>MP</span><span>${u.mana} / ${u.maxMana}</span></div>
+                    <div class="stat-bar"><div class="stat-bar-fill mana" style="width:${mpPct}%"></div></div>
+                </div>` : ''}
+                <div style="margin-top:0.4rem; font-family:'Cinzel',serif; font-size:0.7rem;
+                            color:var(--text-secondary); display:flex; gap:1rem;">
+                    <span>⚔ ${u.attack} ATK</span>
+                    <span>🛡 ${u.defense} DEF</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderTurnIndicator() {
+        const el = document.getElementById('turn-indicator');
+        const active = [...state.playerUnits, ...state.enemyUnits]
+            .find(u => String(u.battleId) === String(state.activeUnitBattleId));
+        const name = active ? active.name : '...';
+        el.className = 'turn-indicator ' + (state.playerTurn ? 'player-turn' : 'enemy-turn');
+        el.textContent = (state.playerTurn ? '⚔ Your Turn — ' : '💀 Enemy Turn — ') + name;
+    }
+
+    function renderLog() {
+        const el = document.getElementById('battle-log');
+        if (!state.battleLog || state.battleLog.length === 0) { el.style.display = 'none'; return; }
+        el.style.display = 'block';
+        el.innerHTML = state.battleLog.map(l => `<div>${l}</div>`).join('');
+        el.scrollTop = el.scrollHeight;
+    }
+
+    function renderActions() {
+        const panel = document.getElementById('action-panel');
+        if (state.over) { panel.innerHTML = ''; return; }
+
+        if (!state.playerTurn) {
+            panel.innerHTML = `
+        <div style="text-align:center;">
+            <p style="font-family:'Cinzel',serif;color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
+                The enemy contemplates their move...
+            </p>
+        </div>`;
+            if (!state.over && !isProcessing) {
+                setTimeout(() => {
+                    if (!state.over && !isProcessing) sendAction({action:'WAIT'});
+                }, 800);
+            }
+            return;
+        }
+
+        const actor = state.playerUnits.find(u => String(u.battleId) === String(state.activeUnitBattleId));
+        if (!actor) { panel.innerHTML = ''; return; }
+
+        const effectiveClass = actor.primaryClass || actor.startingClass;
+        const hybrid = actor.hybridClass || '';
+        const livingEnemies = state.enemyUnits.filter(u => u.alive);
+
+        let html = `<div class="action-panel-title">${actor.name} — Choose Action</div>`;
+        html += `<div class="action-buttons">`;
+        html += btn('ghost', '🛡 Defend', `sendAction({action:'DEFEND'})`);
+        html += btn('ghost', '⏳ Wait', `sendAction({action:'WAIT'})`);
+
+        // ORDER abilities — Heretic gets FireShield instead of Protect
+        if (effectiveClass === 'ORDER') {
+            const protectCost = 25;
+            if (actor.mana >= protectCost) {
+                if (hybrid === 'HERETIC')
+                    html += btn('primary', '🔥 Fire Shield', `sendAction({action:'CAST',abilityIndex:0})`);
+                else
+                    html += btn('primary', '✦ Protect', `sendAction({action:'CAST',abilityIndex:0})`);
+            }
+            if (actor.mana >= 35)
+                html += btn('primary', '✦ Heal', `sendAction({action:'CAST',abilityIndex:1})`);
+        }
+
+        // MAGE abilities — Wizard pays 40 instead of 80
+        if (effectiveClass === 'MAGE') {
+            const replenishCost = (hybrid === 'WIZARD') ? 40 : 80;
+            if (actor.mana >= replenishCost)
+                html += btn('primary', '✦ Replenish', `sendAction({action:'CAST',abilityIndex:0})`);
+        }
+
+        html += `</div>`;
+
+        if (livingEnemies.length > 0) {
+            html += `<div class="target-list"><div class="battle-side-label">Select Target</div>`;
+            livingEnemies.forEach(enemy => {
+                html += targetBtn(`⚔ Attack ${enemy.name}`, `${enemy.health} HP`,
+                    `sendAction({action:'ATTACK',targetBattleId:${enemy.battleId}})`);
+                if (effectiveClass === 'CHAOS' && actor.mana >= 30)
+                    html += targetBtn(`🔥 Fireball → ${enemy.name}`, '',
+                        `sendAction({action:'CAST',targetBattleId:${enemy.battleId},abilityIndex:0})`);
+                if (effectiveClass === 'CHAOS' && actor.mana >= 40)
+                    html += targetBtn(`⚡ Chain Lightning → ${enemy.name}`, '',
+                        `sendAction({action:'CAST',targetBattleId:${enemy.battleId},abilityIndex:1})`);
+                if (effectiveClass === 'WARRIOR' && actor.mana >= 60)
+                    html += targetBtn(`⚔ Berserker → ${enemy.name}`, '',
+                        `sendAction({action:'CAST',targetBattleId:${enemy.battleId},abilityIndex:0})`);
+            });
+            html += `</div>`;
+        }
+
+        panel.innerHTML = html;
+    }
+
+    // ── UI helpers ─────────────────────────────────────────────────────────
+
+    function btn(style, label, onclick) {
+        return `<button class="btn btn-${style} btn-full btn-action" onclick="${onclick}">${label}</button>`;
+    }
+
+    function targetBtn(label, sub, onclick) {
+        return `
+        <button class="target-btn" onclick="${onclick}" style="margin-bottom:0.3rem;width:100%;">
+            <span>${label}</span>
+            ${sub ? `<span style="color:var(--text-muted);font-size:0.6rem;">${sub}</span>` : ''}
+        </button>`;
+    }
+
+    function setActionsDisabled(disabled) {
+        document.querySelectorAll('#action-panel button').forEach(b => b.disabled = disabled);
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('error-banner');
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+
+    function hideError() {
+        document.getElementById('error-banner').style.display = 'none';
+    }
+
+    // ── Boot ───────────────────────────────────────────────────────────────
+    fetchState();
+</script>
+</body>
+</html>

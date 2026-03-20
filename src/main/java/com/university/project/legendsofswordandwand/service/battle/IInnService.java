@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface IInnService {
 
-  void loadInnView(Long campaignId);
+  List<String> loadInnView(Long campaignId);
 
   List<Item> getShopItems();
 
@@ -15,4 +15,6 @@ public interface IInnService {
   boolean purchaseItem(Long campaignId, Long itemId);
 
   boolean recruitHero(Long campaignId, Long heroId);
+
+  void cleanupTemporaryRecruits(Long campaignId);
 }

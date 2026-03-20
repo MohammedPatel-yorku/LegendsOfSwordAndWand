@@ -1,10 +1,22 @@
 package com.university.project.legendsofswordandwand.service.battle;
 
-import com.university.project.legendsofswordandwand.model.Hero;
+import com.university.project.legendsofswordandwand.battle.BattleState;
+import com.university.project.legendsofswordandwand.model.enums.ActionType;
+import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
+import java.util.Map;
 
 public interface IBattleService {
 
-  void executeAttack(Hero attacker, Hero defender);
+  BattleState initializePvEBattle(Long campaignId, int playerCumulativeLevel);
 
-  void executeDefend(Hero unit);
+  BattleState executePlayerAction(
+      BattleState state, ActionType actionType, Long targetBattleId, Integer abilityIndex);
+
+  BattleState executeEnemyTurn(BattleState state);
+
+  BattleStatus checkBattleStatus(BattleState state);
+
+  Map<String, Object> awardBattleRewards(BattleState state);
+
+  void applyBattleLoss(BattleState state);
 }

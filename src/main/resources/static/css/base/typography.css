@@ -26,6 +26,7 @@ a {
 a:hover { color: var(--gold-light); text-shadow: var(--glow-gold); }
 
 .game-logo {
+    font-family: 'Cinzel Decorative', 'Cinzel', serif;
     font-size: clamp(1.4rem, 3vw, 2rem);
     text-shadow: var(--glow-gold);
     display: block;

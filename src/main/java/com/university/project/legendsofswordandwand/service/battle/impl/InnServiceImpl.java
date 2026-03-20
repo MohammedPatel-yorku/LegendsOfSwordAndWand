@@ -1,9 +1,10 @@
 package com.university.project.legendsofswordandwand.service.battle.impl;
 
-import com.university.project.legendsofswordandwand.model.Hero;
-import com.university.project.legendsofswordandwand.model.Item;
-import com.university.project.legendsofswordandwand.model.Party;
+import com.university.project.legendsofswordandwand.battle.HeroStatCalculator;
+import com.university.project.legendsofswordandwand.model.*;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
+import com.university.project.legendsofswordandwand.repository.CampaignRepository;
+import com.university.project.legendsofswordandwand.repository.InventoryRepository;
 import com.university.project.legendsofswordandwand.repository.ItemRepository;
 import com.university.project.legendsofswordandwand.service.battle.IInnService;
 import com.university.project.legendsofswordandwand.service.hero.IHeroService;
@@ -13,7 +14,6 @@ import java.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-/** InventoryService handles business logic for Inventory objects. */
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -23,19 +23,19 @@ class InnServiceImpl implements IInnService {
   private final ItemRepository itemRepository;
   private final Random random = new Random();
   private final IHeroService heroService;
+  private final InventoryRepository inventoryRepository;
+  private final HeroStatCalculator heroStatCalculator;
+  private final CampaignRepository campaignRepository;
 
   @Override
-  public void loadInnView(Long campaignId) {
-    partyManagementService.reviveAndHealParty(campaignId);
+  public List<String> loadInnView(Long campaignId) {
+    return partyManagementService.reviveAndHealPartyWithSummary(campaignId);
   }
 
   @Override
   public List<Item> getShopItems() {
-
     List<Item> items = itemRepository.findAll();
-
     if (items.isEmpty()) {
-
       items =
           itemRepository.saveAll(
               Arrays.asList(
@@ -52,10 +52,19 @@ class InnServiceImpl implements IInnService {
 
   @Override
   public List<Hero> getAvailableRecruits(Long campaignId) {
+    cleanupTemporaryRecruits(campaignId);
 
     Party party = partyManagementService.getActiveParty(campaignId);
 
-    if (party.getHeroes().size() >= 5) return Collections.emptyList();
+    // Spec: recruits only available in first 10 rooms
+    Campaign campaign =
+        campaignRepository
+            .findById(campaignId)
+            .orElseThrow(() -> new RuntimeException("Campaign not found"));
+    if (campaign.getCurrentRoom() > 10) return Collections.emptyList();
+
+    long permanentCount = party.getHeroes().stream().filter(h -> !h.isTemporary()).count();
+    if (permanentCount >= 5) return Collections.emptyList();
 
     int count = 1 + random.nextInt(3);
     HeroClass[] classes = HeroClass.values();
@@ -63,12 +72,36 @@ class InnServiceImpl implements IInnService {
     List<Hero> recruits =
         java.util.stream.IntStream.range(0, count)
             .mapToObj(
-                i ->
-                    Hero.builder()
-                        .name(generateRecruitName())
-                        .startingClass(classes[random.nextInt(classes.length)])
-                        .party(party)
-                        .build())
+                i -> {
+                  HeroClass cls = classes[random.nextInt(classes.length)];
+                  // Spec: random level between 1-4
+                  int level = 1 + random.nextInt(4);
+
+                  Hero h =
+                      Hero.builder()
+                          .name(generateRecruitName())
+                          .startingClass(cls)
+                          .party(party)
+                          .build();
+
+                  switch (cls) {
+                    case ORDER -> h.setOrderLevels(level);
+                    case CHAOS -> h.setChaosLevels(level);
+                    case WARRIOR -> h.setWarriorLevels(level);
+                    case MAGE -> h.setMageLevels(level);
+                  }
+
+                  // Apply base level gains for levels 2-4
+                  for (int lvl = 1; lvl < level; lvl++) {
+                    heroStatCalculator.applyLevelUp(h, cls);
+                  }
+
+                  // Apply class bonus for level 1
+                  heroStatCalculator.applyClassBonusOnly(h, cls);
+
+                  h.setLevel(level);
+                  return h;
+                })
             .toList();
 
     recruits.forEach(
@@ -82,7 +115,6 @@ class InnServiceImpl implements IInnService {
 
   @Override
   public boolean purchaseItem(Long campaignId, Long itemId) {
-
     Party party = partyManagementService.getActiveParty(campaignId);
     Item item =
         itemRepository.findById(itemId).orElseThrow(() -> new RuntimeException("Item not found"));
@@ -90,33 +122,50 @@ class InnServiceImpl implements IInnService {
     if (party.getGold() < item.getCost()) return false;
 
     partyManagementService.deductGold(party.getId(), item.getCost());
+
+    // Add to inventory
+    Inventory inventory = party.getInventory();
+    if (inventory == null) {
+      inventory = Inventory.builder().party(party).build();
+    }
+    inventory.getItemIds().add(itemId);
+    inventoryRepository.save(inventory);
     return true;
   }
 
   @Override
   public boolean recruitHero(Long campaignId, Long heroId) {
-
     Party party = partyManagementService.getActiveParty(campaignId);
-    if (party.getHeroes().size() >= 5) throw new RuntimeException("Party is full");
+
+    long permanentCount = party.getHeroes().stream().filter(h -> !h.isTemporary()).count();
+    if (permanentCount >= 5) throw new RuntimeException("Party is full");
 
     Hero hero =
         heroService.findById(heroId).orElseThrow(() -> new RuntimeException("Hero not found"));
 
-    int cost = hero.getLevel() == 1 ? 0 : hero.getLevel() * 200;
+    int cost = hero.getLevel() == 1 ? 0 : (hero.getLevel() - 1) * 200;
     if (party.getGold() < cost) throw new RuntimeException("Not enough gold");
 
-    partyManagementService.addHeroToParty(party.getId(), hero.getId());
+    // Mark permanent before saving so they survive next inn visit cleanup
+    hero.setTemporary(false);
+    heroService.save(hero);
+
     partyManagementService.deductGold(party.getId(), cost);
     return true;
   }
 
-  private String generateRecruitName() {
+  @Override
+  public void cleanupTemporaryRecruits(Long campaignId) {
+    Party party = partyManagementService.getActiveParty(campaignId);
+    List<Hero> temps = party.getHeroes().stream().filter(Hero::isTemporary).toList();
+    temps.forEach(h -> heroService.delete(h.getId()));
+  }
 
+  private String generateRecruitName() {
     String[] names = {
       "Aldric", "Seraphine", "Corvus", "Mira", "Theron",
       "Isolde", "Gareth", "Lyra", "Dorian", "Elara"
     };
-
     return names[random.nextInt(names.length)];
   }
 }

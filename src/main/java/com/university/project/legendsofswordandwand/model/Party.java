@@ -37,13 +37,16 @@ public class Party {
   @OneToMany(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Hero> heroes = new ArrayList<>();
 
+  @OneToOne(mappedBy = "party", cascade = CascadeType.ALL, orphanRemoval = true)
+  private Inventory inventory;
+
   public int getCumulativeLevel() {
-    return heroes.stream().mapToInt(Hero::getLevel).sum();
+    return heroes.stream().filter(h -> !h.isTemporary()).mapToInt(Hero::getLevel).sum();
   }
 
   public int calculateScore() {
-
-    int heroScore = heroes.stream().mapToInt(h -> h.getLevel() * 100).sum();
+    int heroScore =
+        heroes.stream().filter(h -> !h.isTemporary()).mapToInt(h -> h.getLevel() * 100).sum();
     int goldScore = gold * 10;
     return heroScore + goldScore;
   }

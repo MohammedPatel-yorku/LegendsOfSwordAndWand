@@ -7,6 +7,8 @@ import com.university.project.legendsofswordandwand.repository.PartyRepository;
 import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import com.university.project.legendsofswordandwand.service.party.IPartyManagementService;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -82,5 +84,49 @@ class PartyManagementServiceImpl implements IPartyManagementService {
 
     party.getHeroes().add(hero);
     partyRepository.save(party);
+  }
+
+  @Override
+  public List<String> reviveAndHealPartyWithSummary(Long campaignId) {
+
+    Party party =
+        campaignRepository
+            .findActivePartyByCampaignId(campaignId)
+            .orElseThrow(() -> new RuntimeException("Party not found"));
+
+    List<String> summary = new ArrayList<>();
+
+    party.getHeroes().stream()
+        .filter(h -> !h.isTemporary())
+        .forEach(
+            hero -> {
+              int hpBefore = hero.getHealth();
+              int manaBefore = hero.getMana();
+              boolean wasDead = hpBefore <= 0;
+
+              hero.setHealth(hero.getMaxHealth());
+              hero.setMana(hero.getMaxMana());
+
+              if (wasDead) {
+                summary.add(hero.getName() + " was revived and fully restored.");
+              } else {
+                int hpGained = hero.getMaxHealth() - hpBefore;
+                int manaGained = hero.getMaxMana() - manaBefore;
+                if (hpGained > 0 || manaGained > 0) {
+                  summary.add(
+                      hero.getName()
+                          + " restored "
+                          + (hpGained > 0 ? hpGained + " HP" : "")
+                          + (hpGained > 0 && manaGained > 0 ? " and " : "")
+                          + (manaGained > 0 ? manaGained + " MP" : "")
+                          + ".");
+                } else {
+                  summary.add(hero.getName() + " was already at full health.");
+                }
+              }
+            });
+
+    partyRepository.save(party);
+    return summary;
   }
 }

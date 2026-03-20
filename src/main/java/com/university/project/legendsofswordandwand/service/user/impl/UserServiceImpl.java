@@ -35,12 +35,23 @@ class UserServiceImpl implements IUserService {
     int cumulativeLevel = 0;
     int gold = 0;
 
-    if (hasParty) {
-
-      Party latest = user.getParties().get(user.getParties().size() - 1);
-      partySize = latest.getHeroes().size();
-      cumulativeLevel = latest.getCumulativeLevel();
-      gold = latest.getGold();
+    if (hasCampaign) {
+      // Show the active campaign's party on the dashboard
+      var activeCampaign = campaignRepository.findActiveCampaignByUsername(username);
+      if (activeCampaign.isPresent()) {
+        Party party = activeCampaign.get().getParty();
+        partySize = (int) party.getHeroes().stream().filter(h -> !h.isTemporary()).count();
+        cumulativeLevel = party.getCumulativeLevel();
+        gold = party.getGold();
+      }
+    } else if (hasParty) {
+      Party latest =
+          user.getParties().stream().filter(Party::isSaved).reduce((a, b) -> b).orElse(null);
+      if (latest != null) {
+        partySize = (int) latest.getHeroes().stream().filter(h -> !h.isTemporary()).count();
+        cumulativeLevel = latest.getCumulativeLevel();
+        gold = latest.getGold();
+      }
     }
 
     return new DashboardInfo(username, hasParty, hasCampaign, partySize, cumulativeLevel, gold);

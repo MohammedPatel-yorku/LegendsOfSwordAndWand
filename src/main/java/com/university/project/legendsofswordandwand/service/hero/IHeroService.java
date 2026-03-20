@@ -17,4 +17,6 @@ public interface IHeroService {
   Optional<Hero> findById(Long heroId);
 
   Hero save(Hero hero);
+
+  void delete(Long heroId);
 }

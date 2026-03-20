@@ -21,7 +21,7 @@ public class Inventory {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ManyToOne
+  @OneToOne
   @Setter
   @JoinColumn(name = "party_id")
   private Party party;

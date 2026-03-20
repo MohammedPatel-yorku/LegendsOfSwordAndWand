@@ -44,6 +44,8 @@ class HeroServiceImpl implements IHeroService {
 
     incrementClassLevel(hero, selectedHeroClass);
 
+    heroStatCalculator.applyClassBonusOnly(hero, selectedHeroClass);
+
     party.getHeroes().add(hero);
     heroRepository.save(hero);
   }
@@ -71,7 +73,6 @@ class HeroServiceImpl implements IHeroService {
 
     if (!hero.isHybrid()
         && hero.getPrimaryClass() != null
-        && hero.getPrimaryClass() != chosenClass
         && getClassLevel(hero, chosenClass) == 5) {
       hero.setSecondaryClass(chosenClass);
       hero.setHybrid(true);
@@ -113,6 +114,12 @@ class HeroServiceImpl implements IHeroService {
   public Hero save(Hero hero) {
 
     return heroRepository.save(hero);
+  }
+
+  @Override
+  public void delete(Long heroId) {
+
+    heroRepository.deleteById(heroId);
   }
 
   private void incrementClassLevel(Hero hero, HeroClass heroClass) {

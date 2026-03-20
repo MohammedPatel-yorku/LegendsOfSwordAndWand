@@ -57,7 +57,7 @@
 .card-ornament.br { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
 
 .card.wide { max-width: 900px; }
-.card.xl   { max-width: 1100px; }
+.card.xl   { max-width: 1300px; padding: 2.5rem 3rem; }
 
 /* ── Card Header ────────────────────────────────────────── */
 .card-header {

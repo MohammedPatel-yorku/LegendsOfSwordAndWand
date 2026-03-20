@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<!-- With the use of AI -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inn — Legends of Sword and Wand</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<div class="page-wrapper">
+    <div class="card xl">
+        <div class="card-ornament tl"></div>
+        <div class="card-ornament tr"></div>
+        <div class="card-ornament bl"></div>
+        <div class="card-ornament br"></div>
+
+        <div th:replace="~{fragments/navbar :: userbar}"></div>
+
+        <div class="card-header">
+            <span class="game-logo flicker">🍺 The Wanderer's Rest 🍺</span>
+            <p class="subtitle">
+                Room <span th:text="${currentRoom}">1</span> / 30
+                &nbsp;·&nbsp;
+                <span th:text="${gold}">0</span> gold
+            </p>
+        </div>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+        <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+        <div class="campaign-layout">
+
+            <div th:if="${healSummary != null and !#lists.isEmpty(healSummary)}"
+                 style="margin-bottom:1rem; padding:0.75rem; background:rgba(46,204,113,0.08);
+            border:1px solid rgba(46,204,113,0.3); border-radius:var(--radius-sm);">
+                <div style="font-family:'Cinzel',serif; font-size:0.7rem; color:#2ecc71;
+                margin-bottom:0.4rem; letter-spacing:0.1em;">✦ Inn Rest</div>
+                <div th:each="line : ${healSummary}"
+                     style="font-size:0.75rem; color:var(--text-secondary);"
+                     th:text="${line}"></div>
+            </div>
+
+            <!-- LEFT: party panel -->
+            <div class="party-panel">
+                <div class="party-panel-header">
+                    <span class="party-panel-title">Your Party</span>
+                    <span class="party-gold" th:text="${permanentHeroCount} + ' / 5'">1 / 5</span>
+                </div>
+
+                <div th:each="hero : ${heroes}" th:if="${!hero.temporary}" class="hero-card">
+                    <div class="hero-card-top">
+                        <span class="hero-name" th:text="${hero.name}">Hero</span>
+                        <span th:if="${hero.hybrid}"
+                              class="hero-class-badge HYBRID"
+                              th:text="${hero.hybridClass}">Hybrid</span>
+                        <span th:unless="${hero.hybrid}"
+                              th:class="'hero-class-badge ' + ${hero.startingClass}"
+                              th:text="${hero.startingClass}">Class</span>
+                    </div>
+                    <div class="hero-level">
+                        Lv <span th:text="${hero.level}">1</span>
+                        &nbsp;·&nbsp;
+                        <span th:text="${hero.attack}">5</span> ATK
+                        &nbsp;·&nbsp;
+                        <span th:text="${hero.defense}">5</span> DEF
+                    </div>
+                    <div class="stat-bar-row">
+                        <div class="stat-bar-label">
+                            <span>HP</span>
+                            <span th:text="${hero.health} + ' / ' + ${hero.maxHealth}">100/100</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill hp"
+                                 th:style="'width: ' + ${hero.maxHealth > 0 ? hero.health * 100 / hero.maxHealth : 0} + '%'"></div>
+                        </div>
+                    </div>
+                    <div class="stat-bar-row" style="margin-top:0.3rem;">
+                        <div class="stat-bar-label">
+                            <span>MP</span>
+                            <span th:text="${hero.mana} + ' / ' + ${hero.maxMana}">50/50</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill mana"
+                                 th:style="'width: ' + ${hero.maxMana > 0 ? hero.mana * 100 / hero.maxMana : 0} + '%'"></div>
+                        </div>
+                    </div>
+                    <div class="hero-xp-row">
+                        <span>XP <span th:text="${hero.experience}">0</span> / <span th:text="${hero.experienceToNextLevel}">575</span></span>
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-bar-fill"
+                             th:style="'width: ' + ${hero.experienceToNextLevel > 0 ? T(java.lang.Math).min(hero.experience * 100 / hero.experienceToNextLevel, 100) : 100} + '%'"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level Up Panel -->
+            <div th:if="${levelUpHeroes != null and !#lists.isEmpty(levelUpHeroes)}"
+                 style="margin-bottom:1.5rem;">
+                <div class="divider">Level Up Available!</div>
+                <div th:each="hero : ${levelUpHeroes}"
+                     style="background:var(--bg-raised); border:1px solid var(--gold-muted);
+                border-radius:var(--radius-md); padding:1rem 1.2rem; margin-bottom:0.8rem;">
+                    <div style="font-family:'Cinzel',serif; font-size:0.85rem; color:var(--gold-bright);
+                    margin-bottom:0.8rem;">
+                        ✦ <span th:text="${hero.name}">Hero</span> is ready to level up!
+                        <span style="font-size:0.7rem; color:var(--text-secondary);">
+                (Lv <span th:text="${hero.level}">1</span>
+                → <span th:text="${hero.level + 1}">2</span>)
+            </span>
+                    </div>
+                    <form th:action="@{/campaign/level-up}" method="post"
+                          style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap;">
+                        <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                        <input type="hidden" name="heroId" th:value="${hero.id}"/>
+                        <input type="hidden" name="returnTo" value="inn"/>
+                        <select th:if="${!hero.hybrid}" name="heroClass"
+                                style="background:var(--bg-card); color:var(--text-primary);
+                           border:1px solid var(--border-dim); border-radius:var(--radius-sm);
+                           padding:0.4rem 0.6rem; font-family:'Cinzel',serif;
+                           font-size:0.75rem; flex:1;">
+                            <option th:each="cls : ${allHeroClasses}"
+                                    th:value="${cls}"
+                                    th:text="${cls}"
+                                    th:selected="${cls == hero.startingClass}">
+                            </option>
+                        </select>
+                        <input th:if="${hero.hybrid}" type="hidden" name="heroClass"
+                               th:value="${hero.primaryClass}"/>
+                        <span th:if="${hero.hybrid}"
+                              style="font-size:0.75rem; color:var(--text-secondary); flex:1;">
+                Class locked as
+                <span th:text="${hero.hybridClass}" style="color:var(--gold-bright);"></span>
+            </span>
+                        <button type="submit" class="btn btn-primary" style="white-space:nowrap;">
+                            ✦ Level Up
+                        </button>
+                    </form>
+                    <div th:if="${!hero.hybrid}"
+                         style="margin-top:0.6rem; font-size:0.65rem; color:var(--text-muted);
+                    font-family:'Cinzel',serif; display:flex; gap:1rem; flex-wrap:wrap;">
+                        <span>ORDER: +5 MP, +2 DEF</span>
+                        <span>CHAOS: +3 ATK, +5 HP</span>
+                        <span>WARRIOR: +2 ATK, +3 DEF</span>
+                        <span>MAGE: +5 MP, +1 ATK</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: shop + recruits + continue -->
+            <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+                <!-- Shop -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                    <div th:each="item : ${shopItems}"
+                         style="display:flex; align-items:center; justify-content:space-between;
+                padding:0.6rem 0.8rem; background:var(--bg-raised);
+                border:1px solid var(--border-dim); border-radius:var(--radius-sm);">
+                        <div>
+                            <div style="font-family:'Cinzel',serif; font-size:0.75rem;
+                        color:var(--text-primary);"
+                                 th:text="${item.name}">Item</div>
+                            <div style="font-size:0.65rem; color:var(--text-secondary);">
+                                <span th:if="${item.revives}">Revive + Full HP + Full MP</span>
+                                <span th:unless="${item.revives}">
+                    <span th:if="${item.hpRestore > 0}" th:text="'+' + ${item.hpRestore} + ' HP'"></span>
+                    <span th:if="${item.hpRestore > 0 and item.manaRestore > 0}"> · </span>
+                    <span th:if="${item.manaRestore > 0}" th:text="'+' + ${item.manaRestore} + ' MP'"></span>
+                </span>
+                            </div>
+                        </div>
+                        <form th:action="@{/inn/buy}" method="post" style="margin-left:0.5rem;">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <input type="hidden" name="itemId" th:value="${item.id}"/>
+                            <button type="submit"
+                                    th:disabled="${gold < item.cost}"
+                                    th:class="${gold >= item.cost} ? 'btn btn-primary' : 'btn btn-ghost'"
+                                    style="font-size:0.65rem; padding:0.3rem 0.6rem;"
+                                    th:text="${item.cost} + ' g'">Buy</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Recruits -->
+                <div th:if="${availableRecruits != null and !#lists.isEmpty(availableRecruits)}">
+                    <div class="party-panel-header">
+                        <span class="party-panel-title">Available Recruits</span>
+                    </div>
+
+                    <div th:each="recruit : ${availableRecruits}" class="hero-card"
+                         style="margin-bottom:0.5rem;">
+                        <div class="hero-card-top">
+                            <span class="hero-name" th:text="${recruit.name}">Recruit</span>
+                            <span th:class="'hero-class-badge ' + ${recruit.startingClass}"
+                                  th:text="${recruit.startingClass}">Class</span>
+                        </div>
+                        <div class="hero-level">
+                            Lv <span th:text="${recruit.level}">1</span>
+                            &nbsp;·&nbsp;
+                            <span th:text="${recruit.attack}">5</span> ATK
+                            &nbsp;·&nbsp;
+                            <span th:text="${recruit.defense}">5</span> DEF
+                        </div>
+                        <form th:action="@{/inn/recruit}" method="post" style="margin-top:0.5rem;">
+                            <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                            <input type="hidden" name="heroId" th:value="${recruit.id}"/>
+                            <button type="submit"
+                                    th:disabled="${permanentHeroCount >= 5}"
+                                    th:class="${permanentHeroCount < 5} ? 'btn btn-primary btn-full' : 'btn btn-ghost btn-full'"
+                                    th:text="${recruit.level == 1} ? 'Recruit — Free' : 'Recruit — ' + ${(recruit.level - 1) * 200} + ' g'">
+                                Recruit
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div th:if="${availableRecruits == null or #lists.isEmpty(availableRecruits)}"
+                     style="font-family:'Cinzel',serif; font-size:0.8rem;
+                                    color:var(--text-muted); text-align:center; padding:1rem 0;">
+                    No heroes available for hire.
+                </div>
+
+                <!-- Continue -->
+                <form th:action="@{/inn/continue}" method="post" style="margin-top:auto;">
+                    <input type="hidden" name="_csrf" th:value="${_csrf.token}"/>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        ➜ &nbsp; Continue to Next Room
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>

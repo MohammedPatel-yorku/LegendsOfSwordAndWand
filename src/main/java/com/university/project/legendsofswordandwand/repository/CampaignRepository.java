@@ -29,4 +29,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
   @Query(
       "SELECT c FROM Campaign c WHERE c.owner.username = :username AND c.active = false ORDER BY c.id DESC")
   List<Campaign> findCompletedByOwnerUsername(@Param("username") String username);
+
+  @Query("SELECT c FROM Campaign c WHERE c.active = false AND c.score > 0 ORDER BY c.score DESC")
+  List<Campaign> findTopScores();
 }

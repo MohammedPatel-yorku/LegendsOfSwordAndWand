@@ -4,6 +4,7 @@ import com.university.project.legendsofswordandwand.dto.response.CampaignViewInf
 import com.university.project.legendsofswordandwand.dto.response.CompleteCampaignInfo;
 import com.university.project.legendsofswordandwand.dto.response.ProfileInfo;
 import com.university.project.legendsofswordandwand.model.Campaign;
+import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.enums.RoomType;
 import com.university.project.legendsofswordandwand.repository.CampaignRepository;
@@ -39,6 +40,7 @@ class CampaignProgressServiceImpl implements ICampaignProgressService {
 
     campaign.setCurrentRoom(campaign.getCurrentRoom() + 1);
     campaign.setLastRoomType(roomType);
+    campaign.setRoomPending(true);
     campaignRepository.save(campaign);
 
     return roomType;
@@ -61,14 +63,22 @@ class CampaignProgressServiceImpl implements ICampaignProgressService {
 
   @Override
   public CampaignViewInfo getCampaignViewData(String username) {
-
     Campaign campaign = campaignService.getActiveCampaign(username);
-
+    List<Hero> permanentHeroes =
+        campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).toList();
     return new CampaignViewInfo(
         campaign.getId(),
         campaign.getCurrentRoom(),
         campaign.getParty().getGold(),
-        campaign.getParty().getHeroes());
+        permanentHeroes);
+  }
+
+  @Override
+  public void clearRoomPending(String username) {
+
+    Campaign campaign = campaignService.getActiveCampaign(username);
+    campaign.setRoomPending(false);
+    campaignRepository.save(campaign);
   }
 
   @Override
@@ -83,7 +93,7 @@ class CampaignProgressServiceImpl implements ICampaignProgressService {
         campaign.getId(),
         campaign.getScore(),
         campaign.getParty().getGold(),
-        campaign.getParty().getHeroes(),
+        campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).toList(),
         savedParties.size() >= 5,
         savedParties);
   }
