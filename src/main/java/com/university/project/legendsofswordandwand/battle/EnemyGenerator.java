@@ -27,7 +27,7 @@ public class EnemyGenerator {
    */
   private enum Archetype {
     GLASS_CANNON("glass cannon", 7, 3, 0, 0, 35, 12),
-    TANK("tank", 3, 2, 1, 2, 90, 25),
+    TANK("tank", 3, 2, 2, 2, 90, 25),
     BALANCED("balanced", 6, 2, 1, 1, 50, 18),
     SWIFT("swift", 7, 3, 0, 1, 45, 15),
     BRUTE("brute", 7, 3, 2, 1, 60, 22);
@@ -108,10 +108,11 @@ public class EnemyGenerator {
   /**
    * Generates a randomized enemy party scaled to the player's cumulative level and party size.
    *
-   * <p>The number of enemies is randomly chosen between 1 and the smaller of 5 or {@code
-   * playerPartySize + 1}. Individual enemy levels are distributed so the party's cumulative level
-   * stays within a variance band of roughly ±20% of the player's cumulative level, slightly
-   * favouring the enemies.
+   * <p>Enemy count is at least {@code min(2, playerPartySize)} to avoid single-enemy fights
+   * against larger parties. Individual enemy levels are capped at the player's average hero
+   * level plus 2, preventing any single enemy from being dramatically overleveled.
+   * The total cumulative level stays within a ±20% variance band of the player's cumulative
+   * level, slightly favouring the enemies.
    *
    * @param playerCumulativeLevel the sum of all player hero levels
    * @param playerPartySize the number of heroes in the player's party
@@ -119,7 +120,9 @@ public class EnemyGenerator {
    */
   public List<Hero> generate(int playerCumulativeLevel, int playerPartySize) {
 
-    int count = 1 + random.nextInt(Math.min(5, playerPartySize + 1));
+    int minCount = Math.min(2, playerPartySize);
+    int maxCount = Math.min(5, playerPartySize + 1);
+    int count = minCount + random.nextInt(Math.max(1, maxCount - minCount + 1));
 
     int target = Math.max(playerCumulativeLevel + (playerCumulativeLevel / 5), count);
     int variance = Math.max(1, target / 5);
@@ -128,7 +131,7 @@ public class EnemyGenerator {
     int targetCumulativeLevel = minTarget + random.nextInt(maxTarget - minTarget + 1);
 
     int avgPartyLevel = Math.max(1, playerCumulativeLevel / Math.max(1, playerPartySize));
-    int maxIndividualLevel = Math.max(2, Math.min(avgPartyLevel * 2, targetCumulativeLevel / count + 2));
+    int maxIndividualLevel = Math.max(2, avgPartyLevel + 2);
     int[] levels = distributeLevels(count, targetCumulativeLevel, maxIndividualLevel);
 
     List<Hero> enemies = new ArrayList<>();
@@ -141,12 +144,11 @@ public class EnemyGenerator {
   /**
    * Distributes a target cumulative level across a fixed number of enemies.
    *
-   * <p>Each enemy starts at level 1. Remaining levels are randomly assigned one at a time, capped
-   * per enemy at {@code maxIndividualLevel} to keep individual levels balanced relative to party size
-   * and to prevent single overpowered enemies.
+   * <p>Each enemy starts at level 1. Remaining levels are randomly assigned one at a time,
+   * capped per enemy at {@code maxIndividualLevel} to prevent single overpowered enemies.
    *
    * @param count the number of enemies to distribute levels across
-   * @param targetCumulativeLevel the total level sum to approximate
+   * @param targetCumulativeLevel the total level sum to distribute
    * @param maxIndividualLevel the maximum level any single enemy can reach
    * @return an array of individual enemy levels
    */
@@ -155,16 +157,19 @@ public class EnemyGenerator {
     Arrays.fill(levels, 1);
 
     int remaining = targetCumulativeLevel - count;
-    int attempts = 0;
-    int distributed = 0;
 
-    while (distributed < remaining && attempts < remaining * 3) {
-      int idx = random.nextInt(count);
-      if (levels[idx] < maxIndividualLevel) {
-        levels[idx]++;
-        distributed++;
+    while (remaining > 0) {
+      // Find enemies that still have room to grow
+      List<Integer> eligible = new ArrayList<>();
+      for (int i = 0; i < count; i++) {
+        if (levels[i] < maxIndividualLevel) eligible.add(i);
       }
-      attempts++;
+      // If no enemy can grow further, stop
+      if (eligible.isEmpty()) break;
+
+      int idx = eligible.get(random.nextInt(eligible.size()));
+      levels[idx]++;
+      remaining--;
     }
 
     return levels;

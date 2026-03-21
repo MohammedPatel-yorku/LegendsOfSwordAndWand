@@ -166,7 +166,9 @@
 
     async function replayLog(cursorBefore) {
         const newEntries = state.battleLog.slice(cursorBefore);
-        logCursor = state.battleLog.length;  // advance cursor to end
+        const newHpSnaps = state.hpSnapshots ? state.hpSnapshots.slice(cursorBefore) : [];
+        const newManaSnaps = state.manaSnapshots ? state.manaSnapshots.slice(cursorBefore) : [];
+        logCursor = state.battleLog.length;
 
         const logEl = document.getElementById('battle-log');
         logEl.style.display = 'block';
@@ -179,11 +181,42 @@
             renderTurnIndicator();
             renderActions();
             setActionsDisabled(false);
-            if (state.over) setTimeout(() => window.location.href = '/battle/result', 1200);
+            if (state.over) {
+                document.querySelectorAll('form[action="/logout-check"] button')
+                    .forEach(b => { b.disabled = false; b.style.opacity = ''; b.style.cursor = ''; });
+                setTimeout(() => window.location.href = '/battle/result', 1200);
+            }
             return;
         }
 
-        for (const entry of newEntries) {
+        for (let i = 0; i < newEntries.length; i++) {
+            const entry = newEntries[i];
+            const hpSnap = newHpSnaps[i] || {};
+            const manaSnap = newManaSnaps[i] || {};
+
+            // Apply this snapshot to unit displays
+            const allUnits = [...state.playerUnits, ...state.enemyUnits];
+            const snapshotUnits = allUnits.map(u => ({
+                ...u,
+                health: hpSnap[u.battleId] !== undefined ? hpSnap[u.battleId] : u.health,
+                mana: manaSnap[u.battleId] !== undefined ? manaSnap[u.battleId] : u.mana
+            }));
+
+            const snapPlayerUnits = snapshotUnits.filter(u => !u.enemy);
+            const snapEnemyUnits = snapshotUnits.filter(u => u.enemy);
+
+            // Save prev for animation comparison
+            const prevPlayerUnits = prevState ? prevState.playerUnits : state.playerUnits;
+            const prevEnemyUnits = prevState ? prevState.enemyUnits : state.enemyUnits;
+
+            renderUnitsFromData('player-units', snapPlayerUnits, false);
+            renderUnitsFromData('enemy-units', snapEnemyUnits, true);
+            applyAnimationsFromData(
+                [...prevPlayerUnits, ...prevEnemyUnits],
+                snapshotUnits
+            );
+            prevState = { ...state, playerUnits: snapPlayerUnits, enemyUnits: snapEnemyUnits };
+
             const div = document.createElement('div');
             div.textContent = entry;
             if (!entry.startsWith('►') && !entry.startsWith('  ')) {
@@ -193,35 +226,19 @@
             while (logEl.children.length > 20) logEl.removeChild(logEl.firstChild);
             logEl.scrollTop = logEl.scrollHeight;
 
-            // Only re-render units on lines that describe stat changes
-            const isStatChange = entry.includes('dmg') || entry.includes('HP')
-                || entry.includes('restores') || entry.includes('defends')
-                || entry.includes('MP') || entry.includes('shield')
-                || entry.includes('chains') || entry.includes('hits')
-                || entry.includes('Berserker') || entry.includes('Fireball')
-                || entry.includes('Lightning') || entry.includes('Heal')
-                || entry.includes('Protect') || entry.includes('Replenish');
-
-            if (isStatChange) {
-                renderUnits('player-units', state.playerUnits, false);
-                renderUnits('enemy-units', state.enemyUnits, true);
-                applyAnimations();
-                prevState = state;
-            }
-
             await delay(350);
         }
 
+        // Final render with actual state
+        renderUnits('player-units', state.playerUnits, false);
+        renderUnits('enemy-units', state.enemyUnits, true);
         renderTurnIndicator();
         renderActions();
         setActionsDisabled(false);
 
         if (state.over) {
-            document.querySelectorAll('form[action="/logout-check"] button').forEach(b => {
-                b.disabled = false;
-                b.style.opacity = '';
-                b.style.cursor = '';
-            });
+            document.querySelectorAll('form[action="/logout-check"] button')
+                .forEach(b => { b.disabled = false; b.style.opacity = ''; b.style.cursor = ''; });
             setTimeout(() => window.location.href = '/battle/result', 1200);
         }
     }
@@ -244,6 +261,57 @@
             });
             setTimeout(() => window.location.href = '/battle/result', 1200);
         }
+    }
+
+    function renderUnitsFromData(containerId, units, isEnemy) {
+        const el = document.getElementById(containerId);
+        el.innerHTML = units.map(u => {
+            const isActive = String(u.battleId) === String(state.activeUnitBattleId);
+            const hpPct = u.maxHealth > 0 ? Math.max(0, u.health * 100 / u.maxHealth) : 0;
+            const mpPct = u.maxMana > 0 ? Math.max(0, u.mana * 100 / u.maxMana) : 0;
+            const deadClass = u.health <= 0 ? ' dead' : '';
+            const activeClass = isActive ? ' active-unit' : '';
+            const side = isEnemy ? 'enemy' : 'player';
+            return `
+        <div class="unit-card ${side}${deadClass}${activeClass}" data-id="${u.battleId}">
+            <div class="unit-card-header">
+                <span class="unit-name">${u.name}</span>
+                <span class="unit-level">Lv ${u.level}</span>
+            </div>
+            <div class="stat-bar-row">
+                <div class="stat-bar-label"><span>HP</span><span>${u.health} / ${u.maxHealth}</span></div>
+                <div class="stat-bar"><div class="stat-bar-fill hp" style="width:${hpPct}%"></div></div>
+            </div>
+            ${(!isEnemy || state.pvp) && u.maxMana > 0 ? `
+            <div class="stat-bar-row">
+                <div class="stat-bar-label"><span>MP</span><span>${u.mana} / ${u.maxMana}</span></div>
+                <div class="stat-bar"><div class="stat-bar-fill mana" style="width:${mpPct}%"></div></div>
+            </div>` : ''}
+            <div style="margin-top:0.4rem; font-family:'Cinzel',serif; font-size:0.7rem;
+                        color:var(--text-secondary); display:flex; gap:1rem;">
+                <span>⚔ ${u.attack} ATK</span>
+                <span>🛡 ${u.defense} DEF</span>
+            </div>
+        </div>`;
+        }).join('');
+    }
+
+    function applyAnimationsFromData(prevUnits, currUnits) {
+        currUnits.forEach(curr => {
+            const prev = prevUnits.find(p => String(p.battleId) === String(curr.battleId));
+            if (!prev) return;
+            const el = document.querySelector(`[data-id="${curr.battleId}"]`);
+            if (!el) return;
+            if (curr.health < prev.health) {
+                el.classList.remove('flash-damage', 'flash-heal');
+                void el.offsetWidth;
+                el.classList.add('flash-damage');
+            } else if (curr.health > prev.health) {
+                el.classList.remove('flash-damage', 'flash-heal');
+                void el.offsetWidth;
+                el.classList.add('flash-heal');
+            }
+        });
     }
 
     function delay(ms) {
