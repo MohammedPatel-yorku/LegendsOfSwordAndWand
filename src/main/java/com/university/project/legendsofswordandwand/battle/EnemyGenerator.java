@@ -27,10 +27,10 @@ public class EnemyGenerator {
    */
   private enum Archetype {
     GLASS_CANNON("glass cannon", 7, 3, 0, 0, 35, 12),
-    TANK("tank", 3, 2, 5, 3, 90, 25),
-    BALANCED("balanced", 6, 3, 1, 1, 50, 18),
+    TANK("tank", 3, 2, 2, 2, 90, 25),
+    BALANCED("balanced", 6, 2, 1, 1, 50, 18),
     SWIFT("swift", 7, 3, 0, 1, 45, 15),
-    BRUTE("brute", 7, 3, 3, 1, 60, 22);
+    BRUTE("brute", 7, 3, 2, 1, 60, 22);
 
     final String label;
     final int atkBase, atkScale, defBase, defScale, hpBase, hpScale;
@@ -52,14 +52,32 @@ public class EnemyGenerator {
       this.hpScale = hpScale;
     }
 
+    /**
+     * Returns the attack stat for a unit of the given level.
+     *
+     * @param level the unit's level
+     * @return the computed attack value
+     */
     int attack(int level) {
       return atkBase + (level - 1) * atkScale;
     }
 
+    /**
+     * Returns the defense stat for a unit of the given level.
+     *
+     * @param level the unit's level
+     * @return the computed defense value
+     */
     int defense(int level) {
       return defBase + (level - 1) * defScale;
     }
 
+    /**
+     * Returns the maximum health for a unit of the given level.
+     *
+     * @param level the unit's level
+     * @return the computed HP value
+     */
     int hp(int level) {
       return hpBase + (level - 1) * hpScale;
     }
@@ -87,6 +105,18 @@ public class EnemyGenerator {
     }
   }
 
+  /**
+   * Generates a randomized enemy party scaled to the player's cumulative level and party size.
+   *
+   * <p>The number of enemies is randomly chosen between 1 and the smaller of 5 or {@code
+   * playerPartySize + 1}. Individual enemy levels are distributed so the party's cumulative level
+   * stays within a variance band of roughly ±20% of the player's cumulative level, slightly
+   * favouring the enemies.
+   *
+   * @param playerCumulativeLevel the sum of all player hero levels
+   * @param playerPartySize the number of heroes in the player's party
+   * @return a list of generated enemy {@link Hero} instances
+   */
   public List<Hero> generate(int playerCumulativeLevel, int playerPartySize) {
 
     int count = 1 + random.nextInt(Math.min(5, playerPartySize + 1));
@@ -106,12 +136,21 @@ public class EnemyGenerator {
     return enemies;
   }
 
+  /**
+   * Distributes a target cumulative level across a fixed number of enemies.
+   *
+   * <p>Each enemy starts at level 1. Remaining levels are randomly assigned one at a time, capped
+   * per enemy to keep individual levels balanced relative to party size.
+   *
+   * @param count the number of enemies to distribute levels across
+   * @param targetCumulativeLevel the total level sum to approximate
+   * @return an array of individual enemy levels
+   */
   private int[] distributeLevels(int count, int targetCumulativeLevel) {
     int[] levels = new int[count];
     Arrays.fill(levels, 1);
 
-    // Cap individual level inversely to count
-    int maxIndividualLevel = Math.max(2, 12 - (count * 2));
+    int maxIndividualLevel = Math.max(10, targetCumulativeLevel / Math.max(1, count - 1));
 
     int remaining = targetCumulativeLevel - count;
     int attempts = 0;
@@ -129,6 +168,13 @@ public class EnemyGenerator {
     return levels;
   }
 
+  /**
+   * Builds a single enemy {@link Hero} of the given level with a randomly chosen {@link EnemyType}
+   * and its associated {@link Archetype} stats.
+   *
+   * @param level the level to build the enemy at
+   * @return a fully initialised enemy {@link Hero}
+   */
   private Hero buildEnemy(int level) {
     EnemyType type = EnemyType.values()[random.nextInt(EnemyType.values().length)];
     Archetype a = type.archetype;

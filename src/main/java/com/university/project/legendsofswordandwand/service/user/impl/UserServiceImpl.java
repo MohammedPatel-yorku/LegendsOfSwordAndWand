@@ -20,6 +20,17 @@ class UserServiceImpl implements IUserService {
   private final UserRepository userRepository;
   private final CampaignRepository campaignRepository;
 
+  /**
+   * Assembles and returns dashboard summary information for the given user.
+   *
+   * <p>If the user has an active campaign, the dashboard reflects that campaign's party stats. If
+   * the user has no active campaign but has a saved party, the most recently saved party's stats
+   * are shown instead. Party size counts only permanent (non-temporary) heroes.
+   *
+   * @param username the username of the player
+   * @return a {@link DashboardInfo} populated with the user's current status
+   * @throws RuntimeException if the user is not found
+   */
   @Override
   public DashboardInfo getDashboardInfo(String username) {
 
@@ -57,6 +68,13 @@ class UserServiceImpl implements IUserService {
     return new DashboardInfo(username, hasParty, hasCampaign, partySize, cumulativeLevel, gold);
   }
 
+  /**
+   * Returns the ID of the user with the given username.
+   *
+   * @param username the username to look up
+   * @return the user's ID
+   * @throws RuntimeException if no user exists with the given username
+   */
   @Override
   public Long getUserIdByUsername(String username) {
 

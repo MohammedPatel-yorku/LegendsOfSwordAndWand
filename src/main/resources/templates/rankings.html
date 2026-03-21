@@ -188,6 +188,54 @@
             </div>
         </div>
 
+        <div class="divider" style="margin-top:2rem;">⚔ PvP League Standings</div>
+
+        <div th:if="${#lists.isEmpty(pvpStandings)}"
+             style="text-align:center; color:var(--text-muted); font-style:italic; padding:1rem 0;">
+            No PvP battles have been played yet.
+        </div>
+
+        <div th:unless="${#lists.isEmpty(pvpStandings)}" style="overflow-x:auto;">
+            <table class="hof-table" style="width:100%;">
+                <thead>
+                <tr>
+                    <th style="width:3.5rem; text-align:center;">Rank</th>
+                    <th>Player</th>
+                    <th style="text-align:center;">W</th>
+                    <th style="text-align:center;">L</th>
+                    <th style="text-align:center;">Games</th>
+                    <th style="text-align:center;">Win %</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="entry : ${pvpStandings}"
+                    th:class="${entry.username() == username} ? 'hof-row-own' : ''">
+                    <td style="text-align:center;">
+                        <span class="hof-rank" th:if="${entry.rank() == 1}">🥇</span>
+                        <span class="hof-rank" th:if="${entry.rank() == 2}">🥈</span>
+                        <span class="hof-rank" th:if="${entry.rank() == 3}">🥉</span>
+                        <span class="hof-rank-num" th:if="${entry.rank() > 3}"
+                              th:text="${entry.rank()}">4</span>
+                    </td>
+                    <td>
+                        <div th:text="${entry.username()}"
+                             th:class="${entry.username() == username} ? 'hof-username-own' : 'hof-username'">
+                            Player
+                        </div>
+                    </td>
+                    <td style="text-align:center; color:#80c080; font-family:'Cinzel',serif;"
+                        th:text="${entry.wins()}">0</td>
+                    <td style="text-align:center; color:#e07070; font-family:'Cinzel',serif;"
+                        th:text="${entry.losses()}">0</td>
+                    <td style="text-align:center; color:var(--text-secondary);"
+                        th:text="${entry.totalGames()}">0</td>
+                    <td style="text-align:center; color:var(--gold-bright); font-family:'Cinzel',serif;"
+                        th:text="${entry.winRate()} + '%'">0%</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
         <div style="margin-top:1.5rem; text-align:center;">
             <a href="/dashboard" class="btn btn-ghost" style="font-size:0.75rem;">
                 ← Back to Dashboard

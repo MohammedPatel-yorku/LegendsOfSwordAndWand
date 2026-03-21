@@ -4,9 +4,46 @@ import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.model.enums.HybridClass;
 import org.springframework.stereotype.Component;
 
+/**
+ * Spring component responsible for resolving the {@link HybridClass} that results from combining
+ * two {@link HeroClass} values.
+ *
+ * <p>When both classes are the same, a pure specialisation is returned. When the classes differ,
+ * the combination maps to a unique hybrid archetype.
+ */
 @Component
 public class HybridClassResolver {
 
+  /**
+   * Resolves the {@link HybridClass} for the given pair of {@link HeroClass} values.
+   *
+   * <p>The resolution is order-independent: {@code resolve(ORDER, CHAOS)} and {@code resolve(CHAOS,
+   * ORDER)} return the same result. If both classes are identical, the pure specialisation for that
+   * class is returned:
+   *
+   * <ul>
+   *   <li>{@code ORDER + ORDER} → {@code PRIEST}
+   *   <li>{@code CHAOS + CHAOS} → {@code INVOKER}
+   *   <li>{@code WARRIOR + WARRIOR} → {@code KNIGHT}
+   *   <li>{@code MAGE + MAGE} → {@code WIZARD}
+   * </ul>
+   *
+   * Cross-class combinations resolve as follows:
+   *
+   * <ul>
+   *   <li>{@code ORDER + CHAOS} → {@code HERETIC}
+   *   <li>{@code ORDER + WARRIOR} → {@code PALADIN}
+   *   <li>{@code ORDER + MAGE} → {@code PROPHET}
+   *   <li>{@code CHAOS + WARRIOR} → {@code ROGUE}
+   *   <li>{@code CHAOS + MAGE} → {@code SORCERER}
+   *   <li>{@code WARRIOR + MAGE} → {@code WARLOCK}
+   * </ul>
+   *
+   * @param primary the hero's primary {@link HeroClass}
+   * @param secondary the hero's secondary {@link HeroClass}
+   * @return the resolved {@link HybridClass}
+   * @throws IllegalArgumentException if the combination does not map to any known hybrid
+   */
   public HybridClass resolve(HeroClass primary, HeroClass secondary) {
 
     HeroClass a = primary.ordinal() <= secondary.ordinal() ? primary : secondary;
