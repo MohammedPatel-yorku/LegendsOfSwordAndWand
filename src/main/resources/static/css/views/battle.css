@@ -1,9 +1,18 @@
 /* ── Battle View ────────────────────────────────────────── */
-.battle-layout {
+.battle-layout-new {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
+    grid-template-columns: 1fr 380px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.battle-units-col {
+    min-width: 0;
+}
+
+.battle-actions-col {
+    position: sticky;
+    top: 1rem;
 }
 
 .battle-side-label {
@@ -188,7 +197,11 @@
 .result-win  { color: var(--gold-bright); text-shadow: var(--glow-gold); }
 .result-lose { color: var(--crimson-bright); text-shadow: var(--glow-red); }
 
-@media (max-width: 700px) {
-    .battle-layout  { grid-template-columns: 1fr; }
-    .action-buttons { grid-template-columns: 1fr; }
+@media (max-width: 800px) {
+    .battle-layout-new {
+        grid-template-columns: 1fr;
+    }
+    .battle-actions-col {
+        position: static;
+    }
 }

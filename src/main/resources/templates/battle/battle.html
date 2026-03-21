@@ -42,28 +42,32 @@
         <!-- Turn indicator -->
         <div id="turn-indicator" class="turn-indicator player-turn">Loading...</div>
 
-        <!-- Battle layout -->
-        <div class="battle-layout">
-            <div>
+        <!-- Battle layout — units left, actions right -->
+        <div class="battle-layout-new">
+
+            <!-- LEFT: both unit panels stacked -->
+            <div class="battle-units-col">
                 <div class="battle-side-label" th:text="${isPvp} ? 'Challenger' : 'Your Party'">Your Party</div>
                 <div id="player-units"></div>
-            </div>
-            <div>
-                <div class="battle-side-label"  th:text="${isPvp} ? 'Defender' : 'Enemies'">Enemies</div>
+
+                <div class="battle-side-label" style="margin-top:1rem;"
+                     th:text="${isPvp} ? 'Defender' : 'Enemies'">Enemies</div>
                 <div id="enemy-units"></div>
             </div>
-        </div>
 
-        <!-- Battle log -->
-        <div id="battle-log"
-             style="margin:1rem 0; padding:0.75rem; background:rgba(0,0,0,0.3);
+            <!-- RIGHT: action panel + log -->
+            <div class="battle-actions-col">
+                <div id="action-panel" class="action-panel"></div>
+
+                <div id="battle-log"
+                     style="margin-top:1rem; padding:0.75rem; background:rgba(0,0,0,0.3);
                     border:1px solid var(--border-dim); font-family:monospace;
                     font-size:0.75rem; color:var(--text-secondary);
-                    max-height:150px; overflow-y:auto; display:none;">
-        </div>
+                    max-height:200px; overflow-y:auto; display:none;">
+                </div>
+            </div>
 
-        <!-- Action panel -->
-        <div id="action-panel" class="action-panel"></div>
+        </div>
     </div>
 </div>
 
@@ -203,6 +207,11 @@
         setActionsDisabled(false);
 
         if (state.over) {
+            document.querySelectorAll('form[action="/logout-check"] button').forEach(b => {
+                b.disabled = false;
+                b.style.opacity = '';
+                b.style.cursor = '';
+            });
             setTimeout(() => window.location.href = '/battle/result', 1200);
         }
     }
@@ -217,7 +226,14 @@
         renderLog();
         renderActions();
         setActionsDisabled(false);
-        if (state.over) setTimeout(() => window.location.href = '/battle/result', 1200);
+        if (state.over) {
+            document.querySelectorAll('form[action="/logout-check"] button').forEach(b => {
+                b.disabled = false;
+                b.style.opacity = '';
+                b.style.cursor = '';
+            });
+            setTimeout(() => window.location.href = '/battle/result', 1200);
+        }
     }
 
     function delay(ms) {
@@ -423,6 +439,12 @@
 
     // ── Boot ───────────────────────────────────────────────────────────────
     fetchState();
+    document.querySelectorAll('form[action="/logout-check"] button').forEach(b => {
+        b.disabled = true;
+        b.title = 'Cannot log out during a battle';
+        b.style.opacity = '0.4';
+        b.style.cursor = 'not-allowed';
+    });
 </script>
 </body>
 </html>
