@@ -184,20 +184,30 @@
         }
 
         for (const entry of newEntries) {
-            renderUnits('player-units', state.playerUnits, false);
-            renderUnits('enemy-units', state.enemyUnits, true);
-            applyAnimations();
-            prevState = state;
-
             const div = document.createElement('div');
             div.textContent = entry;
             if (!entry.startsWith('►') && !entry.startsWith('  ')) {
                 div.style.color = 'var(--crimson-bright)';
             }
             logEl.appendChild(div);
-            // Keep DOM trimmed to last 20 visible lines only
             while (logEl.children.length > 20) logEl.removeChild(logEl.firstChild);
             logEl.scrollTop = logEl.scrollHeight;
+
+            // Only re-render units on lines that describe stat changes
+            const isStatChange = entry.includes('dmg') || entry.includes('HP')
+                || entry.includes('restores') || entry.includes('defends')
+                || entry.includes('MP') || entry.includes('shield')
+                || entry.includes('chains') || entry.includes('hits')
+                || entry.includes('Berserker') || entry.includes('Fireball')
+                || entry.includes('Lightning') || entry.includes('Heal')
+                || entry.includes('Protect') || entry.includes('Replenish');
+
+            if (isStatChange) {
+                renderUnits('player-units', state.playerUnits, false);
+                renderUnits('enemy-units', state.enemyUnits, true);
+                applyAnimations();
+                prevState = state;
+            }
 
             await delay(350);
         }

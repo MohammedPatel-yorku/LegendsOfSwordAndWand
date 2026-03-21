@@ -54,13 +54,13 @@ public final class AbilityHelper {
    * Calculates the net damage dealt by an attacker to a defender.
    *
    * <p>Damage is computed as the attacker's attack stat minus the defender's defense stat, with a
-   * minimum of {@code 0}.
+   * minimum of {@code 1}.
    *
    * @param attacker the {@link BattleUnit} dealing the damage
    * @param defender the {@link BattleUnit} receiving the damage
    * @return the non-negative net damage value
    */
   public static int calculateDamage(BattleUnit attacker, BattleUnit defender) {
-    return Math.max(0, attacker.getHero().getAttack() - defender.getHero().getDefense());
+    return Math.max(1, attacker.getHero().getAttack() - defender.getHero().getDefense());
   }
 }
