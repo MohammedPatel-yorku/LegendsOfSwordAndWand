@@ -2,7 +2,10 @@ package com.university.project.legendsofswordandwand.service.user.impl;
 
 import com.university.project.legendsofswordandwand.dto.response.HallOfFameEntry;
 import com.university.project.legendsofswordandwand.dto.response.ProfileInfo;
-import com.university.project.legendsofswordandwand.dto.response.ProfileInfo.*;
+import com.university.project.legendsofswordandwand.dto.response.ProfileInfo.CampaignResultInfo;
+import com.university.project.legendsofswordandwand.dto.response.ProfileInfo.HeroInfo;
+import com.university.project.legendsofswordandwand.dto.response.ProfileInfo.PartyInfo;
+import com.university.project.legendsofswordandwand.dto.response.PvPStandingEntry;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
@@ -119,6 +122,28 @@ class ProfileServiceImpl implements IProfileService {
               cumulativeLevel,
               c.getParty().getGold()));
     }
+    return entries;
+  }
+
+  @Override
+  public List<PvPStandingEntry> getPvPStandings() {
+
+    List<User> users = userRepository.findPvPStandings();
+    List<PvPStandingEntry> entries = new ArrayList<>();
+
+    for (int i = 0; i < users.size(); i++) {
+      User u = users.get(i);
+      int total = u.getPvpWins() + u.getPvpLosses();
+      int winRate = total > 0 ? (u.getPvpWins() * 100 / total) : 0;
+      entries.add(new PvPStandingEntry(
+              i + 1,
+              u.getUsername(),
+              u.getPvpWins(),
+              u.getPvpLosses(),
+              total,
+              winRate));
+    }
+
     return entries;
   }
 }

@@ -17,8 +17,8 @@ public class RankingsController {
   private final IProfileService profileService;
 
   /**
-   * Serves the rankings page, populating the model with hall of fame entries and the current user's
-   * username.
+   * Serves the rankings page, populating the model with hall of fame entries, pvp standing entries
+   * and the current user's username.
    *
    * @param authentication the current user's authentication
    * @param model the Spring MVC model
@@ -28,6 +28,7 @@ public class RankingsController {
   public String rankingsPage(Authentication authentication, Model model) {
     if (authentication == null) return "redirect:/login";
     model.addAttribute("entries", profileService.getHallOfFame());
+    model.addAttribute("pvpStandings", profileService.getPvPStandings());
     model.addAttribute("username", authentication.getName());
     return "rankings";
   }
