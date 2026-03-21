@@ -45,11 +45,11 @@
         <!-- Battle layout -->
         <div class="battle-layout">
             <div>
-                <div class="battle-side-label">Your Party</div>
+                <div class="battle-side-label" th:text="${isPvp} ? 'Challenger' : 'Your Party'">Your Party</div>
                 <div id="player-units"></div>
             </div>
             <div>
-                <div class="battle-side-label">Enemies</div>
+                <div class="battle-side-label"  th:text="${isPvp} ? 'Defender' : 'Enemies'">Enemies</div>
                 <div id="enemy-units"></div>
             </div>
         </div>
@@ -264,7 +264,7 @@
                     <div class="stat-bar-label"><span>HP</span><span>${u.health} / ${u.maxHealth}</span></div>
                     <div class="stat-bar"><div class="stat-bar-fill hp" style="width:${hpPct}%"></div></div>
                 </div>
-                ${!isEnemy ? `
+                ${(!isEnemy || state.pvp) && u.maxMana > 0 ? `
                 <div class="stat-bar-row">
                     <div class="stat-bar-label"><span>MP</span><span>${u.mana} / ${u.maxMana}</span></div>
                     <div class="stat-bar"><div class="stat-bar-fill mana" style="width:${mpPct}%"></div></div>
@@ -284,7 +284,11 @@
             .find(u => String(u.battleId) === String(state.activeUnitBattleId));
         const name = active ? active.name : '...';
         el.className = 'turn-indicator ' + (state.playerTurn ? 'player-turn' : 'enemy-turn');
-        el.textContent = (state.playerTurn ? '⚔ Your Turn — ' : '💀 Enemy Turn — ') + name;
+        if (state.pvp) {
+            el.textContent = (state.playerTurn ? '⚔ Challenger\'s Turn — ' : '⚔ Defender\'s Turn — ') + name;
+        } else {
+            el.textContent = (state.playerTurn ? '⚔ Your Turn — ' : '💀 Enemy Turn — ') + name;
+        }
     }
 
     function renderLog() {
@@ -299,7 +303,8 @@
         const panel = document.getElementById('action-panel');
         if (state.over) { panel.innerHTML = ''; return; }
 
-        if (!state.playerTurn) {
+        // In PvE, auto-execute enemy turns
+        if (!state.pvp && !state.playerTurn) {
             panel.innerHTML = `
         <div style="text-align:center;">
             <p style="font-family:'Cinzel',serif;color:var(--text-secondary);font-size:0.85rem;margin-bottom:1rem;">
@@ -314,19 +319,39 @@
             return;
         }
 
-        const actor = state.playerUnits.find(u => String(u.battleId) === String(state.activeUnitBattleId));
+        // Find active unit from both sides (needed for PvP)
+        const actor = [...state.playerUnits, ...state.enemyUnits]
+            .find(u => String(u.battleId) === String(state.activeUnitBattleId));
         if (!actor) { panel.innerHTML = ''; return; }
 
         const effectiveClass = actor.primaryClass || actor.startingClass;
         const hybrid = actor.hybridClass || '';
-        const livingEnemies = state.enemyUnits.filter(u => u.alive);
 
-        let html = `<div class="action-panel-title">${actor.name} — Choose Action</div>`;
+        // In PvP, enemies of the active unit are the opposite side
+        const livingEnemies = actor.enemy
+            ? state.playerUnits.filter(u => u.alive)
+            : state.enemyUnits.filter(u => u.alive);
+
+        // Label whose turn it is
+        const turnLabel = state.pvp
+            ? (state.playerTurn ? '⚔ Challenger' : '⚔ Defender')
+            : '⚔ Your Turn';
+
+        let html = `<div class="action-panel-title">${turnLabel} — ${actor.name} — Choose Action</div>`;
         html += `<div class="action-buttons">`;
         html += btn('ghost', '🛡 Defend', `sendAction({action:'DEFEND'})`);
         html += btn('ghost', '⏳ Wait', `sendAction({action:'WAIT'})`);
+        if (state.pvp) {
+            html += `<form action="/battle/forfeit" method="post" style="width:100%;">
+                <input type="hidden" name="_csrf" value="${CSRF_TOKEN}"/>
+                <button type="submit" class="btn btn-ghost btn-full"
+                        style="color:var(--crimson-bright); margin-top:0.3rem;"
+                        onclick="return confirm('Forfeit the battle? This counts as a loss.')">
+                    ✕ Forfeit Battle
+                </button>
+            </form>`;
+        }
 
-        // ORDER abilities — Heretic gets FireShield instead of Protect
         if (effectiveClass === 'ORDER') {
             const protectCost = 25;
             if (actor.mana >= protectCost) {
@@ -339,7 +364,6 @@
                 html += btn('primary', '✦ Heal', `sendAction({action:'CAST',abilityIndex:1})`);
         }
 
-        // MAGE abilities — Wizard pays 40 instead of 80
         if (effectiveClass === 'MAGE') {
             const replenishCost = (hybrid === 'WIZARD') ? 40 : 80;
             if (actor.mana >= replenishCost)

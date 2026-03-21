@@ -31,19 +31,21 @@ public class PvPController {
   public String pvpPage(Authentication authentication, Model model) {
     if (authentication == null) return "redirect:/login";
     User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
-    model.addAttribute("savedParties",
-            user.getParties().stream().filter(Party::isSaved).toList());
-    model.addAttribute("pendingReceived",
-            pvpInvitationRepository.findPendingByReceiverUsername(authentication.getName()));
-    model.addAttribute("pendingSent",
-            pvpInvitationRepository.findPendingBySenderUsername(authentication.getName()));
+    model.addAttribute("savedParties", user.getParties().stream().filter(Party::isSaved).toList());
+    model.addAttribute(
+        "pendingReceived",
+        pvpInvitationRepository.findPendingByReceiverUsername(authentication.getName()));
+    model.addAttribute(
+        "pendingSent",
+        pvpInvitationRepository.findPendingBySenderUsername(authentication.getName()));
     return "pvp/lobby";
   }
 
   @PostMapping("/invite")
-  public String sendInvite(Authentication authentication,
-                           @RequestParam String enemyUsername,
-                           RedirectAttributes redirectAttributes) {
+  public String sendInvite(
+      Authentication authentication,
+      @RequestParam String enemyUsername,
+      RedirectAttributes redirectAttributes) {
     if (authentication == null) return "redirect:/login";
     try {
       pvpService.createInvitation(authentication.getName(), enemyUsername);
@@ -55,28 +57,27 @@ public class PvPController {
   }
 
   @PostMapping("/accept/{inviteId}")
-  public String acceptInvite(@PathVariable Long inviteId,
-                             Authentication authentication,
-                             Model model) {
+  public String acceptInvite(
+      @PathVariable Long inviteId, Authentication authentication, Model model) {
     if (authentication == null) return "redirect:/login";
     pvpService.acceptInvitation(inviteId);
     User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
     model.addAttribute("inviteId", inviteId);
     model.addAttribute("step", 1); // receiver picks first
-    model.addAttribute("savedParties",
-            user.getParties().stream().filter(Party::isSaved).toList());
+    model.addAttribute("savedParties", user.getParties().stream().filter(Party::isSaved).toList());
     return "pvp/select-party";
   }
 
   @PostMapping("/start")
-  public String startBattle(@RequestParam Long inviteId,
-                            @RequestParam(required = false) Long senderPartyId,
-                            @RequestParam(required = false) Long receiverPartyId,
-                            @RequestParam int step,
-                            Authentication authentication,
-                            HttpSession session,
-                            Model model,
-                            RedirectAttributes redirectAttributes) {
+  public String startBattle(
+      @RequestParam Long inviteId,
+      @RequestParam(required = false) Long senderPartyId,
+      @RequestParam(required = false) Long receiverPartyId,
+      @RequestParam int step,
+      Authentication authentication,
+      HttpSession session,
+      Model model,
+      RedirectAttributes redirectAttributes) {
     if (authentication == null) return "redirect:/login";
 
     if (step == 2) {
@@ -87,14 +88,15 @@ public class PvPController {
       model.addAttribute("inviteId", inviteId);
       model.addAttribute("step", 2);
       model.addAttribute("receiverPartyId", receiverPartyId);
-      model.addAttribute("savedParties",
-              sender.getParties().stream().filter(Party::isSaved).toList());
+      model.addAttribute(
+          "savedParties", sender.getParties().stream().filter(Party::isSaved).toList());
       return "pvp/select-party";
     }
 
     // step == 3: both parties chosen, start the battle
     try {
-      BattleState state = battleService.initializePvPBattle(senderPartyId, receiverPartyId, inviteId);
+      BattleState state =
+          battleService.initializePvPBattle(senderPartyId, receiverPartyId, inviteId);
       session.setAttribute("battleState", state);
       return "redirect:/battle";
     } catch (Exception e) {

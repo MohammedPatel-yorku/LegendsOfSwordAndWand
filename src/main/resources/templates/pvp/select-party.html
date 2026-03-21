@@ -40,11 +40,11 @@
 
                 <button type="submit" class="btn btn-primary btn-full"
                         style="text-align:left; padding:1rem 1.2rem;">
-                    <div style="font-family:'Cinzel',serif; font-size:0.85rem; color:var(--gold-bright); margin-bottom:0.3rem;">
+                    <div style="font-family:'Cinzel',serif; font-size:0.85rem; color:#1a1217; margin-bottom:0.3rem;">
                         Party — Lv <span th:text="${party.cumulativeLevel}">0</span> total
                         · <span th:text="${party.gold}">0</span>g
                     </div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary);">
+                    <div style="font-size:0.75rem; color:#3a2a2e;">
             <span th:each="hero, i : ${party.heroes}"
                   th:if="${!hero.temporary}"
                   th:text="${hero.name} + ' (Lv ' + ${hero.level} + ')' + (!${i.last} ? ', ' : '')"></span>

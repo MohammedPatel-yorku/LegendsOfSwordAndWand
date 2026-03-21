@@ -2,71 +2,86 @@ package com.university.project.legendsofswordandwand.battle;
 
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
-import com.university.project.legendsofswordandwand.repository.PartyRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PvPBattleInitializer extends BattleInitializer {
 
-    private final Party senderParty;
-    private final Party receiverParty;
-    private final Long invitationId;
-    private final UserRepository userRepository;
+  private final Party senderParty;
+  private final Party receiverParty;
+  private final Long invitationId;
+  private final UserRepository userRepository;
 
-    public PvPBattleInitializer(Party senderParty, Party receiverParty,
-                                Long invitationId, UserRepository userRepository) {
+  public PvPBattleInitializer(
+      Party senderParty, Party receiverParty, Long invitationId, UserRepository userRepository) {
 
-        this.senderParty = senderParty;
-        this.receiverParty = receiverParty;
-        this.invitationId = invitationId;
-        this.userRepository = userRepository;
-    }
+    this.senderParty = senderParty;
+    this.receiverParty = receiverParty;
+    this.invitationId = invitationId;
+    this.userRepository = userRepository;
 
-    @Override
-    protected List<BattleUnit> buildPlayerUnits() {
+    restoreParty(senderParty);
+    restoreParty(receiverParty);
+  }
 
-        List<BattleUnit> units = new ArrayList<>();
-        long id = 1L;
+  @Override
+  protected List<BattleUnit> buildPlayerUnits() {
 
-        for (Hero hero : senderParty.getHeroes())
-            if (!hero.isTemporary())
-                units.add(new BattleUnit(id++, new HeroSnapshot(hero), false));
-        return units;
-    }
+    List<BattleUnit> units = new ArrayList<>();
+    long id = 1L;
 
-    @Override
-    protected List<BattleUnit> buildEnemyUnits() {
+    for (Hero hero : senderParty.getHeroes())
+      if (!hero.isTemporary()) units.add(new BattleUnit(id++, new HeroSnapshot(hero), false));
+    return units;
+  }
 
-        List<BattleUnit> units = new ArrayList<>();
-        long id = -1L;
+  @Override
+  protected List<BattleUnit> buildEnemyUnits() {
 
-        for (Hero hero : receiverParty.getHeroes())
-            if (!hero.isTemporary())
-                units.add(new BattleUnit(id--, new HeroSnapshot(hero), true));
-        return units;
-    }
+    List<BattleUnit> units = new ArrayList<>();
+    long id = -1L;
 
-    @Override
-    public void onBattleEnd(BattleState state) {
+    for (Hero hero : receiverParty.getHeroes())
+      if (!hero.isTemporary()) units.add(new BattleUnit(id--, new HeroSnapshot(hero), true));
+    return units;
+  }
 
-        boolean senderWon = state.getStatus() ==
-                com.university.project.legendsofswordandwand.model.enums.BattleStatus.PLAYER_WIN;
+  @Override
+  public void onBattleEnd(BattleState state) {
 
-        String winnerUsername = senderWon
-                ? senderParty.getOwner().getUsername()
-                : receiverParty.getOwner().getUsername();
-        String loserUsername = senderWon
-                ? receiverParty.getOwner().getUsername()
-                : senderParty.getOwner().getUsername();
+    boolean senderWon =
+        state.getStatus()
+            == com.university.project.legendsofswordandwand.model.enums.BattleStatus.PLAYER_WIN;
 
-        userRepository.findByUsername(winnerUsername).ifPresent(u -> {
-            u.setPvpWins(u.getPvpWins() + 1);
-            userRepository.save(u);
-        });
-        userRepository.findByUsername(loserUsername).ifPresent(u -> {
-            u.setPvpLosses(u.getPvpLosses() + 1);
-            userRepository.save(u);
-        });
-    }
+    String winnerUsername =
+        senderWon ? senderParty.getOwner().getUsername() : receiverParty.getOwner().getUsername();
+    String loserUsername =
+        senderWon ? receiverParty.getOwner().getUsername() : senderParty.getOwner().getUsername();
+
+    userRepository
+        .findByUsername(winnerUsername)
+        .ifPresent(
+            u -> {
+              u.setPvpWins(u.getPvpWins() + 1);
+              userRepository.save(u);
+            });
+    userRepository
+        .findByUsername(loserUsername)
+        .ifPresent(
+            u -> {
+              u.setPvpLosses(u.getPvpLosses() + 1);
+              userRepository.save(u);
+            });
+  }
+
+  private void restoreParty(Party party) {
+    party.getHeroes().stream()
+        .filter(h -> !h.isTemporary())
+        .forEach(
+            h -> {
+              h.setHealth(h.getMaxHealth());
+              h.setMana(h.getMaxMana());
+            });
+  }
 }

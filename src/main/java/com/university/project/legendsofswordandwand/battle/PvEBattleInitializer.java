@@ -8,49 +8,51 @@ import java.util.List;
 
 public class PvEBattleInitializer extends BattleInitializer {
 
-    private final Long campaignId;
-    private final int playerCumulativeLevel;
-    private final IPartyManagementService partyManagementService;
-    private final EnemyGenerator enemyGenerator;
+  private final Long campaignId;
+  private final int playerCumulativeLevel;
+  private final IPartyManagementService partyManagementService;
+  private final EnemyGenerator enemyGenerator;
 
-    public PvEBattleInitializer(Long campaignId, int playerCumulativeLevel,
-                                IPartyManagementService partyManagementService, EnemyGenerator enemyGenerator) {
+  public PvEBattleInitializer(
+      Long campaignId,
+      int playerCumulativeLevel,
+      IPartyManagementService partyManagementService,
+      EnemyGenerator enemyGenerator) {
 
-        this.campaignId = campaignId;
-        this.playerCumulativeLevel = playerCumulativeLevel;
-        this.partyManagementService = partyManagementService;
-        this.enemyGenerator = enemyGenerator;
+    this.campaignId = campaignId;
+    this.playerCumulativeLevel = playerCumulativeLevel;
+    this.partyManagementService = partyManagementService;
+    this.enemyGenerator = enemyGenerator;
+  }
+
+  @Override
+  protected List<BattleUnit> buildPlayerUnits() {
+
+    Party party = partyManagementService.getActiveParty(campaignId);
+    List<BattleUnit> units = new ArrayList<>();
+
+    for (Hero hero : party.getHeroes()) {
+      if (!hero.isTemporary())
+        units.add(new BattleUnit(hero.getId(), new HeroSnapshot(hero), false));
     }
+    return units;
+  }
 
-    @Override
-    protected List<BattleUnit> buildPlayerUnits() {
+  @Override
+  protected List<BattleUnit> buildEnemyUnits() {
 
-        Party party = partyManagementService.getActiveParty(campaignId);
-        List<BattleUnit> units = new ArrayList<>();
+    Party party = partyManagementService.getActiveParty(campaignId);
+    List<Hero> enemies = enemyGenerator.generate(playerCumulativeLevel, party.getHeroes().size());
+    List<BattleUnit> units = new ArrayList<>();
 
-        for (Hero hero : party.getHeroes()) {
-            if (!hero.isTemporary())
-                units.add(new BattleUnit(hero.getId(), new HeroSnapshot(hero), false));
-        }
-        return units;
-    }
+    long enemyId = -1L;
+    for (Hero enemy : enemies) units.add(new BattleUnit(enemyId--, new HeroSnapshot(enemy), true));
+    return units;
+  }
 
-    @Override
-    protected List<BattleUnit> buildEnemyUnits() {
+  @Override
+  public void onBattleEnd(BattleState state) {
 
-        Party party = partyManagementService.getActiveParty(campaignId);
-        List<Hero> enemies = enemyGenerator.generate(playerCumulativeLevel, party.getHeroes().size());
-        List<BattleUnit> units = new ArrayList<>();
-
-        long enemyId = -1L;
-        for (Hero enemy : enemies)
-            units.add(new BattleUnit(enemyId--, new HeroSnapshot(enemy), true));
-        return units;
-    }
-
-    @Override
-    public void onBattleEnd(BattleState state) {
-
-        state.setCampaignId(campaignId);
-    }
+    state.setCampaignId(campaignId);
+  }
 }
