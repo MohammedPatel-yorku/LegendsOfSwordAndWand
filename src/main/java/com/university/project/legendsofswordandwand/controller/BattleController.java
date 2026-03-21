@@ -313,7 +313,11 @@ public class BattleController {
         "battleLog",
         state.getBattleLog(),
         "pvp",
-        state.isPvp());
+        state.isPvp(),
+        "hpSnapshots",
+        state.getHpSnapshots(),
+        "manaSnapshots",
+        state.getManaSnapshots());
   }
 
   /**

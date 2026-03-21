@@ -32,12 +32,42 @@ public class BattleState implements Serializable {
   private List<String> battleLog = new ArrayList<>();
 
   /**
-   * Appends a message to the battle log.
+   * Logs a battle message and records a unit snapshot at this point in time.
+   * The snapshot list stays in sync with the battle log — index N in
+   * {@code hpSnapshots} corresponds to log entry N.
    *
-   * @param message the message to log
+   * @param message the log message to record
    */
   public void log(String message) {
     battleLog.add(message);
+
+    List<BattleUnit> all = new ArrayList<>();
+    all.addAll(playerUnits);
+    all.addAll(enemyUnits);
+    recordSnapshot(all);
+  }
+
+  private List<Map<Long, Integer>> hpSnapshots = new ArrayList<>();
+
+  private List<Map<Long, Integer>> manaSnapshots = new ArrayList<>();
+
+  /**
+   * Records a snapshot of all unit HP and mana at the current moment.
+   * Called automatically by {@link #log(String)} so each log entry has
+   * a corresponding state snapshot for step-by-step animation replay.
+   *
+   * @param allUnits all battle units (player and enemy) at this moment
+   */
+  public void recordSnapshot(List<BattleUnit> allUnits) {
+
+    Map<Long, Integer> hpSnap = new HashMap<>();
+    Map<Long, Integer> manaSnap = new HashMap<>();
+    for (BattleUnit u : allUnits) {
+      hpSnap.put(u.getBattleId(), u.getHero().getHealth());
+      manaSnap.put(u.getBattleId(), u.getHero().getMana());
+    }
+    hpSnapshots.add(hpSnap);
+    manaSnapshots.add(manaSnap);
   }
 
   /**
