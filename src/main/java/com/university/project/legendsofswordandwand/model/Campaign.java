@@ -43,6 +43,10 @@ public class Campaign {
   @Setter
   private int score = 0;
 
+  @Column(name = "has_visited_inn", nullable = false)
+  @Setter
+  private boolean hasVisitedInn = false;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "last_room_type", nullable = true)
   @Setter

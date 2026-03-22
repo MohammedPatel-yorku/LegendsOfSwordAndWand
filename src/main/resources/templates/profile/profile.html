@@ -18,8 +18,8 @@
                     <span class="user-greeting">
                         ⚔ &nbsp;<span th:text="${profile.username()}">Adventurer</span>
                     </span>
-                    <a href="/dashboard" class="btn btn-ghost" style="padding: 0.4rem 0.9rem; font-size: 0.7rem">
-                        ← Keep
+                    <a href="javascript:history.back()" class="btn btn-ghost" style="padding: 0.4rem 0.9rem; font-size: 0.7rem">
+                        ← Back
                     </a>
                 </div>
 
@@ -63,8 +63,8 @@
                             </div>
 
                             <div th:if="${!#lists.isEmpty(party.heroes())}">
-                                <div class="stat-header">
-                                    <span>Hero</span>
+                                <div class="stat-header" style="grid-template-columns: 2fr 40px 48px 40px 40px 40px;">
+                                    <span></span>
                                     <span>LV</span>
                                     <span>HP</span>
                                     <span>ATK</span>
@@ -74,7 +74,8 @@
                                 <div th:each="hero : ${party.heroes()}" class="hero-row">
                                     <div>
                                         <div class="hero-name" th:text="${hero.name()}">Hero</div>
-                                        <div class="hero-class" th:text="${hero.heroClass()}">CLASS</div>
+                                        <div class="hero-class"
+                                             th:text="${hero.hybrid()} ? ${hero.hybridClass()} : ${hero.heroClass()}">CLASS</div>
                                     </div>
                                     <div class="hero-stat" th:text="${hero.level()}">1</div>
                                     <div class="hero-stat"

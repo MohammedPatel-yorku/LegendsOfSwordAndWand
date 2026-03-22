@@ -1,6 +1,9 @@
 package com.university.project.legendsofswordandwand.dto.request;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Setter
 @Getter

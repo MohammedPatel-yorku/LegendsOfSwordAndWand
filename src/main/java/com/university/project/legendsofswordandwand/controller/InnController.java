@@ -3,6 +3,7 @@ package com.university.project.legendsofswordandwand.controller;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
+import com.university.project.legendsofswordandwand.model.enums.RoomType;
 import com.university.project.legendsofswordandwand.service.battle.IInnService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
@@ -14,9 +15,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * MVC controller handling inn-related requests, including healing, shopping, hero recruitment, and
+ * continuing the campaign after an inn visit.
+ */
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/inn")
@@ -30,11 +38,33 @@ public class InnController {
   private final ICampaignService campaignService;
   private final ICampaignProgressService campaignProgressService;
 
+  /**
+   * Serves the inn page, initialising healing, shop items, and available recruits.
+   *
+   * <p>Access is permitted if the player is retreating after a loss, if an inn room is pending, or
+   * if recruit data is already stored in the session. On the first arrival, the party is healed and
+   * recruits are generated and cached in the session by ID to avoid stale entity references on
+   * subsequent redirects. Redirects to {@code /campaign} if access conditions are not met or if an
+   * error occurs.
+   *
+   * @param authentication the current user's authentication
+   * @param model the Spring MVC model
+   * @param session the current {@link HttpSession}
+   * @return the logical view name for the inn page, or a redirect
+   */
   @GetMapping
   public String innPage(Authentication authentication, Model model, HttpSession session) {
     if (authentication == null) return "redirect:/login";
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
+
+      String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
+      boolean retreatingAfterLoss = "PLAYER_LOSE".equals(lastResult);
+      boolean innRoomPending =
+          campaign.isRoomPending() && campaign.getLastRoomType() == RoomType.INN;
+      if (!retreatingAfterLoss && !innRoomPending && session.getAttribute(RECRUITS_KEY) == null) {
+        return "redirect:/campaign";
+      }
 
       // Heal only on first arrival, not on every buy/recruit redirect
       if (session.getAttribute(RECRUITS_KEY) == null) {
@@ -88,6 +118,17 @@ public class InnController {
     return "campaign/inn";
   }
 
+  /**
+   * Handles a shop item purchase at the inn.
+   *
+   * <p>Adds a success or error flash attribute depending on whether the party had sufficient gold,
+   * then redirects back to the inn.
+   *
+   * @param authentication the current user's authentication
+   * @param itemId the ID of the shop item to purchase
+   * @param redirectAttributes used to pass flash attributes across the redirect
+   * @return a redirect to {@code /inn}
+   */
   @PostMapping("/buy")
   public String buyItem(
       Authentication authentication,
@@ -105,6 +146,15 @@ public class InnController {
     return "redirect:/inn";
   }
 
+  /**
+   * Recruits a hero from the inn's available recruits and removes them from the session list.
+   *
+   * @param authentication the current user's authentication
+   * @param heroId the ID of the hero to recruit
+   * @param session the current {@link HttpSession}
+   * @param redirectAttributes used to pass flash attributes across the redirect
+   * @return a redirect to {@code /inn}
+   */
   @PostMapping("/recruit")
   public String recruitHero(
       Authentication authentication,
@@ -131,6 +181,20 @@ public class InnController {
     return "redirect:/inn";
   }
 
+  /**
+   * Concludes the inn visit, cleans up temporary recruits, and returns to the campaign.
+   *
+   * <p>Temporary recruits are removed from the party. Session attributes for recruits, heal
+   * summary, and last battle result are cleared. If the player is continuing after a loss, the
+   * pending room is intentionally kept so they retry the same battle room. Otherwise, the pending
+   * room is cleared normally.
+   *
+   * <p>Exceptions are silently ignored to ensure the redirect always occurs.
+   *
+   * @param authentication the current user's authentication
+   * @param session the current {@link HttpSession}
+   * @return a redirect to {@code /campaign}
+   */
   @PostMapping("/continue")
   public String continueFromInn(Authentication authentication, HttpSession session) {
     if (authentication == null) return "redirect:/login";
