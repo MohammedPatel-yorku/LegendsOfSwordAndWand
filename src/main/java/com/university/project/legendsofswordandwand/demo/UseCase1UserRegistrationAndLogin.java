@@ -1,56 +1,50 @@
 package com.university.project.legendsofswordandwand.demo;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.TestPropertySource;
 
-@SpringBootApplication(scanBasePackages = "com.university.project.legendsofswordandwand")
-public class UseCase1UserRegistrationAndLogin {
+import static org.assertj.core.api.Assertions.assertThat;
 
-  public static void main(String[] args) {
-    //
-    //    System.setProperty("spring.profiles.active", "demo");
-    //
-    //    SpringApplication app = new SpringApplication(UseCase1UserRegistrationAndLogin.class);
-    //    app.setWebApplicationType(WebApplicationType.NONE);
-    //    app.setAdditionalProfiles("demo");
-    //    ConfigurableApplicationContext context = app.run(args);
-    //
-    //    UserService userService = context.getBean(UserService.class);
-    //
-    //    System.out.println("-----------------Use Case 1: User Registration and
-    // Login-----------------");
-    //
-    //    Scanner scanner = new Scanner(System.in);
-    //
-    //    System.out.println("\nTesting Registration");
-    //
-    //    System.out.print("Enter your username for registration: ");
-    //    String username = scanner.nextLine();
-    //
-    //    System.out.print("Enter your password for registration: ");
-    //    String password = scanner.nextLine();
-    //
-    //    if (userService.registerUser(username, password)) {
-    //      System.out.println("User successfully registered!");
-    //    } else {
-    //      System.out.println("User not registered!");
-    //    }
-    //
-    //    System.out.println("\nTesting Login");
-    //
-    //    System.out.print("Enter your username for login: ");
-    //    String loginUsername = scanner.nextLine();
-    //
-    //    System.out.print("Enter your password for login: ");
-    //    String loginPassword = scanner.nextLine();
-    //
-    //    if (userService.loginUser(loginUsername, loginPassword)) {
-    //      System.out.println("User logged in successfully!");
-    //    } else {
-    //      System.out.println("User not logged in!");
-    //    }
-    //
-    //    System.out.println("\n-----------------End of Demo-----------------\n\n");
-    //
-    //    context.close();
+@SpringBootTest
+@TestPropertySource(properties = "spring.profiles.active=demo")
+class UseCase1UserRegistrationAndLoginTest {
+
+  @Test
+  void applicationContextLoads() {
+    assertThat(true).isTrue();
+  }
+
+  @Test
+  void mainMethodDoesNotThrowException() {
+    assertThat(() -> UseCase1UserRegistrationAndLogin.main(new String[] {}))
+        .doesNotThrowAnyException();
+  }
+
+  @Test
+  void useCase1IsSpringBootApplication() {
+    assertThat(UseCase1UserRegistrationAndLogin.class)
+        .hasAnnotation(org.springframework.boot.autoconfigure.SpringBootApplication.class);
+  }
+
+  @Test
+  void scanBasePackagesIsConfigured() {
+    SpringBootApplication annotation =
+        UseCase1UserRegistrationAndLogin.class.getAnnotation(SpringBootApplication.class);
+    assertThat(annotation.scanBasePackages())
+        .contains("com.university.project.legendsofswordandwand");
+  }
+
+  @Test
+  void demoContextCanBeCreated() {
+    SpringApplication app = new SpringApplication(UseCase1UserRegistrationAndLogin.class);
+    ConfigurableApplicationContext context =
+        app.run(new String[] {"--spring.profiles.active=demo"});
+    assertThat(context).isNotNull();
+    assertThat(context.isActive()).isTrue();
+    context.close();
+    assertThat(context.isActive()).isFalse();
   }
 }
