@@ -1,4 +1,4 @@
-package com.university.project.legendsofswordandwand.battle;
+package com.university.project.legendsofswordandwand.battle.strategy;
 
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;

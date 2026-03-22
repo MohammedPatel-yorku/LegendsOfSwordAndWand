@@ -15,14 +15,17 @@ import java.util.List;
 public class ProtectAbility implements Ability {
 
   private final HybridClass hybridClass;
+  private final double multiplier;
 
   /**
    * Constructs a {@code ProtectAbility} for the given hybrid class.
    *
    * @param hybridClass the caster's hybrid class, used to determine the shield multiplier
    */
-  public ProtectAbility(HybridClass hybridClass) {
+  public ProtectAbility(HybridClass hybridClass, double multiplier) {
+
     this.hybridClass = hybridClass;
+    this.multiplier = multiplier;
   }
 
   /**
@@ -56,7 +59,7 @@ public class ProtectAbility implements Ability {
       List<BattleUnit> enemies,
       BattleState state) {
 
-    double multiplier = (hybridClass == HybridClass.PROPHET) ? 2.0 : 1.0;
+    double multiplier = this.multiplier;
 
     for (BattleUnit ally : allies) {
 

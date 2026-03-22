@@ -1,5 +1,7 @@
-package com.university.project.legendsofswordandwand.battle;
+package com.university.project.legendsofswordandwand.battle.initializer;
 
+import com.university.project.legendsofswordandwand.battle.BattleState;
+import com.university.project.legendsofswordandwand.battle.BattleUnit;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
 import java.util.List;
 

@@ -17,14 +17,17 @@ import java.util.List;
 public class HealAbility implements Ability {
 
   private final HybridClass hybridClass;
+  private final double multiplier;
 
   /**
    * Constructs a {@code HealAbility} for the given hybrid class.
    *
    * @param hybridClass the caster's hybrid class, used to determine heal targets and amounts
    */
-  public HealAbility(HybridClass hybridClass) {
+  public HealAbility(HybridClass hybridClass, double multiplier) {
+
     this.hybridClass = hybridClass;
+    this.multiplier = multiplier;
   }
 
   /**
@@ -59,7 +62,7 @@ public class HealAbility implements Ability {
       List<BattleUnit> enemies,
       BattleState state) {
 
-    double multiplier = (hybridClass == HybridClass.PROPHET) ? 2.0 : 1.0;
+    double multiplier = this.multiplier;
 
     if (hybridClass == HybridClass.PRIEST) {
       allies.forEach(u -> applyHeal(u.getHero(), multiplier, state));

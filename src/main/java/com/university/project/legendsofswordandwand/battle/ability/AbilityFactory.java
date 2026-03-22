@@ -2,6 +2,9 @@ package com.university.project.legendsofswordandwand.battle.ability;
 
 import com.university.project.legendsofswordandwand.battle.ability.chaos.ChainLightningAbility;
 import com.university.project.legendsofswordandwand.battle.ability.chaos.FireballAbility;
+import com.university.project.legendsofswordandwand.battle.ability.decorator.DoubleEffectDecorator;
+import com.university.project.legendsofswordandwand.battle.ability.decorator.SelfHealBeforeAttackDecorator;
+import com.university.project.legendsofswordandwand.battle.ability.decorator.StunDecorator;
 import com.university.project.legendsofswordandwand.battle.ability.mage.ReplenishAbility;
 import com.university.project.legendsofswordandwand.battle.ability.order.FireShieldAbility;
 import com.university.project.legendsofswordandwand.battle.ability.order.HealAbility;
@@ -44,7 +47,14 @@ public class AbilityFactory {
     return switch (heroClass) {
       case ORDER -> resolveOrder(hybridClass, abilityIndex);
       case CHAOS -> resolveChaos(hybridClass, abilityIndex);
-      case WARRIOR -> new BerserkerAbility(hybridClass, random);
+      case WARRIOR -> {
+        Ability base = new BerserkerAbility();
+        if (hybridClass == HybridClass.PALADIN)
+          base = new SelfHealBeforeAttackDecorator(base);
+        if (hybridClass == HybridClass.KNIGHT)
+          base = new StunDecorator(base, random);
+        yield base;
+      }
       case MAGE -> new ReplenishAbility(hybridClass);
     };
   }
@@ -63,12 +73,19 @@ public class AbilityFactory {
   private Ability resolveOrder(HybridClass hybridClass, int abilityIndex) {
 
     if (abilityIndex == 0) {
-      return hybridClass == HybridClass.HERETIC
-          ? new FireShieldAbility()
-          : new ProtectAbility(hybridClass);
+
+      if (hybridClass == HybridClass.HERETIC) return new FireShieldAbility();
+      Ability protect = new ProtectAbility(hybridClass, 1.0);
+
+      if (hybridClass == HybridClass.PROPHET)
+        protect = new DoubleEffectDecorator(protect);
+      return protect;
     }
 
-    return new HealAbility(hybridClass);
+    Ability heal = new HealAbility(hybridClass, 1.0);
+    if (hybridClass == HybridClass.PROPHET)
+      heal = new DoubleEffectDecorator(heal);
+    return heal;
   }
 
   /**

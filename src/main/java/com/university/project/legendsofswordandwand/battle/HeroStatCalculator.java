@@ -1,5 +1,6 @@
 package com.university.project.legendsofswordandwand.battle;
 
+import com.university.project.legendsofswordandwand.battle.strategy.ClassBonusStrategy;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import java.util.List;

@@ -1,6 +1,5 @@
 package com.university.project.legendsofswordandwand.battle.strategy;
 
-import com.university.project.legendsofswordandwand.battle.ClassBonusStrategy;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import org.springframework.stereotype.Component;
