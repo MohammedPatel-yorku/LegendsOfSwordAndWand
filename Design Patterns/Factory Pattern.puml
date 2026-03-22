@@ -1,25 +1,59 @@
-@startuml
-'https://plantuml.com/class-diagram
+@startuml Factory_Pattern
+skinparam classAttributeIconSize 0
 
-title Hero Creation - Factory Pattern
-
-class HeroFactory {
-    + createHero(type : HeroClass, name : String) : Hero
+interface Ability {
+    + getManaCost(): int
+    + execute(caster, target, allies, enemies, state): void
 }
 
-abstract class Hero {
-    - name : String
-    - health : int
+class AbilityFactory {
+    + resolve(heroClass: HeroClass, hybridClass: HybridClass, abilityIndex: int): Ability
+    - resolveOrder(hybridClass: HybridClass, abilityIndex: int): Ability
+    - resolveChaos(hybridClass: HybridClass, abilityIndex: int): Ability
 }
 
-class Warrior
-class Mage
-class Rogue
+class BerserkerAbility {
+  + getManaCost(): int
+  + execute(...): void
+}
 
-Hero <|-- Warrior
-Hero <|-- Mage
-Hero <|-- Rogue
+class ReplenishAbility {
+  + getManaCost(): int
+  + execute(...): void
+}
 
-HeroFactory --> Hero
+class FireballAbility {
+  + getManaCost(): int
+  + execute(...): void
+}
+
+class ChainLightningAbility {
+  + getManaCost(): int
+  + execute(...): void
+}
+
+class HealAbility {
+  + getManaCost(): int
+  + execute(...): void
+}
+
+class ProtectAbility {
+  + getManaCost(): int
+  + execute(...): void
+}
+
+class FireShieldAbility {
+  + getManaCost(): int
+  + execute(...): void
+}
+
+Ability <|.. BerserkerAbility
+Ability <|.. ReplenishAbility
+Ability <|.. FireballAbility
+Ability <|.. ChainLightningAbility
+Ability <|.. HealAbility
+Ability <|.. ProtectAbility
+Ability <|.. FireShieldAbility
+AbilityFactory ..> Ability : <<creates>>
 
 @enduml

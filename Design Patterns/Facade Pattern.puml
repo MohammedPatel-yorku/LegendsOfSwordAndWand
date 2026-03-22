@@ -1,0 +1,56 @@
+@startuml Facade_Pattern
+skinparam classAttributeIconSize 0
+
+package "Controllers (clients)" {
+  class BattleController
+  class CampaignController
+}
+
+package "Facade Layer" {
+  interface IBattleService {
+    + initializePvEBattle(campaignId, level): BattleState
+    + initializePvPBattle(senderPartyId, receiverPartyId, invitationId): BattleState
+    + executePlayerAction(state, actionType, targetId, abilityIndex): BattleState
+    + executeEnemyTurn(state): BattleState
+    + checkBattleStatus(state): BattleStatus
+    + awardBattleRewards(state): Map
+    + applyBattleLoss(state): void
+    + updatePvPResult(state): void
+  }
+
+  class BattleServiceImpl {
+    + initializePvEBattle(...): BattleState
+    + executePlayerAction(...): BattleState
+    - executeAttack(attacker, defender, state): void
+    - executeDefend(hero): void
+    - decideEnemyAction(actor, targets, state): void
+    - advanceTurn(state): BattleState
+  }
+}
+
+package "Subsystem" {
+  class BattleInitializer
+  class AbilityExecutor
+  class DamageCalculator
+  class EnemyGenerator
+  class HeroStatCalculator
+  interface IHeroService
+  interface IPartyManagementService
+}
+
+BattleController --> IBattleService
+CampaignController --> IBattleService
+IBattleService <|.. BattleServiceImpl
+BattleServiceImpl --> BattleInitializer : creates
+BattleServiceImpl --> AbilityExecutor : delegates to
+BattleServiceImpl --> DamageCalculator : delegates to
+BattleServiceImpl --> EnemyGenerator : delegates to
+BattleServiceImpl --> IHeroService : delegates to
+BattleServiceImpl --> IPartyManagementService : delegates to
+
+note bottom of IBattleService
+  Clients interact only with this interface.
+  All subsystem complexity is hidden behind it.
+end note
+
+@enduml

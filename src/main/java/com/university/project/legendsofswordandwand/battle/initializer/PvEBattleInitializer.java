@@ -1,5 +1,9 @@
-package com.university.project.legendsofswordandwand.battle;
+package com.university.project.legendsofswordandwand.battle.initializer;
 
+import com.university.project.legendsofswordandwand.battle.BattleState;
+import com.university.project.legendsofswordandwand.battle.BattleUnit;
+import com.university.project.legendsofswordandwand.battle.EnemyGenerator;
+import com.university.project.legendsofswordandwand.battle.HeroSnapshot;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.service.party.IPartyManagementService;
