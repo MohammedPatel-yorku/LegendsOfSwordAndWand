@@ -51,7 +51,7 @@ class UseCase2StartPvECampaignTest {
     authService.register(registerRequest);
 
     Campaign campaign =
-        campaignService.startNewCampaign("roomUser", "Legolas", HeroClass.RANGER);
+        campaignService.startNewCampaign("roomUser", "Legolas", HeroClass.ORDER);
 
     assertThat(campaign.getCurrentRoom()).isZero();
   }

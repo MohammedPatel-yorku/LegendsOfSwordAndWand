@@ -115,6 +115,7 @@ public class CampaignController {
    *
    * <p>Redirects to {@code /battle} if the next room is a battle, or {@code /inn} otherwise.
    * Redirects to {@code /campaign} if progression fails.
+   * Redirects to {@code /campaign/complete} if 30 rooms complete.
    *
    * @param authentication the current user's authentication
    * @return a redirect to the appropriate room destination
@@ -123,6 +124,12 @@ public class CampaignController {
   public String nextRoom(Authentication authentication) {
     if (authentication == null) return "redirect:/login";
     try {
+      Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
+      if (campaign.getCurrentRoom() >= 30 && !campaign.isRoomPending()) {
+        campaignService.completeCampaign(authentication.getName());
+        return "redirect:/campaign/complete";
+      }
+
       RoomType room = campaignProgressService.enterNextRoom(authentication.getName());
       return room == RoomType.BATTLE ? "redirect:/battle" : "redirect:/inn";
     } catch (Exception e) {
