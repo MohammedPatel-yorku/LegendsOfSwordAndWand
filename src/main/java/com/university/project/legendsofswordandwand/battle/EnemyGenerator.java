@@ -108,11 +108,11 @@ public class EnemyGenerator {
   /**
    * Generates a randomized enemy party scaled to the player's cumulative level and party size.
    *
-   * <p>Enemy count is at least {@code min(2, playerPartySize)} to avoid single-enemy fights
-   * against larger parties. Individual enemy levels are capped at the player's average hero
-   * level plus 2, preventing any single enemy from being dramatically overleveled.
-   * The total cumulative level stays within a ±20% variance band of the player's cumulative
-   * level, slightly favouring the enemies.
+   * <p>Enemy count is at least {@code min(2, playerPartySize)} to avoid single-enemy fights against
+   * larger parties. Individual enemy levels are capped at the player's average hero level plus 2,
+   * preventing any single enemy from being dramatically overleveled. The total cumulative level
+   * stays within a ±20% variance band of the player's cumulative level, slightly favouring the
+   * enemies.
    *
    * @param playerCumulativeLevel the sum of all player hero levels
    * @param playerPartySize the number of heroes in the player's party
@@ -144,8 +144,8 @@ public class EnemyGenerator {
   /**
    * Distributes a target cumulative level across a fixed number of enemies.
    *
-   * <p>Each enemy starts at level 1. Remaining levels are randomly assigned one at a time,
-   * capped per enemy at {@code maxIndividualLevel} to prevent single overpowered enemies.
+   * <p>Each enemy starts at level 1. Remaining levels are randomly assigned one at a time, capped
+   * per enemy at {@code maxIndividualLevel} to prevent single overpowered enemies.
    *
    * @param count the number of enemies to distribute levels across
    * @param targetCumulativeLevel the total level sum to distribute

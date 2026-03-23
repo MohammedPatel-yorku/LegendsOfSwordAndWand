@@ -1,5 +1,7 @@
 package com.university.project.legendsofswordandwand.demo;
 
+import static org.assertj.core.api.Assertions.*;
+
 import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.dto.response.DashboardInfo;
 import com.university.project.legendsofswordandwand.model.User;
@@ -13,23 +15,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.*;
-
 @SpringBootTest
 @TestPropertySource(properties = "spring.profiles.active=demo")
 class UseCase1UserRegistrationAndLoginTest {
 
-  @Autowired
-  private IAuthService authService;
+  @Autowired private IAuthService authService;
 
-  @Autowired
-  private IUserService userService;
+  @Autowired private IUserService userService;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+  @Autowired private PasswordEncoder passwordEncoder;
 
   @BeforeEach
   void setUp() {
@@ -39,9 +35,9 @@ class UseCase1UserRegistrationAndLoginTest {
   @Test
   void userCanRegisterSuccessfully() {
     RegisterRequest request = new RegisterRequest("testUser", "password123");
-    
+
     User registeredUser = authService.register(request);
-    
+
     assertThat(registeredUser).isNotNull();
     assertThat(registeredUser.getUsername()).isEqualTo("testUser");
     assertThat(registeredUser.getId()).isNotNull();
@@ -50,9 +46,9 @@ class UseCase1UserRegistrationAndLoginTest {
   @Test
   void passwordIsEncodedAfterRegistration() {
     RegisterRequest request = new RegisterRequest("encodedUser", "myPassword");
-    
+
     User registeredUser = authService.register(request);
-    
+
     assertThat(passwordEncoder.matches("myPassword", registeredUser.getPassword())).isTrue();
     assertThat(registeredUser.getPassword()).isNotEqualTo("myPassword");
   }
@@ -61,9 +57,9 @@ class UseCase1UserRegistrationAndLoginTest {
   void duplicateUsernameThrowsException() {
     RegisterRequest request1 = new RegisterRequest("duplicateUser", "password1");
     RegisterRequest request2 = new RegisterRequest("duplicateUser", "password2");
-    
+
     authService.register(request1);
-    
+
     assertThatThrownBy(() -> authService.register(request2))
         .isInstanceOf(RuntimeException.class)
         .hasMessageContaining("Username already exists");
@@ -73,9 +69,9 @@ class UseCase1UserRegistrationAndLoginTest {
   void userCanBeFoundAfterRegistration() {
     RegisterRequest request = new RegisterRequest("findableUser", "password123");
     authService.register(request);
-    
+
     var foundUser = userRepository.findByUsername("findableUser");
-    
+
     assertThat(foundUser).isPresent();
     assertThat(foundUser.get().getUsername()).isEqualTo("findableUser");
   }
@@ -83,9 +79,9 @@ class UseCase1UserRegistrationAndLoginTest {
   @Test
   void userHasZeroWinsAndLossesAfterRegistration() {
     RegisterRequest request = new RegisterRequest("newUser", "password123");
-    
+
     User registeredUser = authService.register(request);
-    
+
     assertThat(registeredUser.getPvpWins()).isZero();
     assertThat(registeredUser.getPvpLosses()).isZero();
   }
@@ -94,9 +90,9 @@ class UseCase1UserRegistrationAndLoginTest {
   void userIdCanBeRetrievedByUsername() {
     RegisterRequest request = new RegisterRequest("userWithId", "password123");
     User registeredUser = authService.register(request);
-    
+
     Long retrievedId = userService.getUserIdByUsername("userWithId");
-    
+
     assertThat(retrievedId).isEqualTo(registeredUser.getId());
   }
 
@@ -111,9 +107,9 @@ class UseCase1UserRegistrationAndLoginTest {
   void dashboardInfoCanBeRetrievedForRegisteredUser() {
     RegisterRequest request = new RegisterRequest("dashboardUser", "password123");
     authService.register(request);
-    
+
     DashboardInfo dashboardInfo = userService.getDashboardInfo("dashboardUser");
-    
+
     assertThat(dashboardInfo).isNotNull();
     assertThat(dashboardInfo.username()).isEqualTo("dashboardUser");
     assertThat(dashboardInfo.hasParty()).isFalse();
@@ -124,9 +120,9 @@ class UseCase1UserRegistrationAndLoginTest {
   void dashboardInfoHasZeroGoldForNewUser() {
     RegisterRequest request = new RegisterRequest("newDashboardUser", "password123");
     authService.register(request);
-    
+
     DashboardInfo dashboardInfo = userService.getDashboardInfo("newDashboardUser");
-    
+
     assertThat(dashboardInfo.gold()).isZero();
     assertThat(dashboardInfo.partySize()).isZero();
     assertThat(dashboardInfo.cumulativeLevel()).isZero();
@@ -137,11 +133,11 @@ class UseCase1UserRegistrationAndLoginTest {
     RegisterRequest user1 = new RegisterRequest("user1", "pass1");
     RegisterRequest user2 = new RegisterRequest("user2", "pass2");
     RegisterRequest user3 = new RegisterRequest("user3", "pass3");
-    
+
     User registered1 = authService.register(user1);
     User registered2 = authService.register(user2);
     User registered3 = authService.register(user3);
-    
+
     assertThat(registered1.getId()).isNotEqualTo(registered2.getId());
     assertThat(registered2.getId()).isNotEqualTo(registered3.getId());
     assertThat(userRepository.count()).isEqualTo(3);
@@ -151,9 +147,10 @@ class UseCase1UserRegistrationAndLoginTest {
   void registeredUserCanLoginWithCorrectPassword() {
     RegisterRequest request = new RegisterRequest("loginUser", "correctPassword");
     User registeredUser = authService.register(request);
-    
-    boolean passwordMatches = passwordEncoder.matches("correctPassword", registeredUser.getPassword());
-    
+
+    boolean passwordMatches =
+        passwordEncoder.matches("correctPassword", registeredUser.getPassword());
+
     assertThat(passwordMatches).isTrue();
   }
 
@@ -161,9 +158,10 @@ class UseCase1UserRegistrationAndLoginTest {
   void registeredUserCannotLoginWithWrongPassword() {
     RegisterRequest request = new RegisterRequest("secureUser", "correctPassword");
     User registeredUser = authService.register(request);
-    
-    boolean passwordMatches = passwordEncoder.matches("wrongPassword", registeredUser.getPassword());
-    
+
+    boolean passwordMatches =
+        passwordEncoder.matches("wrongPassword", registeredUser.getPassword());
+
     assertThat(passwordMatches).isFalse();
   }
 }

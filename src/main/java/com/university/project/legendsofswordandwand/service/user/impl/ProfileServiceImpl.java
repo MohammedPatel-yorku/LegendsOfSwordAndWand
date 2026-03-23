@@ -135,13 +135,9 @@ class ProfileServiceImpl implements IProfileService {
       User u = users.get(i);
       int total = u.getPvpWins() + u.getPvpLosses();
       int winRate = total > 0 ? (u.getPvpWins() * 100 / total) : 0;
-      entries.add(new PvPStandingEntry(
-              i + 1,
-              u.getUsername(),
-              u.getPvpWins(),
-              u.getPvpLosses(),
-              total,
-              winRate));
+      entries.add(
+          new PvPStandingEntry(
+              i + 1, u.getUsername(), u.getPvpWins(), u.getPvpLosses(), total, winRate));
     }
 
     return entries;

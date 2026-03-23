@@ -1,0 +1,51 @@
+@startuml CD_Repository
+skinparam classAttributeIconSize 0
+
+interface "JpaRepository<T,ID>" as JPA
+
+interface HeroRepository {
+  + findById(id: Long): Optional<Hero>
+}
+
+interface PartyRepository {
+  + findById(id: Long): Optional<Party>
+}
+
+interface UserRepository {
+  + findByUsername(username: String): Optional<User>
+  + existsByUsername(username: String): boolean
+  + findPvPStandings(): List<User>
+}
+
+interface CampaignRepository {
+  + findActivePartyByCampaignId(campaignId: Long): Optional<Party>
+  + existsActiveCampaignByOwnerId(userId: Long): boolean
+  + findActiveCampaignByUsername(username: String): Optional<Campaign>
+  + findAllByOwnerIdOrderByScoreDesc(userId: Long): List<Campaign>
+  + findCompletedByOwnerUsername(username: String): List<Campaign>
+  + findTopScores(): List<Campaign>
+}
+
+interface InventoryRepository {
+  + findByPartyId(partyId: Long): Optional<Inventory>
+}
+
+interface ItemRepository {
+  + findByName(name: String): Optional<Item>
+}
+
+interface PvPInvitationRepository {
+  + existsBySenderIdAndReceiverId(senderId: Long, receiverId: Long): boolean
+  + findPendingByReceiverUsername(username: String): List<PvPInvitation>
+  + findPendingBySenderUsername(username: String): List<PvPInvitation>
+}
+
+JPA <|.. HeroRepository
+JPA <|.. PartyRepository
+JPA <|.. UserRepository
+JPA <|.. CampaignRepository
+JPA <|.. InventoryRepository
+JPA <|.. ItemRepository
+JPA <|.. PvPInvitationRepository
+
+@enduml

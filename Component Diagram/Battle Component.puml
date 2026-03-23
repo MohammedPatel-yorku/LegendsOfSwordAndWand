@@ -1,0 +1,195 @@
+@startuml CD_Battle_Engine
+skinparam classAttributeIconSize 0
+
+class BattleState {
+  - playerUnits: List<BattleUnit>
+  - enemyUnits: List<BattleUnit>
+  - turnQueue: LinkedList<Long>
+  - activeUnitBattleId: Long
+  - battleLog: List<String>
+  - shields: Map<Long,Integer>
+  - stunned: Map<Long,Integer>
+  - playerTurn: boolean
+  - status: BattleStatus
+  - campaignId: Long
+  - pvp: boolean
+  + log(message: String): void
+  + findUnit(battleId: long): BattleUnit
+  + getActiveUnit(): BattleUnit
+  + isStunned(heroId: Long): boolean
+  + applyStun(heroId: Long): void
+  + tickStuns(): void
+  + getShield(battleId: Long): int
+  + setShield(battleId: Long, amount: int): void
+  + getLivingPlayerHeroes(): List<BattleUnit>
+  + getLivingEnemyHeroes(): List<BattleUnit>
+  + isOver(): boolean
+}
+
+class BattleUnit {
+  - battleId: long
+  - hero: HeroSnapshot
+  - enemy: boolean
+  + isAlive(): boolean
+}
+
+class HeroSnapshot {
+  - id: Long
+  - name: String
+  - startingClass: HeroClass
+  - primaryClass: HeroClass
+  - hybridClass: HybridClass
+  - level: int
+  - health: int
+  - maxHealth: int
+  - attack: int
+  - defense: int
+  - mana: int
+  - maxMana: int
+  + isAlive(): boolean
+}
+
+class AbilityExecutor {
+  - abilityFactory: AbilityFactory
+  + executeAbility(caster: BattleUnit, target: BattleUnit, allies: List, enemies: List, state: BattleState, abilityIndex: int): void
+  + maybeSneak(attacker: BattleUnit, defender: BattleUnit, state: BattleState): void
+  + applyManaBurn(defender: BattleUnit): void
+}
+
+class DamageCalculator {
+  + calculateDamage(attackerAttack: int, defenderDefense: int): int
+}
+
+class HeroStatCalculator {
+  - strategies: List<ClassBonusStrategy>
+  - hybridClassResolver: HybridClassResolver
+  + applyLevelUp(hero: Hero, heroClass: HeroClass): void
+  + applyClassBonusOnly(hero: Hero, heroClass: HeroClass): void
+}
+
+class HybridClassResolver {
+  + resolve(primary: HeroClass, secondary: HeroClass): HybridClass
+}
+
+class EnemyGenerator {
+  + generate(playerCumulativeLevel: int, playerPartySize: int): List<Hero>
+}
+
+abstract class BattleInitializer {
+  + {final} initialize(): BattleState
+  # {abstract} buildPlayerUnits(): List<BattleUnit>
+  # {abstract} buildEnemyUnits(): List<BattleUnit>
+  + {abstract} onBattleEnd(state: BattleState): void
+}
+
+class PvEBattleInitializer {
+  - campaignId: Long
+  - playerCumulativeLevel: int
+  # buildPlayerUnits(): List<BattleUnit>
+  # buildEnemyUnits(): List<BattleUnit>
+  + onBattleEnd(state: BattleState): void
+}
+
+class PvPBattleInitializer {
+  - senderParty: Party
+  - receiverParty: Party
+  - invitationId: Long
+  # buildPlayerUnits(): List<BattleUnit>
+  # buildEnemyUnits(): List<BattleUnit>
+  + onBattleEnd(state: BattleState): void
+}
+
+interface ClassBonusStrategy {
+  + getHeroClass(): HeroClass
+  + applyLevelBonus(hero: Hero): void
+}
+
+class OrderBonusStrategy {
+    + applyLevelBonus(hero: Hero): void
+}
+class ChaosBonusStrategy {
+    + applyLevelBonus(hero: Hero): void
+}
+class WarriorBonusStrategy {
+    + applyLevelBonus(hero: Hero): void
+}
+class MageBonusStrategy {
+    + applyLevelBonus(hero: Hero): void
+}
+
+interface Ability {
+  + getManaCost(): int
+  + execute(caster, target, allies, enemies, state): void
+}
+
+abstract class AbilityDecorator {
+  # wrapped: Ability
+  + getManaCost(): int
+  + execute(...): void
+}
+
+class SelfHealBeforeAttackDecorator {
+    + execute(...): void
+}
+class StunDecorator {
+    - random: Random
+    + execute(...): void
+}
+class DoubleEffectDecorator {
+    + execute(...): void
+}
+class BerserkerAbility {
+    + execute(...): void
+}
+class HealAbility {
+    - multiplier: double
+    + execute(...): void
+}
+class ProtectAbility {
+    - multiplier: double
+    + execute(...): void
+}
+class FireShieldAbility {
+    + execute(...): void
+}
+class FireballAbility {
+    + execute(...): void
+}
+class ChainLightningAbility {
+    + execute(...): void
+}
+
+class AbilityFactory {
+  + resolve(heroClass: HeroClass, hybridClass: HybridClass, abilityIndex: int): Ability
+}
+
+class AbilityHelper {
+  + {static} applyDamage(attacker, target, raw, state): void
+  + {static} calculateDamage(attacker, defender): int
+}
+
+BattleState o-- BattleUnit
+BattleUnit o-- HeroSnapshot
+BattleInitializer <|-- PvEBattleInitializer
+BattleInitializer <|-- PvPBattleInitializer
+HeroStatCalculator o-- ClassBonusStrategy
+HeroStatCalculator --> HybridClassResolver
+ClassBonusStrategy <|.. OrderBonusStrategy
+ClassBonusStrategy <|.. ChaosBonusStrategy
+ClassBonusStrategy <|.. WarriorBonusStrategy
+ClassBonusStrategy <|.. MageBonusStrategy
+Ability <|.. AbilityDecorator
+Ability <|.. BerserkerAbility
+Ability <|.. HealAbility
+Ability <|.. ProtectAbility
+Ability <|.. FireShieldAbility
+Ability <|.. FireballAbility
+Ability <|.. ChainLightningAbility
+AbilityDecorator <|-- SelfHealBeforeAttackDecorator
+AbilityDecorator <|-- StunDecorator
+AbilityDecorator <|-- DoubleEffectDecorator
+AbilityDecorator o-- Ability
+AbilityFactory ..> Ability : <<creates>>
+AbilityExecutor --> AbilityFactory
+
+@enduml

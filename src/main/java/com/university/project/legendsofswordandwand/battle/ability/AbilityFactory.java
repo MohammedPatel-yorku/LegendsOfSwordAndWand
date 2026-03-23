@@ -27,20 +27,23 @@ public class AbilityFactory {
   private final Random random = new Random();
 
   /**
-   * Resolves and returns the appropriate {@link Ability} for the given hero configuration.
+   * Resolves and returns the appropriate {@link Ability} for the given hero configuration,
+   * including any Decorator wrappers for hybrid class effects.
    *
    * <ul>
    *   <li>{@code ORDER} — delegates to {@link #resolveOrder(HybridClass, int)}
    *   <li>{@code CHAOS} — delegates to {@link #resolveChaos(HybridClass, int)}
-   *   <li>{@code WARRIOR} — always returns a {@link BerserkerAbility}
-   *   <li>{@code MAGE} — always returns a {@link ReplenishAbility}
+   *   <li>{@code WARRIOR} — returns a {@link BerserkerAbility}, optionally wrapped with {@link
+   *       SelfHealBeforeAttackDecorator} for {@code PALADIN} or {@link StunDecorator} for {@code
+   *       KNIGHT}
+   *   <li>{@code MAGE} — returns a {@link ReplenishAbility}
    * </ul>
    *
    * @param heroClass the hero's primary class, determining which ability group to use
-   * @param hybridClass the hero's hybrid class, used to further specialise the ability
+   * @param hybridClass the hero's hybrid class, used to select and stack decorators
    * @param abilityIndex the ability slot index ({@code 0} for the first ability, {@code 1} for the
    *     second)
-   * @return the resolved {@link Ability} instance
+   * @return the resolved {@link Ability} instance, possibly wrapped in one or more decorators
    */
   public Ability resolve(HeroClass heroClass, HybridClass hybridClass, int abilityIndex) {
 
@@ -49,10 +52,8 @@ public class AbilityFactory {
       case CHAOS -> resolveChaos(hybridClass, abilityIndex);
       case WARRIOR -> {
         Ability base = new BerserkerAbility();
-        if (hybridClass == HybridClass.PALADIN)
-          base = new SelfHealBeforeAttackDecorator(base);
-        if (hybridClass == HybridClass.KNIGHT)
-          base = new StunDecorator(base, random);
+        if (hybridClass == HybridClass.PALADIN) base = new SelfHealBeforeAttackDecorator(base);
+        if (hybridClass == HybridClass.KNIGHT) base = new StunDecorator(base, random);
         yield base;
       }
       case MAGE -> new ReplenishAbility(hybridClass);
@@ -77,14 +78,12 @@ public class AbilityFactory {
       if (hybridClass == HybridClass.HERETIC) return new FireShieldAbility();
       Ability protect = new ProtectAbility(hybridClass, 1.0);
 
-      if (hybridClass == HybridClass.PROPHET)
-        protect = new DoubleEffectDecorator(protect);
+      if (hybridClass == HybridClass.PROPHET) protect = new DoubleEffectDecorator(protect);
       return protect;
     }
 
     Ability heal = new HealAbility(hybridClass, 1.0);
-    if (hybridClass == HybridClass.PROPHET)
-      heal = new DoubleEffectDecorator(heal);
+    if (hybridClass == HybridClass.PROPHET) heal = new DoubleEffectDecorator(heal);
     return heal;
   }
 

@@ -1,0 +1,48 @@
+@startuml CD_Service_Battle_Campaign
+skinparam classAttributeIconSize 0
+
+interface IBattleService {
+  + initializePvEBattle(campaignId: Long, level: int): BattleState
+  + initializePvPBattle(senderPartyId: Long, receiverPartyId: Long, invitationId: Long): BattleState
+  + executePlayerAction(state: BattleState, action: ActionType, targetId: Long, abilityIndex: Integer): BattleState
+  + executeEnemyTurn(state: BattleState): BattleState
+  + checkBattleStatus(state: BattleState): BattleStatus
+  + awardBattleRewards(state: BattleState): Map
+  + applyBattleLoss(state: BattleState): void
+  + updatePvPResult(state: BattleState): void
+}
+
+interface IInnService {
+  + loadInnView(campaignId: Long): List<String>
+  + getAvailableRecruits(campaignId: Long): List<Hero>
+  + buyItem(campaignId: Long, itemId: Long): void
+  + recruitHero(campaignId: Long, heroId: Long): void
+}
+
+interface ICampaignService {
+  + startNewCampaign(username: String, heroName: String, heroClass: HeroClass): Campaign
+  + getActiveCampaign(username: String): Campaign
+  + exitCampaign(username: String): Campaign
+  + completeCampaign(username: String): Campaign
+  + hasActiveCampaign(userId: Long): boolean
+  + savePartyFromCampaign(campaignId: Long, userId: Long): void
+  + replacePartyFromCampaign(campaignId: Long, userId: Long, partyId: Long): void
+  + getPartyCumulativeLevel(username: String): int
+  + abandonCampaign(username: String): void
+}
+
+interface ICampaignProgressService {
+  + enterNextRoom(username: String): RoomType
+  + isCampaignComplete(username: String): boolean
+  + calculateAndPersistScore(campaign: Campaign): int
+  + getCampaignViewData(username: String): CampaignViewInfo
+  + getCompletionData(username: String): CompleteCampaignInfo
+  + clearRoomPending(username: String): void
+}
+
+class BattleServiceImpl implements IBattleService
+class InnServiceImpl implements IInnService
+class CampaignServiceImpl implements ICampaignService
+class CampaignProgressServiceImpl implements ICampaignProgressService
+
+@enduml

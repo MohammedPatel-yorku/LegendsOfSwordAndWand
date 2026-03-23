@@ -45,12 +45,16 @@ public class CampaignController {
   }
 
   /**
-   * Starts new campaign, mapped to POST '/start'.
+   * Handles new campaign form submission, mapped to POST {@code /campaign/new}.
+   *
+   * <p>Validates that a hero name was provided before attempting to start the campaign. On success,
+   * redirects to the campaign page. On failure, re-renders the new campaign form with an error
+   * message.
    *
    * @param authentication the current user's authentication
-   * @param heroName name to give to the starting hero
-   * @param heroClass hero class to assign to the starting hero
-   * @param model the Spring MVC model
+   * @param heroName the name to give the starting hero; must not be blank
+   * @param heroClass the {@link HeroClass} to assign to the starting hero
+   * @param model the Spring MVC model, used to pass error messages back to the view
    * @return a redirect to {@code /campaign} on success, or the new campaign view on failure
    */
   @PostMapping("/new")
@@ -114,8 +118,8 @@ public class CampaignController {
    * Advances the campaign to the next room and redirects accordingly.
    *
    * <p>Redirects to {@code /battle} if the next room is a battle, or {@code /inn} otherwise.
-   * Redirects to {@code /campaign} if progression fails.
-   * Redirects to {@code /campaign/complete} if 30 rooms complete.
+   * Redirects to {@code /campaign} if progression fails. Redirects to {@code /campaign/complete} if
+   * 30 rooms complete.
    *
    * @param authentication the current user's authentication
    * @return a redirect to the appropriate room destination
