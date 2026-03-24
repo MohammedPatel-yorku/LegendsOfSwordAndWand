@@ -274,6 +274,20 @@ public class BattleController {
     return "redirect:/campaign";
   }
 
+  /**
+   * Handles a PvP forfeit request, forcing a loss for the forfeiting player.
+   *
+   * <p>Sets the battle status to {@link BattleStatus#PLAYER_LOSE} and immediately updates the PvP
+   * win/loss records for both players. The battle state and rewards flag are then cleared from the
+   * session. Non-PvP battles cannot be forfeited — requests without an active PvP battle in session
+   * are redirected to the dashboard.
+   *
+   * @param authentication the current user's authentication
+   * @param session the current {@link HttpSession}, used to retrieve and clear the active {@link
+   *     BattleState}
+   * @return a redirect to {@code /pvp} after the forfeit is processed, or {@code /dashboard} if no
+   *     active PvP battle is found
+   */
   @PostMapping("/forfeit")
   public String forfeit(Authentication authentication, HttpSession session) {
     if (authentication == null) return "redirect:/login";

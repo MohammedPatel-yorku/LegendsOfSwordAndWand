@@ -1,5 +1,7 @@
 package com.university.project.legendsofswordandwand.demo;
 
+import static org.assertj.core.api.Assertions.*;
+
 import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Item;
@@ -8,31 +10,24 @@ import com.university.project.legendsofswordandwand.repository.UserRepository;
 import com.university.project.legendsofswordandwand.service.auth.IAuthService;
 import com.university.project.legendsofswordandwand.service.battle.IInnService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.*;
-
 @SpringBootTest
 @TestPropertySource(properties = "spring.profiles.active=demo")
 class UseCase4InteractWithTheInnTest {
 
-  @Autowired
-  private IInnService innService;
+  @Autowired private IInnService innService;
 
-  @Autowired
-  private ICampaignService campaignService;
+  @Autowired private ICampaignService campaignService;
 
-  @Autowired
-  private IAuthService authService;
+  @Autowired private IAuthService authService;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
   @BeforeEach
   void setUp() {
@@ -60,9 +55,7 @@ class UseCase4InteractWithTheInnTest {
 
     List<Item> shopItems = innService.getShopItems();
 
-    shopItems.forEach(item -> 
-      assertThat(item.getCost()).isGreaterThanOrEqualTo(0)
-    );
+    shopItems.forEach(item -> assertThat(item.getCost()).isGreaterThanOrEqualTo(0));
   }
 
   @Test
@@ -71,11 +64,7 @@ class UseCase4InteractWithTheInnTest {
 
     List<Item> shopItems = innService.getShopItems();
 
-    shopItems.forEach(item -> 
-      assertThat(item.getName())
-          .isNotNull()
-          .isNotBlank()
-    );
+    shopItems.forEach(item -> assertThat(item.getName()).isNotNull().isNotBlank());
   }
 
   @Test
@@ -96,11 +85,12 @@ class UseCase4InteractWithTheInnTest {
     List<Hero> recruits = innService.getAvailableRecruits(campaign.getId());
 
     if (!recruits.isEmpty()) {
-      recruits.forEach(hero -> {
-        assertThat(hero.getHealth()).isGreaterThan(0);
-        assertThat(hero.getAttack()).isGreaterThanOrEqualTo(0);
-        assertThat(hero.getDefense()).isGreaterThanOrEqualTo(0);
-      });
+      recruits.forEach(
+          hero -> {
+            assertThat(hero.getHealth()).isGreaterThan(0);
+            assertThat(hero.getAttack()).isGreaterThanOrEqualTo(0);
+            assertThat(hero.getDefense()).isGreaterThanOrEqualTo(0);
+          });
     }
   }
 
@@ -130,7 +120,7 @@ class UseCase4InteractWithTheInnTest {
     RegisterRequest user2 = new RegisterRequest("innUser2", "pass2");
     authService.register(user1);
     authService.register(user2);
-    
+
     var campaign1 = campaignService.startNewCampaign("innUser1", "Hero1", HeroClass.WARRIOR);
     var campaign2 = campaignService.startNewCampaign("innUser2", "Hero2", HeroClass.MAGE);
 
@@ -149,11 +139,7 @@ class UseCase4InteractWithTheInnTest {
     List<Hero> recruits = innService.getAvailableRecruits(campaign.getId());
 
     if (!recruits.isEmpty()) {
-      recruits.forEach(hero -> 
-        assertThat(hero.getName())
-            .isNotNull()
-            .isNotBlank()
-      );
+      recruits.forEach(hero -> assertThat(hero.getName()).isNotNull().isNotBlank());
     }
   }
 
@@ -193,8 +179,6 @@ class UseCase4InteractWithTheInnTest {
   void itemsHavePositiveOrZeroCost() {
     List<Item> items = innService.getShopItems();
 
-    items.forEach(item -> 
-      assertThat(item.getCost()).isGreaterThanOrEqualTo(0)
-    );
+    items.forEach(item -> assertThat(item.getCost()).isGreaterThanOrEqualTo(0));
   }
 }

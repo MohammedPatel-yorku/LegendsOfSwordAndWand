@@ -32,9 +32,8 @@ public class BattleState implements Serializable {
   private List<String> battleLog = new ArrayList<>();
 
   /**
-   * Logs a battle message and records a unit snapshot at this point in time.
-   * The snapshot list stays in sync with the battle log — index N in
-   * {@code hpSnapshots} corresponds to log entry N.
+   * Logs a battle message and records a unit snapshot at this point in time. The snapshot list
+   * stays in sync with the battle log — index N in {@code hpSnapshots} corresponds to log entry N.
    *
    * @param message the log message to record
    */
@@ -52,9 +51,9 @@ public class BattleState implements Serializable {
   private List<Map<Long, Integer>> manaSnapshots = new ArrayList<>();
 
   /**
-   * Records a snapshot of all unit HP and mana at the current moment.
-   * Called automatically by {@link #log(String)} so each log entry has
-   * a corresponding state snapshot for step-by-step animation replay.
+   * Records a snapshot of all unit HP and mana at the current moment. Called automatically by
+   * {@link #log(String)} so each log entry has a corresponding state snapshot for step-by-step
+   * animation replay.
    *
    * @param allUnits all battle units (player and enemy) at this moment
    */
@@ -91,10 +90,19 @@ public class BattleState implements Serializable {
   /** Whether this battle is a PvP encounter. */
   private boolean pvp = false;
 
+  /** The ID of the {@code PvPInvitation} that initiated this battle. {@code null} for PvE. */
   private Long pvpInvitationId;
+
+  /** The username of the player who sent the PvP invitation. {@code null} for PvE. */
   private String pvpSenderUsername;
+
+  /** The username of the player who accepted the PvP invitation. {@code null} for PvE. */
   private String pvpReceiverUsername;
+
+  /** The ID of the sender's saved party used in this PvP battle. {@code null} for PvE. */
   private Long pvpSenderPartyId;
+
+  /** The ID of the receiver's saved party used in this PvP battle. {@code null} for PvE. */
   private Long pvpReceiverPartyId;
 
   /**

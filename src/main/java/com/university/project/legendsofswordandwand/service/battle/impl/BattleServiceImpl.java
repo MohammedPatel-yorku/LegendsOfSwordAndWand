@@ -130,10 +130,14 @@ class BattleServiceImpl implements IBattleService {
         return advanceTurn(state);
       }
       case CAST -> {
-        List<BattleUnit> allies = state.getLivingPlayerHeroes();
-        List<BattleUnit> enemies = state.getLivingEnemyHeroes();
+        List<BattleUnit> allies = actor.isEnemy()
+                ? state.getLivingEnemyHeroes()
+                : state.getLivingPlayerHeroes();
+        List<BattleUnit> enemies = actor.isEnemy()
+                ? state.getLivingPlayerHeroes()
+                : state.getLivingEnemyHeroes();
         abilityExecutor.executeAbility(
-            actor, target, allies, enemies, state, abilityIndex != null ? abilityIndex : 0);
+                actor, target, allies, enemies, state, abilityIndex != null ? abilityIndex : 0);
       }
     }
 

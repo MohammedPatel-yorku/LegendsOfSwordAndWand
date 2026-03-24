@@ -1,5 +1,7 @@
 package com.university.project.legendsofswordandwand.demo;
 
+import static org.assertj.core.api.Assertions.*;
+
 import com.university.project.legendsofswordandwand.battle.BattleState;
 import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
@@ -14,23 +16,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.*;
-
 @SpringBootTest
 @TestPropertySource(properties = "spring.profiles.active=demo")
 class UseCase3SingleBattleTest {
 
-  @Autowired
-  private IBattleService battleService;
+  @Autowired private IBattleService battleService;
 
-  @Autowired
-  private ICampaignService campaignService;
+  @Autowired private ICampaignService campaignService;
 
-  @Autowired
-  private IAuthService authService;
+  @Autowired private IAuthService authService;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
   @BeforeEach
   void setUp() {
@@ -131,9 +127,9 @@ class UseCase3SingleBattleTest {
 
     BattleState battleState = battleService.initializePvEBattle(campaign.getId(), 1);
 
-    battleState.getPlayerUnits().forEach(
-        unit -> assertThat(unit.getHero().getHealth()).isGreaterThan(0)
-    );
+    battleState
+        .getPlayerUnits()
+        .forEach(unit -> assertThat(unit.getHero().getHealth()).isGreaterThan(0));
   }
 
   @Test
@@ -143,9 +139,9 @@ class UseCase3SingleBattleTest {
 
     BattleState battleState = battleService.initializePvEBattle(campaign.getId(), 1);
 
-    battleState.getEnemyUnits().forEach(
-        unit -> assertThat(unit.getHero().getHealth()).isGreaterThan(0)
-    );
+    battleState
+        .getEnemyUnits()
+        .forEach(unit -> assertThat(unit.getHero().getHealth()).isGreaterThan(0));
   }
 
   @Test
@@ -197,17 +193,16 @@ class UseCase3SingleBattleTest {
     BattleState battle1 = battleService.initializePvEBattle(campaign.getId(), 1);
     BattleState battle2 = battleService.initializePvEBattle(campaign.getId(), 10);
 
-    assertTrue(hasStrongerUnits(battle2.getEnemyUnits(), battle1.getEnemyUnits())
-        || hasSameStrength(battle2.getEnemyUnits(), battle1.getEnemyUnits()));
+    assertTrue(
+        hasStrongerUnits(battle2.getEnemyUnits(), battle1.getEnemyUnits())
+            || hasSameStrength(battle2.getEnemyUnits(), battle1.getEnemyUnits()));
   }
 
-  private boolean hasStrongerUnits(
-      java.util.List<?> units2, java.util.List<?> units1) {
+  private boolean hasStrongerUnits(java.util.List<?> units2, java.util.List<?> units1) {
     return true;
   }
 
-  private boolean hasSameStrength(
-      java.util.List<?> units2, java.util.List<?> units1) {
+  private boolean hasSameStrength(java.util.List<?> units2, java.util.List<?> units1) {
     return true;
   }
 

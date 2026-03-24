@@ -1,0 +1,111 @@
+@startuml CD_Model
+skinparam classAttributeIconSize 0
+
+enum HeroClass {
+    ORDER, CHAOS, WARRIOR, MAGE
+}
+enum HybridClass {
+    PRIEST, HERETIC, PALADIN, PROPHET, INVOKER, ROGUE, SORCERER, KNIGHT, WARLOCK, WIZARD
+}
+enum InvitationStatus {
+    PENDING, ACCEPTED, REJECTED, EXPIRED, CANCELED
+}
+enum RoomType {
+    BATTLE, INN
+}
+enum BattleStatus {
+    IN_PROGRESS, PLAYER_WIN, PLAYER_LOSE
+}
+enum ActionType {
+    ATTACK, DEFEND, WAIT, CAST
+}
+
+class User {
+  - id: Long
+  - username: String
+  - password: String
+  - pvpWins: int
+  - pvpLosses: int
+  - parties: List<Party>
+}
+
+class Party {
+  - id: Long
+  - gold: int
+  - saved: boolean
+  - heroes: List<Hero>
+  - inventory: Inventory
+  + getCumulativeLevel(): int
+  + calculateScore(): int
+}
+
+class Hero {
+  - id: Long
+  - name: String
+  - startingClass: HeroClass
+  - primaryClass: HeroClass
+  - secondaryClass: HeroClass
+  - hybridClass: HybridClass
+  - isHybrid: boolean
+  - level: int
+  - health: int
+  - maxHealth: int
+  - attack: int
+  - defense: int
+  - mana: int
+  - maxMana: int
+  - experience: int
+  - experienceToNextLevel: int
+  - temporary: boolean
+}
+
+class Campaign {
+  - id: Long
+  - currentRoom: int
+  - active: boolean
+  - score: int
+  - hasVisitedInn: boolean
+  - lastRoomType: RoomType
+  - roomPending: boolean
+}
+
+class Inventory {
+  - id: Long
+  - itemIds: List<Long>
+}
+
+class Item {
+  - id: Long
+  - name: String
+  - cost: int
+  - hpRestore: int
+  - manaRestore: int
+  - revives: boolean
+  + {static} bread(): Item
+  + {static} cheese(): Item
+  + {static} steak(): Item
+  + {static} water(): Item
+  + {static} juice(): Item
+  + {static} wine(): Item
+  + {static} elixir(): Item
+}
+
+class PvPInvitation {
+  - id: Long
+  - status: InvitationStatus
+  - createdAt: LocalDateTime
+  - respondedAt: LocalDateTime
+}
+
+User "1" o-- "0..*" Party
+User "1" -- "0..*" PvPInvitation
+Party "1" o-- "0..*" Hero
+Party "1" o-- "1" Inventory
+Campaign --> Party
+Campaign --> User
+Hero --> HeroClass
+Hero --> HybridClass
+PvPInvitation --> InvitationStatus
+PvPInvitation --> User : sender/receiver
+
+@enduml

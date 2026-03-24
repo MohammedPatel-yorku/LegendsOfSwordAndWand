@@ -1,5 +1,7 @@
 package com.university.project.legendsofswordandwand.demo;
 
+import static org.assertj.core.api.Assertions.*;
+
 import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
@@ -12,20 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.*;
-
 @SpringBootTest
 @TestPropertySource(properties = "spring.profiles.active=demo")
 class UseCase2StartPvECampaignTest {
 
-  @Autowired
-  private ICampaignService campaignService;
+  @Autowired private ICampaignService campaignService;
 
-  @Autowired
-  private IAuthService authService;
+  @Autowired private IAuthService authService;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
   @BeforeEach
   void setUp() {
@@ -50,8 +47,7 @@ class UseCase2StartPvECampaignTest {
     RegisterRequest registerRequest = new RegisterRequest("roomUser", "password123");
     authService.register(registerRequest);
 
-    Campaign campaign =
-        campaignService.startNewCampaign("roomUser", "Legolas", HeroClass.RANGER);
+    Campaign campaign = campaignService.startNewCampaign("roomUser", "Legolas", HeroClass.ORDER);
 
     assertThat(campaign.getCurrentRoom()).isZero();
   }
@@ -61,8 +57,7 @@ class UseCase2StartPvECampaignTest {
     RegisterRequest registerRequest = new RegisterRequest("partyUser", "password123");
     authService.register(registerRequest);
 
-    Campaign campaign =
-        campaignService.startNewCampaign("partyUser", "Gimli", HeroClass.WARRIOR);
+    Campaign campaign = campaignService.startNewCampaign("partyUser", "Gimli", HeroClass.WARRIOR);
 
     assertThat(campaign.getParty()).isNotNull();
     assertThat(campaign.getParty().getHeroes()).isNotEmpty();
@@ -73,8 +68,7 @@ class UseCase2StartPvECampaignTest {
     RegisterRequest registerRequest = new RegisterRequest("ownerUser", "password123");
     authService.register(registerRequest);
 
-    Campaign campaign =
-        campaignService.startNewCampaign("ownerUser", "Gandalf", HeroClass.MAGE);
+    Campaign campaign = campaignService.startNewCampaign("ownerUser", "Gandalf", HeroClass.MAGE);
 
     assertThat(campaign.getOwner()).isNotNull();
     assertThat(campaign.getOwner().getUsername()).isEqualTo("ownerUser");
@@ -83,8 +77,7 @@ class UseCase2StartPvECampaignTest {
   @Test
   void cannotStartCampaignWithoutRegistration() {
     assertThatThrownBy(
-            () ->
-                campaignService.startNewCampaign("unregisteredUser", "Hero", HeroClass.WARRIOR))
+            () -> campaignService.startNewCampaign("unregisteredUser", "Hero", HeroClass.WARRIOR))
         .isInstanceOf(RuntimeException.class)
         .hasMessageContaining("User not found");
   }
@@ -98,8 +91,7 @@ class UseCase2StartPvECampaignTest {
 
     assertThatThrownBy(
             () ->
-                campaignService.startNewCampaign(
-                    "multiCampaignUser", "SecondHero", HeroClass.MAGE))
+                campaignService.startNewCampaign("multiCampaignUser", "SecondHero", HeroClass.MAGE))
         .isInstanceOf(RuntimeException.class)
         .hasMessageContaining("Campaign already in progress");
   }
@@ -135,10 +127,8 @@ class UseCase2StartPvECampaignTest {
     authService.register(user1);
     authService.register(user2);
 
-    Campaign campaign1 =
-        campaignService.startNewCampaign("user1", "Hero1", HeroClass.WARRIOR);
-    Campaign campaign2 =
-        campaignService.startNewCampaign("user2", "Hero2", HeroClass.MAGE);
+    Campaign campaign1 = campaignService.startNewCampaign("user1", "Hero1", HeroClass.WARRIOR);
+    Campaign campaign2 = campaignService.startNewCampaign("user2", "Hero2", HeroClass.MAGE);
 
     assertThat(campaign1.getId()).isNotEqualTo(campaign2.getId());
     assertThat(campaign1.getOwner().getUsername()).isNotEqualTo(campaign2.getOwner().getUsername());
@@ -160,8 +150,7 @@ class UseCase2StartPvECampaignTest {
     RegisterRequest registerRequest = new RegisterRequest("scoreUser", "password123");
     authService.register(registerRequest);
 
-    Campaign campaign =
-        campaignService.startNewCampaign("scoreUser", "Hero", HeroClass.WARRIOR);
+    Campaign campaign = campaignService.startNewCampaign("scoreUser", "Hero", HeroClass.WARRIOR);
 
     assertThat(campaign.getScore()).isZero();
   }
@@ -173,8 +162,7 @@ class UseCase2StartPvECampaignTest {
       RegisterRequest request = new RegisterRequest("userForClass", "password");
       authService.register(request);
 
-      Campaign campaign =
-          campaignService.startNewCampaign("userForClass", "Hero", heroClass);
+      Campaign campaign = campaignService.startNewCampaign("userForClass", "Hero", heroClass);
 
       assertThat(campaign).isNotNull();
       assertThat(campaign.isActive()).isTrue();

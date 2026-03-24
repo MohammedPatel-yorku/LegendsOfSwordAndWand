@@ -1,0 +1,24 @@
+@startuml CD_Config
+skinparam classAttributeIconSize 0
+
+class SecurityConfig {
+  - userDetailsService: CustomUserDetailsService
+  + authenticationProvider(): DaoAuthenticationProvider
+  + authenticationManager(config: AuthenticationConfiguration): AuthenticationManager
+  + filterChain(http: HttpSecurity): SecurityFilterChain
+  + passwordEncoder(): PasswordEncoder
+}
+
+class CustomUserDetailsService {
+  - userRepository: UserRepository
+  + loadUserByUsername(username: String): UserDetails
+}
+
+interface "UserDetailsService" as UDS {
+  + loadUserByUsername(username: String): UserDetails
+}
+
+UDS <|.. CustomUserDetailsService
+SecurityConfig --> CustomUserDetailsService
+
+@enduml
