@@ -1,5 +1,7 @@
 package com.university.project.legendsofswordandwand.demo;
 
+import static org.assertj.core.api.Assertions.*;
+
 import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
@@ -12,8 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
-
-import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @TestPropertySource(properties = "spring.profiles.active=demo")

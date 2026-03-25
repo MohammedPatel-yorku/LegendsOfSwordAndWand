@@ -1,5 +1,7 @@
 package com.university.project.legendsofswordandwand.demo;
 
+import static org.assertj.core.api.Assertions.*;
+
 import com.university.project.legendsofswordandwand.dto.request.RegisterRequest;
 import com.university.project.legendsofswordandwand.dto.response.DashboardInfo;
 import com.university.project.legendsofswordandwand.model.User;
@@ -13,23 +15,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.*;
-
 @SpringBootTest
 @TestPropertySource(properties = "spring.profiles.active=demo")
 class UseCase1UserRegistrationAndLoginTest {
 
-  @Autowired
-  private IAuthService authService;
+  @Autowired private IAuthService authService;
 
-  @Autowired
-  private IUserService userService;
+  @Autowired private IUserService userService;
 
-  @Autowired
-  private UserRepository userRepository;
+  @Autowired private UserRepository userRepository;
 
-  @Autowired
-  private PasswordEncoder passwordEncoder;
+  @Autowired private PasswordEncoder passwordEncoder;
 
   @BeforeEach
   void setUp() {
@@ -41,6 +37,7 @@ class UseCase1UserRegistrationAndLoginTest {
   void userCanRegisterSuccessfully() {
     System.out.println("\n[DEMO 1] Testing: userCanRegisterSuccessfully");
     RegisterRequest request = new RegisterRequest("testUser", "password123");
+
 
     User registeredUser = authService.register(request);
 
@@ -58,6 +55,7 @@ class UseCase1UserRegistrationAndLoginTest {
     System.out.println("\n[DEMO 2] Testing: passwordIsEncodedAfterRegistration");
     RegisterRequest request = new RegisterRequest("encodedUser", "myPassword");
 
+
     User registeredUser = authService.register(request);
 
     boolean passwordMatches = passwordEncoder.matches("myPassword", registeredUser.getPassword());
@@ -74,6 +72,7 @@ class UseCase1UserRegistrationAndLoginTest {
     System.out.println("\n[DEMO 3] Testing: duplicateUsernameThrowsException");
     RegisterRequest request1 = new RegisterRequest("duplicateUser", "password1");
     RegisterRequest request2 = new RegisterRequest("duplicateUser", "password2");
+
 
     authService.register(request1);
     System.out.println(" First user registered successfully");
@@ -98,6 +97,7 @@ class UseCase1UserRegistrationAndLoginTest {
     RegisterRequest request = new RegisterRequest("findableUser", "password123");
     authService.register(request);
 
+
     var foundUser = userRepository.findByUsername("findableUser");
 
     System.out.println(" User found in repository: " + foundUser.isPresent());
@@ -115,6 +115,7 @@ class UseCase1UserRegistrationAndLoginTest {
     System.out.println("\n[DEMO 5] Testing: userHasZeroWinsAndLossesAfterRegistration");
     RegisterRequest request = new RegisterRequest("newUser", "password123");
 
+
     User registeredUser = authService.register(request);
 
     System.out.println(" New user stats:");
@@ -131,6 +132,7 @@ class UseCase1UserRegistrationAndLoginTest {
     System.out.println("\n[DEMO 6] Testing: userIdCanBeRetrievedByUsername");
     RegisterRequest request = new RegisterRequest("userWithId", "password123");
     User registeredUser = authService.register(request);
+
 
     Long retrievedId = userService.getUserIdByUsername("userWithId");
 
@@ -164,6 +166,7 @@ class UseCase1UserRegistrationAndLoginTest {
     RegisterRequest request = new RegisterRequest("dashboardUser", "password123");
     authService.register(request);
 
+
     DashboardInfo dashboardInfo = userService.getDashboardInfo("dashboardUser");
 
     System.out.println(" Dashboard info retrieved!");
@@ -183,6 +186,7 @@ class UseCase1UserRegistrationAndLoginTest {
     System.out.println("\n[DEMO 9] Testing: dashboardInfoHasZeroGoldForNewUser");
     RegisterRequest request = new RegisterRequest("newDashboardUser", "password123");
     authService.register(request);
+
 
     DashboardInfo dashboardInfo = userService.getDashboardInfo("newDashboardUser");
 
@@ -204,6 +208,7 @@ class UseCase1UserRegistrationAndLoginTest {
     RegisterRequest user1 = new RegisterRequest("user1", "pass1");
     RegisterRequest user2 = new RegisterRequest("user2", "pass2");
     RegisterRequest user3 = new RegisterRequest("user3", "pass3");
+
 
     User registered1 = authService.register(user1);
     User registered2 = authService.register(user2);

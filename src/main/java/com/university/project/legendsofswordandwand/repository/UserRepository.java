@@ -1,7 +1,6 @@
 package com.university.project.legendsofswordandwand.repository;
 
 import com.university.project.legendsofswordandwand.model.User;
-
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,6 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   boolean existsByUsername(String username);
 
-  @Query("SELECT u FROM User u WHERE (u.pvpWins + u.pvpLosses) > 0 ORDER BY u.pvpWins DESC, u.pvpLosses ASC")
+  @Query(
+      "SELECT u FROM User u WHERE (u.pvpWins + u.pvpLosses) > 0 ORDER BY u.pvpWins DESC, u.pvpLosses ASC")
   List<User> findPvPStandings();
 }

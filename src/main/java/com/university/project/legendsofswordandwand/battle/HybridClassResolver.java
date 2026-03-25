@@ -41,8 +41,9 @@ public class HybridClassResolver {
    *
    * @param primary the hero's primary {@link HeroClass}
    * @param secondary the hero's secondary {@link HeroClass}
-   * @return the resolved {@link HybridClass}
-   * @throws IllegalArgumentException if the combination does not map to any known hybrid
+   * @return the resolved {@link HybridClass} * @throws IllegalArgumentException if the two classes
+   *     do not map to any known hybrid * combination — this should never occur in practice as all
+   *     valid {@link HeroClass} * pairings are explicitly handled
    */
   public HybridClass resolve(HeroClass primary, HeroClass secondary) {
 
