@@ -1,51 +1,40 @@
-@startuml Component_Diagram
+@startuml Component_Diagram_Simple
 skinparam componentStyle rectangle
+skinparam linetype ortho
 
-component "Controller" as CTRL {
-  interface "HTTP Routes" as HTTP
+package "Presentation Layer" {
+  component "Controllers" as CTRL
+  component "Security Config" as CFG
 }
 
-component "Service Layer" as SVC {
-  interface "IBattleService" as IBS
-  interface "ICampaignService" as ICS
-  interface "IHeroService" as IHS
-  interface "IInnService" as IIS
-  interface "IAuthService" as IAS
-  interface "IUserService" as IUS
-  interface "IProfileService" as IPS
-  interface "IPvPService" as IPVP
-  interface "IInventoryService" as IINV
-  interface "IPartyService" as IPTY
+package "Service Layer" {
+  component "Service Interfaces\n& Implementations" as SVC
 }
 
-component "Battle Engine" as BATTLE {
-  interface "BattleState" as BS
-  interface "AbilityFactory" as AF
-  interface "BattleInitializer" as BI
-  interface "ClassBonusStrategy" as CBS
+package "Battle Engine" {
+  component "Battle Initializer\n(Template Method)" as BINIT
+  component "Ability System\n(Factory + Decorator)" as ABLS
+  component "Class Bonus Strategies\n(Strategy)" as STRAT
+  component "Battle State" as BSTATE
 }
 
-component "Model" as MODEL {
-  interface "JPA Entities" as JPA
+package "Data Layer" {
+  component "Repositories\n(JPA)" as REPO
+  database "MySQL" as DB
 }
 
-component "Repository" as REPO {
-  interface "JpaRepository" as JPAREPO
+package "Model" {
+  component "JPA Entities\n(Builder)" as MODEL
 }
 
-component "Config" as CFG {
-  interface "SecurityFilterChain" as SEC
-}
-
-database "MySQL" as DB
-
-CTRL --> SVC : uses interfaces
-SVC --> BATTLE : delegates battle logic
-SVC --> REPO : persists via repositories
-BATTLE --> MODEL : reads/mutates entities
-REPO --> MODEL : maps entities
-REPO --> DB : SQL via JPA
-CFG --> SVC : injects via Spring
-CTRL ..> CFG : secured by
+CFG --> CTRL : secures
+CTRL --> SVC : calls
+SVC --> BINIT
+SVC --> ABLS
+SVC --> STRAT
+SVC --> BSTATE
+SVC --> REPO
+REPO --> MODEL
+REPO --> DB
 
 @enduml

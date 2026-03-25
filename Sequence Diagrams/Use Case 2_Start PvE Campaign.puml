@@ -1,180 +1,196 @@
 @startuml
-'https://plantuml.com/sequence-diagram
-
 autonumber
 
-title Use Case 2 - Start PvE Campaign
+skinparam responseMessageBelowArrow true
+
+title Use Case 2 - Start PvE Campaign (Updated)
 
 actor User
 boundary CampaignController
-control CampaignService
-control PartyService
-database PartyRepository
-control HeroService
-database HeroRepository
+control ICampaignService
+control ICampaignProgressService
+control IInventoryService
 database CampaignRepository
-control InventoryService
+database PartyRepository
+database HeroRepository
 database InventoryRepository
-control UserService
-database UserRepository
 
-==Start New Campaign==
+== Start New Campaign ==
 
-User -> CampaignController: Start new PvE Campaign
+User -> CampaignController: POST /campaign/new (heroName, heroClass)
 activate CampaignController
-CampaignController -> CampaignService: startNewCampaign(userId, heroName, heroClass)
-activate CampaignService
 
-CampaignService -> PartyService: createPartyForUser(userId)
-activate PartyService
-PartyService -> PartyRepository: save(party)
+CampaignController -> ICampaignService: startNewCampaign(username, heroName, heroClass)
+activate ICampaignService
+
+ICampaignService -> PartyRepository: save(new Party)
 activate PartyRepository
-PartyRepository --> PartyService: Party saved
+PartyRepository --> ICampaignService: saved Party
 deactivate PartyRepository
-PartyService --> CampaignService: return Party
-deactivate PartyService
 
-CampaignService -> HeroService: createBaseHeroForParty(partyId, heroName, heroClass)
-activate HeroService
-HeroService -> HeroRepository: save(hero)
+ICampaignService -> HeroRepository: save(new Hero with class bonus)
 activate HeroRepository
-HeroRepository --> HeroService: Hero saved
+HeroRepository --> ICampaignService: saved Hero
 deactivate HeroRepository
-deactivate HeroService
 
-CampaignService -> CampaignService: initializeCampaign(currentlyActive, room=1)
-CampaignService -> CampaignRepository: save(campaign)
+ICampaignService -> InventoryRepository: save(new Inventory)
+activate InventoryRepository
+InventoryRepository --> ICampaignService: saved Inventory
+deactivate InventoryRepository
+
+ICampaignService -> CampaignRepository: save(new Campaign, active=true, room=0)
 activate CampaignRepository
-CampaignRepository --> CampaignService: Campaign saved
+CampaignRepository --> ICampaignService: saved Campaign
 deactivate CampaignRepository
 
-CampaignService --> CampaignController: Campaign started
-deactivate CampaignService
-CampaignController --> User: Show campaign view
+ICampaignService --> CampaignController: Campaign
+deactivate ICampaignService
+
+CampaignController --> User: Redirect /campaign
 deactivate CampaignController
 
-==Check Party and Inventory Status==
+== View Campaign Page (Party, Inventory, Room) ==
 
-User -> CampaignController: Check Party and Inventory Status
+User -> CampaignController: GET /campaign
 activate CampaignController
 
-CampaignController -> PartyService: getPartyStatus(partyId)
-activate PartyService
-PartyService -> PartyRepository: findById(partyId)
-activate PartyRepository
+CampaignController -> ICampaignProgressService: getCampaignViewData(username)
+activate ICampaignProgressService
+ICampaignProgressService -> CampaignRepository: findActiveCampaignByUsername(username)
+activate CampaignRepository
+CampaignRepository --> ICampaignProgressService: Campaign
+deactivate CampaignRepository
+ICampaignProgressService --> CampaignController: CampaignViewInfo (heroes, gold, currentRoom)
+deactivate ICampaignProgressService
 
-PartyRepository --> PartyService: return party
-deactivate PartyRepository
-PartyService --> CampaignController: return partyStatus
-deactivate PartyService
-
-CampaignController -> InventoryService: getInventoryStatus(inventoryId)
-activate InventoryService
-InventoryService -> InventoryRepository: findById(inventoryId)
+CampaignController -> IInventoryService: getPartyInventoryItems(campaignId)
+activate IInventoryService
+IInventoryService -> InventoryRepository: findByPartyId(partyId)
 activate InventoryRepository
-
-InventoryRepository --> InventoryService: return inventory
+InventoryRepository --> IInventoryService: Inventory
 deactivate InventoryRepository
-InventoryService --> CampaignController: return inventoryStatus
-deactivate InventoryService
+IInventoryService --> CampaignController: List<Item>
+deactivate IInventoryService
 
-CampaignController --> User: Show Party and Inventory Status
+CampaignController --> User: Show campaign page (room, heroes, gold, inventory)
 deactivate CampaignController
 
-==Visit Next Room==
+== Visit Next Room ==
 
-User -> CampaignController: Visit Next Room
+User -> CampaignController: POST /campaign/next-room
 activate CampaignController
-CampaignController -> CampaignService: visitNextRoom(campaignId)
-activate CampaignService
 
-alt Inn Room
-    CampaignService --> CampaignController: return innRoom
-    note left of CampaignController: See Use Case 4 - Interact With Inn
+CampaignController -> ICampaignProgressService: enterNextRoom(username)
+activate ICampaignProgressService
 
-else Battle Room
-    CampaignService --> CampaignController: return battleRoom
-    deactivate CampaignService
+ICampaignProgressService -> CampaignRepository: findActiveCampaignByUsername(username)
+activate CampaignRepository
+CampaignRepository --> ICampaignProgressService: Campaign
+deactivate CampaignRepository
+
+ICampaignProgressService -> CampaignRepository: save(campaign, roomPending=true, currentRoom++)
+activate CampaignRepository
+CampaignRepository --> ICampaignProgressService: saved Campaign
+deactivate CampaignRepository
+
+alt Battle Room
+    ICampaignProgressService --> CampaignController: RoomType.BATTLE
+    CampaignController --> User: Redirect /battle
+    note right: See Use Case 3 - Single Battle
+
+else Inn Room
+    ICampaignProgressService --> CampaignController: RoomType.INN
+    deactivate ICampaignProgressService
+    CampaignController --> User: Redirect /inn
     deactivate CampaignController
-    note left of CampaignController: See Use Case 3 - Single Battle
-
+    note right: See Use Case 4 - Interact With Inn
 end
 
-==Passed Final Room==
 
-User -> CampaignController: Visit Next Room
+== Campaign Completion (Room 30 Cleared) ==
+
+User -> CampaignController: POST /battle/continue or /inn/leave
 activate CampaignController
-CampaignController -> CampaignService: visitNextRoom(campaignId)
-activate CampaignService
 
-CampaignService -> CampaignRepository: delete(campaign)
+CampaignController -> ICampaignService: completeCampaign(username)
+activate ICampaignService
+
+ICampaignService -> ICampaignProgressService: calculateAndPersistScore(campaign)
+activate ICampaignProgressService
+ICampaignProgressService -> CampaignRepository: save(campaign, score=calculated)
 activate CampaignRepository
-CampaignRepository --> CampaignService: Campaign deleted
+CampaignRepository --> ICampaignProgressService: saved
+deactivate CampaignRepository
+ICampaignProgressService --> ICampaignService: score
+deactivate ICampaignProgressService
+
+ICampaignService -> CampaignRepository: save(campaign, active=false)
+activate CampaignRepository
+CampaignRepository --> ICampaignService: saved Campaign
 deactivate CampaignRepository
 
-CampaignService -> UserService: update(score)
-activate UserService
-UserService -> UserRepository: save()
-activate UserRepository
-UserRepository --> UserService: Score Saved
-deactivate UserRepository
-UserService --> CampaignService: Score Updated
-deactivate UserService
+ICampaignService --> CampaignController: completed Campaign
+deactivate ICampaignService
 
-CampaignService --> CampaignController: return score
-deactivate CampaignService
-CampaignController --> User: Show User Profile View
+CampaignController --> User: Redirect /campaign/complete
+deactivate CampaignController
 
-CampaignController -> User: Save Party?
+== Save Party After Completion ==
 
-alt 5 Parties Saved
-    alt Yes
-        User --> CampaignController: Yes
-        CampaignController -> User: Choose a Party to Replace
-        User --> CampaignController: Party Chosen
+User -> CampaignController: GET /campaign/complete
+activate CampaignController
+CampaignController --> User: Show completion page (score, heroes, save options)
+deactivate CampaignController
 
-        CampaignController -> CampaignService: replaceParty(partyId, partyToReplaceId)
-        activate CampaignService
+alt Less Than 5 Saved Parties
 
-        CampaignService -> PartyRepository: delete(partyToReplaceId)
+    alt User Chooses to Save
+        User -> CampaignController: POST /campaign/complete/save (campaignId)
+        activate CampaignController
+        CampaignController -> ICampaignService: savePartyFromCampaign(campaignId, userId)
+        activate ICampaignService
+        ICampaignService -> PartyRepository: save(party, saved=true)
         activate PartyRepository
-        PartyRepository --> CampaignService: Party Deleted
-        CampaignService -> PartyRepository: save(partyId)
-        PartyRepository --> CampaignService: Party Saved
+        PartyRepository --> ICampaignService: saved Party
         deactivate PartyRepository
+        ICampaignService --> CampaignController: done
+        deactivate ICampaignService
+        CampaignController --> User: Redirect /dashboard
+        deactivate CampaignController
 
-        CampaignService --> CampaignController: Party Replaced
-        deactivate CampaignService
-        CampaignController --> User: Show Main Menu View
-
-    else No
-        User --> CampaignController: No
-        CampaignController --> User: Show Main Menu View
-
+    else User Discards
+        User -> CampaignController: POST /campaign/complete/discard
+        activate CampaignController
+        CampaignController --> User: Redirect /dashboard
+        deactivate CampaignController
     end
 
-    else Less Than 5 Parties Saved
-        alt Yes
-            User --> CampaignController: Yes
+else 5 Saved Parties
 
-            CampaignController -> CampaignService: saveParty(partyId)
-            activate CampaignService
-            CampaignService -> PartyRepository: save(party)
-            activate PartyRepository
+    alt User Chooses to Replace
+        User -> CampaignController: POST /campaign/complete/replace (campaignId, replacePartyId)
+        activate CampaignController
+        CampaignController -> ICampaignService: replacePartyFromCampaign(campaignId, userId, replacePartyId)
+        activate ICampaignService
+        ICampaignService -> PartyRepository: delete(partyToReplace)
+        activate PartyRepository
+        PartyRepository --> ICampaignService: deleted
+        deactivate PartyRepository
+        ICampaignService -> PartyRepository: save(party, saved=true)
+        activate PartyRepository
+        PartyRepository --> ICampaignService: saved Party
+        deactivate PartyRepository
+        ICampaignService --> CampaignController: done
+        deactivate ICampaignService
+        CampaignController --> User: Redirect /dashboard
+        deactivate CampaignController
 
-            PartyRepository --> CampaignService: Party Saved
-            deactivate PartyRepository
-            CampaignService --> CampaignController: Party Saved
-            deactivate CampaignService
-
-            CampaignController --> User: Show Main Menu View
-
-        else No
-            User --> CampaignController: No
-            CampaignController --> User: Show Main Menu View
-            deactivate CampaignController
-
-        end
+    else User Discards
+        User -> CampaignController: POST /campaign/complete/discard
+        activate CampaignController
+        CampaignController --> User: Redirect /dashboard
+        deactivate CampaignController
+    end
 
 end
 

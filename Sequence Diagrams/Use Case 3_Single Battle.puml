@@ -1,95 +1,121 @@
 @startuml
-'https://plantuml.com/sequence-diagram
-
 autonumber
 
-title Use Case 3 - Single Battle
+skinparam responseMessageBelowArrow true
+
+title Use Case 3 - Single Battle (Updated)
 
 actor User
-
 boundary BattleController
-control BattleService
-control TurnManager
-control AbilityExecutor
-control DamageCalculator
-entity Battle
-database BattleRepository
+control ICampaignService
+database CampaignRepository
+control IBattleService
+entity DamageCalculator
+entity AbilityHelper
+entity AbilityExecutor
+entity AbilityFactory
+control IHeroService
+control IPartyManagementService
 
 == Initialize Battle ==
-
-User -> BattleController: startBattle(partyA, partyB)
+User -> BattleController: GET /battle
 activate BattleController
+BattleController -> ICampaignService: getActiveCampaign(username)
+activate ICampaignService
+ICampaignService -> CampaignRepository: findActiveCampaignByUsername(username)
+activate CampaignRepository
 
-BattleController -> BattleService: initializeBattle(partyA, partyB)
-activate BattleService
+CampaignRepository --> ICampaignService: Optional active campaign
+deactivate CampaignRepository
+ICampaignService --> BattleController: Active campaign
 
-BattleService -> Battle: createBattle(partyA, partyB)
-activate Battle
-Battle --> BattleService: Battle Instance
-deactivate Battle
+BattleController -> ICampaignService: getPartyCumulativeLevel(username)
+ICampaignService --> BattleController: Party cumulative level
+deactivate ICampaignService
 
-BattleService -> TurnManager: determineFirstTurn(battleInstance)
-activate TurnManager
-TurnManager --> BattleService: First Active Unit
-deactivate TurnManager
-
-BattleService --> BattleController: Battle Initialized
-deactivate BattleService
+BattleController -> IBattleService: initializePvEBattle(campaignId, partyCumulativeLevel) or initializePvPBattle
+activate IBattleService
+IBattleService --> BattleController: return BattleState
+deactivate IBattleService
+BattleController --> User: Battle session
+deactivate BattleController
 
 == Battle Loop ==
+loop While Either Party Has a Living Hero
+    alt Player Turn
+        User -> BattleController: Post /action ActionType
+        activate BattleController
+        BattleController -> IBattleService: executePlayerAction(battleState, action, targetBattleId, abilityIndex)
+        activate IBattleService
 
-loop Until One Party Defeated
+        alt Attack
+            IBattleService -> IBattleService: executeAttack(attacker, defender, battleState)
+            IBattleService -> DamageCalculator: calculateDamage(attacker.attack, defender.defense)
+            DamageCalculator --> IBattleService: damage
 
-    BattleController -> BattleService: getActiveUnit()
-    activate BattleService
-    BattleService --> BattleController: Active Unit
-    deactivate BattleService
+            IBattleService -> AbilityHelper: applyDamage(attacker, defender, damage, battleState)
 
-    User -> BattleController: selectAbility(target)
+        else Defend
+            IBattleService -> IBattleService: executeDefend(hero)
 
-    BattleController -> BattleService: executeTurn(ability, target)
-    activate BattleService
+        else Wait
+            IBattleService -> IBattleService: advanceTurn(battleState)
 
-    BattleService -> AbilityExecutor: execute(ability, attacker, target)
-    activate AbilityExecutor
+        else Cast
+            IBattleService -> AbilityExecutor: executeAbility(actor, target, allies, enemies, battleState, abilityIndex)
+            AbilityExecutor -> AbilityFactory: resolve(effectiveClass, hybridClass, abilityIndex)
+            AbilityFactory --> AbilityExecutor: ability
 
-    AbilityExecutor -> DamageCalculator: calculateDamage(attacker, target)
-    activate DamageCalculator
-    DamageCalculator --> AbilityExecutor: Damage Value
-    deactivate DamageCalculator
+        end
+        IBattleService --> BattleController: Updated Battle State
 
-    AbilityExecutor --> BattleService: Action Result
-    deactivate AbilityExecutor
+    else Enemy AI Turn
+        User -> BattleController: Post /action
+        BattleController -> IBattleService: executeEnemyTurn(battleState)
+        IBattleService -> IBattleService: decideEnemyAction(actor, targets, battleState)
 
-    BattleService -> TurnManager: nextTurn()
-    activate TurnManager
-    TurnManager --> BattleService: Next Active Unit
-    deactivate TurnManager
+        IBattleService --> BattleController: Updated Battle State
+        deactivate IBattleService
 
-    BattleService --> BattleController: Turn Resolved
-    deactivate BattleService
+    end
+    BattleController --> User: Update Battle Session
+    deactivate BattleController
 
 end
 
 == Battle End ==
+User -> BattleController: Get /result
+activate BattleController
+alt Player Win
+    BattleController -> IBattleService: awardBattleRewards(battleState)
+    activate IBattleService
+    IBattleService -> IHeroService: addExperience(heroId, xp) for each hero
+    activate IHeroService
+    IHeroService --> IBattleService: saved hero
+    deactivate IHeroService
 
-BattleController -> BattleService: finalizeBattle()
-activate BattleService
+    IBattleService -> IPartyManagementService: getActiveParty(campaignId)
+    activate IPartyManagementService
+    IPartyManagementService --> IBattleService: active party
+    IBattleService -> IPartyManagementService: addGold(partyId, gold)
+    deactivate IPartyManagementService
 
-BattleService -> Battle: determineWinner()
-activate Battle
-Battle --> BattleService: Battle Result
-deactivate Battle
+else Player Loss
+    BattleController -> IBattleService: applyBattleLoss(battleState)
+    IBattleService -> IHeroService: Update experience for all heroes
+    activate IHeroService
+    IHeroService --> IBattleService: saved hero
+    deactivate IHeroService
 
-BattleService -> BattleRepository: save(battleResult)
-activate BattleRepository
-BattleRepository --> BattleService: saved
-deactivate BattleRepository
+    IBattleService -> IPartyManagementService: getActiveParty(campaignId)
+    activate IPartyManagementService
+    IPartyManagementService --> IBattleService: active party
+    IBattleService -> IPartyManagementService: deductGold(partyId, gold)
+    deactivate IPartyManagementService
+    deactivate IBattleService
 
-BattleService --> BattleController: return battleResult
-deactivate BattleService
+end
 
-BattleController --> User: Display Result
-deactivate BattleController
+BattleController --> User: Display results
 
 @enduml

@@ -103,7 +103,6 @@ public class CampaignController {
       model.addAttribute("currentRoom", data.currentRoom());
       model.addAttribute("gold", data.gold());
 
-      // Level up panel
       model.addAttribute(
           "levelUpHeroes",
           data.heroes().stream().filter(h -> heroService.isLevelUpPending(h.getId())).toList());

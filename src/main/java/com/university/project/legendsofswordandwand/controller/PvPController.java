@@ -63,7 +63,7 @@ public class PvPController {
     pvpService.acceptInvitation(inviteId);
     User user = userRepository.findByUsername(authentication.getName()).orElseThrow();
     model.addAttribute("inviteId", inviteId);
-    model.addAttribute("step", 1); // receiver picks first
+    model.addAttribute("step", 1);
     model.addAttribute("savedParties", user.getParties().stream().filter(Party::isSaved).toList());
     return "pvp/select-party";
   }
@@ -82,7 +82,6 @@ public class PvPController {
 
     if (step == 2) {
       // Receiver picked — now show party select for sender
-      // Find the sender from the invitation
       var invite = pvpInvitationRepository.findById(inviteId).orElseThrow();
       User sender = invite.getSender();
       model.addAttribute("inviteId", inviteId);
