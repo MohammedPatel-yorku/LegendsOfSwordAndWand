@@ -57,6 +57,15 @@ class BattleServiceImpl implements IBattleService {
     return state;
   }
 
+  /**
+   * Initialises a PvP battle for the invitation sender and receiver.
+   *
+   * <p>{@link BattleState} is set to PvP mode to accommodate a hot-seat battle between two players.
+   *
+   * @param senderPartyId the ID of the party belonging to the sender
+   * @param receiverPartyId the ID of the party belonging to the receiver
+   * @return the fully initialised {@link BattleState}
+   */
   @Override
   public BattleState initializePvPBattle(
       Long senderPartyId, Long receiverPartyId, Long invitationId) {
@@ -201,7 +210,6 @@ class BattleServiceImpl implements IBattleService {
 
     switch (name) {
       case "Skeleton", "Witch", "Shadow" -> {
-        // Glass cannon — always attacks weakest, no spread needed (they die fast anyway)
         BattleUnit target =
             targets.stream()
                 .min(Comparator.comparingInt(u -> u.getHero().getHealth()))
@@ -209,7 +217,6 @@ class BattleServiceImpl implements IBattleService {
         executeAttack(actor, target, state);
       }
       case "Orc", "Dark Knight" -> {
-        // Brute — 60% attack highest attack hero, 40% pick random to spread pressure
         BattleUnit target =
             random.nextInt(100) < 60
                 ? targets.stream()
@@ -219,7 +226,6 @@ class BattleServiceImpl implements IBattleService {
         executeAttack(actor, target, state);
       }
       case "Goblin", "Vampire" -> {
-        // Swift — 75% attack lowest defense, 25% wait
         if (random.nextInt(100) < 75) {
           BattleUnit target =
               targets.stream()
@@ -232,7 +238,6 @@ class BattleServiceImpl implements IBattleService {
         }
       }
       case "Troll" -> {
-        // Tank — defends if hurt, otherwise 50% attack highest HP, 50% random
         boolean hurt = actor.getHero().getHealth() < actor.getHero().getMaxHealth() / 4;
         if (hurt && random.nextInt(100) < 40) {
           executeDefend(actor.getHero());
@@ -248,7 +253,6 @@ class BattleServiceImpl implements IBattleService {
         }
       }
       default -> {
-        // Balanced (Bandit, Wyvern) — always random target
         if (random.nextInt(100) < 85) {
           BattleUnit target = targets.get(random.nextInt(targets.size()));
           executeAttack(actor, target, state);
@@ -336,7 +340,7 @@ class BattleServiceImpl implements IBattleService {
    */
   @Override
   public void applyBattleLoss(BattleState state) {
-    // Write snapshot XP penalties back to DB
+
     state
         .getPlayerUnits()
         .forEach(
@@ -349,7 +353,6 @@ class BattleServiceImpl implements IBattleService {
               int xpInCurrentLevel = Math.max(0, u.getHero().getExperience() - prevThreshold);
               int penalty = (int) (xpInCurrentLevel * 0.30);
               int newXp = Math.max(prevThreshold, u.getHero().getExperience() - penalty);
-              // Load fresh entity and update
               heroService
                   .findById(u.getHero().getId())
                   .ifPresent(

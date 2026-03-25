@@ -1,98 +1,84 @@
 @startuml
-'https://plantuml.com/sequence-diagram
 
 autonumber
 
+skinparam responseMessageBelowArrow true
+
 title Send a PvP Battle Invitation
 
-actor User
+actor User1
 
 boundary PvPController
-control PvPService
-control UserService
-control PartyService
-control BattleService
-database PvPRepository
-database LeagueRepository
-
-actor Enemy
+control IPvPService
+database UserRepository
+database PvPInvitationRepository
+control IBattleService
+boundary BattleController
+actor User2
 
 == Send Invitation ==
-User -> PvPController: sendInvite(enemyUsername, selectedPartyId)
+User1 -> PvPController: Post /invite
 activate PvPController
-PvPController -> PvPService: createInvitation(userId, enemyUsername, selectedPartyId)
-activate PvPService
-
-
-PvPService -> UserService: findByUsername(enemyUsername)
-activate UserService
+PvPController -> IPvPService: createInvitation(username, enemyUsername)
+activate IPvPService
+IPvPService -> UserRepository: findByUsername(enemyUsername)
+activate UserRepository
 
 alt Player Does Not Exist
-    UserService --> PvPService: null
-    PvPService --> PvPController: error("User not found")
+    UserRepository --> IPvPService: null
+    IPvPService --> PvPController: error("User not found")
 
 else Player Found
-    UserService --> PvPService: enemyUser
-    deactivate UserService
+    UserRepository --> IPvPService: enemyUser
+    deactivate UserRepository
 
-    PvPService -> PartyService: hasSavedParty(enemyId)
-    activate PartyService
+    IPvPService -> IPvPService: Check if each user has a saved party
 
-    alt Enemy Has Saved Party
-        PartyService --> PvPService: true
+    alt Either User Has No Saved Party
+        IPvPService --> PvPController: error("No saved parties")
 
-        PvPService -> PvPRepository: save(invitation)
-        activate PvPRepository
-        PvPRepository --> PvPService: Invitation Saved
-        deactivate PvPRepository
-        PvPService --> PvPController: success
-
-    else Enemy Has No Saved Party
-        PartyService --> PvPService: false
-        deactivate PartyService
-
-        PvPService --> PvPController: error("Enemy has no saved party")
-        deactivate PvPService
+    else Both Have a Saved Party
+        IPvPService -> PvPInvitationRepository: save(invitation)
+        deactivate IPvPService
 
     end
 
 end
 
-PvPController --> User: Display Invitation Result
+PvPController --> User1: Invitation Sent
 deactivate PvPController
 
 == Accept Invitation ==
-Enemy -> PvPController: acceptInvite(inviteId)
+User2 -> PvPController: Post /accept/{inviteId}
 activate PvPController
 
-PvPController -> PvPService: acceptInvitation(inviteId)
-activate PvPService
+PvPController -> IPvPService: acceptInvitation(inviteId)
+activate IPvPService
 
-PvPService -> PvPRepository: updateStatus(inviteId, ACCEPTED)
-activate PvPRepository
-PvPRepository --> PvPService: updated
-deactivate PvPRepository
+IPvPService -> IPvPService: Update invitation status to accepted
+IPvPService -> PvPInvitationRepository: save(invitation)
+deactivate IPvPService
 
-PvPService -> PartyService: getSavedParties(userId, opponentId)
-activate PartyService
-PartyService --> PvPService: userParty, opponentParty
-deactivate PartyService
+PvPController -> User2: redirect /pvp/select-party
+User2 --> PvPController: selected party
+PvPController -> User1: redirect /pvp/select-party
+User1 --> PvPController: selected party
 
-PvPService -> BattleService: startBattle(userParty, opponentParty)
-activate BattleService
-BattleService --> PvPService: Battle Result
-deactivate BattleService
-
-PvPService -> LeagueRepository: updateStandings(battleResult)
-activate LeagueRepository
-LeagueRepository --> PvPService: Standings Updated
-deactivate LeagueRepository
-
-PvPService --> PvPController: return Battle Result
-deactivate PvPService
-
-PvPController --> Enemy: Show Battle Result
-PvPController -> User: Show Battle Result
+PvPController -> IBattleService: initializePvPBattle(senderPartyId, receiverPartyId, inviteId)
+deactivate IBattleService
+PvPController --> User2: redirect /battle
 deactivate PvPController
+
+==Battle Result==
+User2 -> BattleController: Get /result
+activate BattleController
+BattleController -> IBattleService: updatePvPResult(battleState)
+activate IBattleService
+IBattleService -> IBattleService: Increment winner wins by one and increment loser losses by one
+IBattleService -> UserRepository: save(user) for both users
+
+IBattleService --> BattleController: Updated battle state
+deactivate IBattleService
+BattleController --> User2: Display Battle Result
 
 @enduml

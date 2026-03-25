@@ -1,86 +1,100 @@
 @startuml
-'https://plantuml.com/sequence-diagram
+autonumber
 
-@startuml
-'autonumber
+skinparam responseMessageBelowArrow true
 
-title Use Case 4 - Interact with the Inn (Campaign specific)
+title Use Case 4 - Interact with the Inn (Updated)
 
 actor User
 boundary InnController
-control InnService
-control PartyService
-control InventoryService
+control ICampaignService
+control IInnService
+control IPartyManagementService
 database PartyRepository
+control IHeroService
+database ItemRepository
 database InventoryRepository
 
-User -> InnController: Enter Inn (campaignId)
+== Display Inn View ==
+User -> InnController: Get /inn
 activate InnController
+InnController -> ICampaignService: getActiveCampaign(username)
+activate ICampaignService
+ICampaignService --> InnController: campaign
+deactivate ICampaignService
+InnController -> IInnService: loadInnView(campaignId)
+activate IInnService
 
-InnController -> InnService: loadInnView(campaignId)
-activate InnService
-
-InnService -> InnService: reviveAndHealParty(campaignId)
-PartyService -> PartyRepository: updatePartyStatus(campaignId)
-activate PartyService
+IInnService -> IPartyManagementService: reviveAndHealParty(campaignId)
+activate IPartyManagementService
+IPartyManagementService -> PartyRepository: save(party)
 activate PartyRepository
-
-PartyRepository --> PartyService: Party updated
+PartyRepository --> IPartyManagementService: saved party
 deactivate PartyRepository
-deactivate PartyService
+IPartyManagementService --> IInnService: revived and healed party
+deactivate IPartyManagementService
+IInnService --> InnController: heal summary
 
-InnService --> InnController: Display party status
+InnController -> IInnService: getAvailableRecruits(campaignId)
+IInnService -> IInnService: cleanupTemporaryRecruits(campaignId)
+IInnService -> IPartyManagementService: getActiveParty(campaignId)
+activate IPartyManagementService
+IPartyManagementService --> IInnService: active party
+deactivate IPartyManagementService
+IInnService -> IInnService: Generate recruits
+IInnService --> InnController: available recruits
+
+InnController -> IInnService: getShopItems()
+IInnService --> InnController: items
+deactivate IInnService
+
+InnController -> IHeroService: isLevelUpPending(heroId)
+activate IHeroService
+IHeroService --> InnController: heroes with pending level ups
+deactivate IHeroService
+
+InnController --> User: Display inn page
+deactivate InnController
+
+==Interact with Inn==
 
 loop While User in Inn
-    User -> InnController: Select Inn action;
-
     alt Buy Item
-        InnController -> InventoryService: purchaseItem(campaignId, itemId)
-        activate InventoryService
-        InventoryService -> PartyService: getActiveParty(campaignId)
-        activate PartyService
-        PartyService -> PartyRepository: findActivePartyByCampaignId(campaignId)
-        activate PartyRepository
-        PartyRepository --> PartyService: Party returned
-        deactivate PartyRepository
-        PartyService --> InventoryService: Party with id (partyId)
-        deactivate PartyService
+        User -> InnController: Post /buy (itemId)
+        activate InnController
+        InnController -> IInnService: purchaseItem(campaignId, itemId)
+        activate IInnService
+        IInnService -> ItemRepository: findById(itemId)
+        activate ItemRepository
+        ItemRepository --> IInnService: Optional item
+        deactivate ItemRepository
 
-        InventoryService -> InventoryRepository: saveInventory(partyId, itemId)
-        activate InventoryRepository
+        IInnService -> IPartyManagementService: deductGold(partyId, itemCost)
+        IInnService -> InventoryRepository: save(inventory)
+        IInnService --> InnController: true
+        deactivate IInnService
 
-        InventoryRepository --> InventoryService: Inventory saved
-        deactivate InventoryRepository
-        InventoryService --> InnController: Purchase successful
-        deactivate InventoryService
+        InnController --> User: Item purchased
 
     else Recruit Hero
-        InnController -> PartyService: recruitHero(campaignId, heroId)
-        activate PartyService
-        PartyService -> PartyRepository: saveParty(campaignId)
-        activate PartyRepository
+        InnController -> IInnService: recruitHero(campaignId, heroId)
+        activate IInnService
+        IInnService -> IHeroService: findById(heroToRecruit)
+        activate IHeroService
+        IHeroService --> IInnService: hero
+        IInnService -> IHeroService: save(hero)
+        deactivate IHeroService
+        IInnService -> IPartyManagementService: deductGold(partyId, heroCost)
 
-        PartyRepository --> PartyService: Party saved
-        deactivate PartyRepository
-        PartyService --> InnController: Hero recruited
-        deactivate PartyService
-
-    else Leave Inn
-        InnController --> User: Exit Inn
-    end
+        IInnService --> InnController: true
+        deactivate IInnService
+        InnController --> User: Hero recruited
 end
 
-InnController -> InnService: exitInn(campaignId)
-InnService -> PartyRepository: savePartyState(campaignId)
-activate PartyRepository
-
-PartyRepository --> InnService: Party state saved
-deactivate PartyRepository
-
-InnService --> InnController: Proceed to next room
-deactivate InnService
-
-InnController --> User: Show campaign view
+==Exit Inn==
+User -> InnController: Post /continue
+InnController -> IInnService: cleanupTemporaryRecruits(campaignId)
+InnController --> User: redirect /campaign
 deactivate InnController
 
 @enduml

@@ -83,11 +83,11 @@ class InnServiceImpl implements IInnService {
    */
   @Override
   public List<Hero> getAvailableRecruits(Long campaignId) {
+
     cleanupTemporaryRecruits(campaignId);
 
     Party party = partyManagementService.getActiveParty(campaignId);
 
-    // Spec: recruits only available in first 10 rooms
     Campaign campaign =
         campaignRepository
             .findById(campaignId)
@@ -168,7 +168,6 @@ class InnServiceImpl implements IInnService {
 
     partyManagementService.deductGold(party.getId(), item.getCost());
 
-    // Add to inventory
     Inventory inventory = party.getInventory();
     if (inventory == null) {
       inventory = Inventory.builder().party(party).build();
@@ -202,7 +201,6 @@ class InnServiceImpl implements IInnService {
     int cost = hero.getLevel() == 1 ? 0 : (hero.getLevel() - 1) * 200;
     if (party.getGold() < cost) throw new RuntimeException("Not enough gold");
 
-    // Mark permanent before saving so they survive next inn visit cleanup
     hero.setTemporary(false);
     heroService.save(hero);
 

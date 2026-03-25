@@ -1,39 +1,40 @@
 @startuml
-title Use Case 6 - Continue Incomplete PvE Campaign
+title Use Case 6 - Continue Incomplete PvE Campaign (Updated)
+
+skinparam responseMessageBelowArrow true
 
 autonumber
 
 actor User
 boundary CampaignController
-control CampaignService
+control ICampaignService
+control ICampaignProgressService
+control IInventoryService
 database CampaignRepository
-control HeroService
-database HeroRepository
 
-User -> CampaignController : Select "Continue Campaign"
+User -> CampaignController : Get /campaign
 activate CampaignController
-
-CampaignController -> CampaignService : resumeCampaign(userId)
-activate CampaignService
-
-CampaignService -> CampaignRepository : findByUserId(userId)
+CampaignController -> ICampaignService: getActiveCampaign(username)
+activate ICampaignService
+ICampaignService -> CampaignRepository: findActiveCampaignByUsername(username)
 activate CampaignRepository
-CampaignRepository --> CampaignService : return Campaign entity
+
+CampaignRepository --> ICampaignService: active campaign
 deactivate CampaignRepository
+ICampaignService --> CampaignController: campaign
+deactivate ICampaignService
 
-CampaignService -> HeroService: getHeroes(campaignId)
-activate HeroService
-HeroService -> HeroRepository : findHeroesByCampaignId(id)
-activate HeroRepository
-HeroRepository --> HeroService : return List<Hero>
-deactivate HeroRepository
-HeroService --> CampaignService: return heroes
-deactivate HeroService
+CampaignController -> ICampaignProgressService: getCampaignViewData(username)
+activate ICampaignProgressService
+ICampaignProgressService --> CampaignController: CampaignViewInfo(campaignId, currentRoom, gold, heroes)
+deactivate ICampaignProgressService
 
-CampaignService --> CampaignController : return loaded campaign
-deactivate CampaignService
+CampaignController -> IInventoryService: getPartyInventoryItems(campaignId)
+activate IInventoryService
+IInventoryService --> CampaignController: List<items>
+deactivate IInventoryService
 
-CampaignController --> User : Display Campaign/Inn View
+CampaignController --> User: Display campaign page
 deactivate CampaignController
 
 @enduml
