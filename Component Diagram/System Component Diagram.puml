@@ -36,5 +36,4 @@ SVC --> BSTATE
 SVC --> REPO
 REPO --> MODEL
 REPO --> DB
-
 @enduml
