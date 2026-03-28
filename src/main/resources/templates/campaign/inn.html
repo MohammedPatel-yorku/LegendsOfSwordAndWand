@@ -163,6 +163,36 @@
             <!-- RIGHT: shop + recruits + continue -->
             <div style="display:flex; flex-direction:column; gap:1.5rem;">
 
+                <!-- Party Inventory -->
+                <div th:if="${inventoryItems != null and !#lists.isEmpty(inventoryItems)}">
+                    <div class="party-panel-header">
+                        <span class="party-panel-title">📦 Your Inventory</span>
+                        <span class="party-gold" th:text="${#lists.size(inventoryItems)} + ' item(s)'"></span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; margin-bottom:0.5rem;">
+                        <div th:each="item : ${inventoryItems}"
+                             style="padding:0.5rem 0.7rem; background:var(--bg-raised);
+                    border:1px solid var(--border-dim); border-radius:var(--radius-sm);
+                    font-size:0.75rem;">
+                            <div style="font-family:'Cinzel',serif; color:var(--gold-bright);"
+                                 th:text="${item.name}">Item</div>
+                            <div style="font-size:0.65rem; color:var(--text-secondary);">
+                                <span th:if="${item.revives}">Revive + Full HP + MP</span>
+                                <span th:unless="${item.revives}">
+                    <span th:if="${item.hpRestore > 0}" th:text="'+' + ${item.hpRestore} + ' HP'"></span>
+                    <span th:if="${item.hpRestore > 0 and item.manaRestore > 0}"> · </span>
+                    <span th:if="${item.manaRestore > 0}" th:text="'+' + ${item.manaRestore} + ' MP'"></span>
+                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${inventoryItems == null or #lists.isEmpty(inventoryItems)}"
+                     style="font-family:'Cinzel',serif; font-size:0.75rem; color:var(--text-muted);
+            padding:0.5rem 0; margin-bottom:0.5rem;">
+                    📦 Inventory is empty.
+                </div>
+
                 <!-- Shop -->
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
                     <div th:each="item : ${shopItems}"

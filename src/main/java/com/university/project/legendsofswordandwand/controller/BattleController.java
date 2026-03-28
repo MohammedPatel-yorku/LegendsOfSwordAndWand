@@ -57,6 +57,11 @@ public class BattleController {
     if (authentication == null) return "redirect:/login";
     try {
       BattleState state = (BattleState) session.getAttribute(SESSION_KEY);
+
+      if (state != null && state.isPvp() && state.isOver()) {
+        return "redirect:/battle/result";
+      }
+
       if (state == null || state.isOver()) {
         var campaign = campaignService.getActiveCampaign(authentication.getName());
         int cumulativeLevel = campaignService.getPartyCumulativeLevel(authentication.getName());
@@ -295,13 +300,10 @@ public class BattleController {
     BattleState state = (BattleState) session.getAttribute(SESSION_KEY);
     if (state == null || !state.isPvp()) return "redirect:/dashboard";
 
-    // Force a loss result for the forfeiting side and update stats
     state.setStatus(BattleStatus.PLAYER_LOSE);
-    battleService.updatePvPResult(state);
-
-    session.removeAttribute(SESSION_KEY);
+    session.setAttribute(SESSION_KEY, state);
     session.removeAttribute("rewardsGiven");
-    return "redirect:/pvp";
+    return "redirect:/battle/result";
   }
 
   /**
