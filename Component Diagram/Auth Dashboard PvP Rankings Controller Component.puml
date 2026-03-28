@@ -1,0 +1,37 @@
+@startuml CD_Controller_Auth_Dashboard_PvP_Rankings
+skinparam classAttributeIconSize 0
+
+class AuthController {
+  + loginPage(): String
+  + registerPage(): String
+  + register(request: RegisterRequest, redirectAttributes: RedirectAttributes): String
+  + logoutCheck(session: HttpSession, redirectAttributes: RedirectAttributes): String
+}
+
+class DashboardController {
+  + dashboardPage(auth: Authentication, model: Model): String
+}
+
+class ProfileController {
+  + profilePage(auth: Authentication, model: Model): String
+}
+
+class PvPController {
+  + pvpPage(auth: Authentication, model: Model): String
+  + sendInvitation(auth: Authentication, receiverUsername: String, redirectAttributes: RedirectAttributes): String
+  + acceptInvitation(auth: Authentication, inviteId: Long, partyId: Long, session: HttpSession): String
+  + declineInvitation(auth: Authentication, inviteId: Long, redirectAttributes: RedirectAttributes): String
+}
+
+class RankingsController {
+  + rankingsPage(auth: Authentication, model: Model): String
+}
+
+AuthController --> IAuthService
+DashboardController --> IUserService
+ProfileController --> IProfileService
+PvPController --> IPvPService
+PvPController --> IBattleService
+RankingsController --> IProfileService
+
+@enduml

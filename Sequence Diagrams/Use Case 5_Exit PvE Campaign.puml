@@ -3,60 +3,30 @@
 
 autonumber
 
-title Use Case 5 - Exit PvE Campaign
+skinparam responseMessageBelowArrow true
+
+title Use Case 5 - Exit PvE Campaign (Updated)
 
 actor User
 
 boundary CampaignController
-control CampaignService
-control PartyService
-control HeroService
-database CampaignRepository
-database PartyRepository
-database HeroRepository
+control ICampaignService
 
-User -> CampaignController: Select "Exit Campaign"
+User -> CampaignController: Select "Save and Exit Campaign"
 activate CampaignController
 
-CampaignController -> CampaignService: requestExit(campaignId)
-activate CampaignService
-
-CampaignService -> CampaignService: validateExitState()
-
 alt Currently in Battle
-    CampaignService --> CampaignController: error("Cannot exit during battle")
+    CampaignController --> User: error("Cannot exit during battle")
 
 else Exit Allowed
-    CampaignService -> PartyService: getActiveParty(campaignId)
-    activate PartyService
-    PartyService -> PartyRepository: save(party)
-    activate PartyRepository
+    CampaignController -> ICampaignService: exitCampaign(campaignId)
+    activate ICampaignService
+    ICampaignService --> CampaignController: saved campaign
+    deactivate ICampaignService
 
-    PartyRepository --> PartyService: Party Saved
-    deactivate PartyRepository
-    PartyService --> CampaignService: Party Persisted
-    deactivate PartyService
+    CampaignController --> User: redirect /dashboard
+    deactivate CampaignController
 
-    CampaignService -> HeroService: saveHeroStates(partyId)
-    activate HeroService
-    HeroService -> HeroRepository: saveAll(heroes)
-    activate HeroRepository
-
-    HeroRepository --> HeroService: Heroes Saved
-    deactivate HeroRepository
-    HeroService --> CampaignService: Heroes Persisted
-    deactivate HeroService
-
-    CampaignService -> CampaignRepository: save(campaignState)
-    activate CampaignRepository
-    CampaignRepository --> CampaignService: Campaign Saved
-    deactivate CampaignRepository
-
-    CampaignService --> CampaignController: Exit Success
-    deactivate CampaignService
 end
-
-CampaignController --> User: Return to Main Menu
-deactivate CampaignController
 
 @enduml

@@ -1,0 +1,31 @@
+@startuml Template_Method_Pattern
+skinparam classAttributeIconSize 0
+
+abstract class BattleInitializer {
+    + {final} initialize() : BattleState
+    # {abstract} buildPlayerUnits(): List<BattleUnit>
+    # {abstract} buildEnemyUnits(): List<BattleUnit>
+    + {abstract} onBattleEnd(state: BattleState): void
+}
+
+class PvEBattleInitializer {
+  - campaignId: Long
+  - playerCumulativeLevel: int
+  # buildPlayerUnits(): List<BattleUnit>
+  # buildEnemyUnits(): List<BattleUnit>
+  + onBattleEnd(state: BattleState): void
+}
+
+class PvPBattleInitializer {
+  - senderParty: Party
+  - receiverParty: Party
+  - invitationId: Long
+  # buildPlayerUnits(): List<BattleUnit>
+  # buildEnemyUnits(): List<BattleUnit>
+  + onBattleEnd(state: BattleState): void
+}
+
+BattleInitializer <|-- PvEBattleInitializer
+BattleInitializer <|-- PvPBattleInitializer
+
+@enduml

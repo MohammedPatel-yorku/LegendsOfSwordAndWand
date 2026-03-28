@@ -1,0 +1,42 @@
+@startuml Builder_Pattern
+skinparam classAttributeIconSize 0
+
+class Item {
+  - name: String
+  - cost: int
+  - hpRestore: int
+  - manaRestore: int
+  - revives: boolean
+  + {static} bread(): Item
+  + {static} cheese(): Item
+  + {static} steak(): Item
+  + {static} water(): Item
+  + {static} juice(): Item
+  + {static} wine(): Item
+  + {static} elixir(): Item
+}
+
+class "Item.ItemBuilder" as ItemBuilder {
+  - name: String
+  - cost: int
+  - hpRestore: int
+  - manaRestore: int
+  - revives: boolean
+  + name(name: String): ItemBuilder
+  + cost(cost: int): ItemBuilder
+  + hpRestore(hp: int): ItemBuilder
+  + manaRestore(mana: int): ItemBuilder
+  + revives(revives: boolean): ItemBuilder
+  + build(): Item
+}
+
+Item --> ItemBuilder : creates via >
+ItemBuilder --> Item : builds >
+
+note right of Item
+  Static factory methods (bread(), elixir() etc.)
+  use the builder internally, providing
+  pre-configured Item instances to clients.
+end note
+
+@enduml

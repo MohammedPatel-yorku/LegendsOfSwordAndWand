@@ -1,0 +1,29 @@
+@startuml CD_Service_User_Auth_PvP
+skinparam classAttributeIconSize 0
+
+interface IAuthService {
+  + register(request: RegisterRequest): User
+}
+
+interface IUserService {
+  + getDashboardInfo(username: String): DashboardInfo
+  + getUserIdByUsername(username: String): Long
+}
+
+interface IProfileService {
+  + getProfile(username: String): ProfileInfo
+  + getHallOfFame(): List<HallOfFameEntry>
+  + getPvPStandings(): List<PvPStandingEntry>
+}
+
+interface IPvPService {
+  + createInvitation(senderUsername: String, receiverUsername: String): void
+  + acceptInvitation(inviteId: Long): void
+}
+
+class AuthServiceImpl implements IAuthService
+class UserServiceImpl implements IUserService
+class ProfileServiceImpl implements IProfileService
+class PvPServiceImpl implements IPvPService
+
+@enduml

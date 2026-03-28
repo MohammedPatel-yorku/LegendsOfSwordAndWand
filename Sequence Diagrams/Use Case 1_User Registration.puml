@@ -1,5 +1,4 @@
 @startuml
-''autonumber each message
 autonumber
 
 skinparam responseMessageBelowArrow true
@@ -7,93 +6,86 @@ skinparam responseMessageBelowArrow true
 title Use Case 1 - User Registration and Login (Updated)
 
 actor User
-boundary UserController
-control IUserService
+boundary AuthController
+control IAuthService
+control CustomUserDetailsService
 database UserRepository
 collections PasswordEncoder
 
 == Registration ==
 
-User -> UserController: Enter username and password
-activate UserController
+User -> AuthController: POST /register (username, password)
+activate AuthController
 
-UserController -> IUserService: registerUser(username, password)
-activate IUserService
+AuthController -> IAuthService: register(RegisterRequest)
+activate IAuthService
 
-IUserService -> IUserService: validate(username, password)
+IAuthService -> UserRepository: existsByUsername(username)
+activate UserRepository
 
-alt Invalid Input
-    IUserService --> UserController: throw new IllegalArgumentException
+alt Username Already Taken
+    UserRepository --> IAuthService: true
+    IAuthService --> AuthController: throw RuntimeException("Username already exists")
+    AuthController --> User: Redirect /register with error message
 
-else Valid Input
-    IUserService -> UserRepository: findByUsername(username)
+else Username Available
+    UserRepository --> IAuthService: false
+    deactivate UserRepository
+
+    IAuthService -> PasswordEncoder: encode(password)
+    activate PasswordEncoder
+    PasswordEncoder --> IAuthService: hashedPassword
+    deactivate PasswordEncoder
+
+    IAuthService -> UserRepository: save(User)
     activate UserRepository
+    UserRepository --> IAuthService: saved User
+    deactivate UserRepository
 
-    alt Username Already Exists
-        UserRepository --> IUserService: existing user
-        deactivate UserRepository
-        IUserService --> UserController: throw new UsernameAlreadyExistsException
-
-    else Username Available
-        UserRepository --> IUserService: null
-        deactivate UserRepository
-
-        IUserService -> PasswordEncoder: encode(password)
-        activate PasswordEncoder
-        PasswordEncoder --> IUserService: hashedPassword
-        deactivate PasswordEncoder
-
-        IUserService -> UserRepository: save(User)
-        activate UserRepository
-        UserRepository --> IUserService: User saved
-        deactivate UserRepository
-
-        IUserService --> UserController: "Registration successful."
-    end
+    IAuthService --> AuthController: saved User
+    deactivate IAuthService
+    AuthController --> User: Redirect /login
+    deactivate AuthController
 end
-
-deactivate IUserService
-UserController --> User: Display registration message
-deactivate UserController
 
 
 == Login ==
 
-User -> UserController: Enter username and password
-activate UserController
+User -> AuthController: POST /login (username, password)
+activate AuthController
 
-UserController -> IUserService: loginUser(username, password)
-activate IUserService
+AuthController -> CustomUserDetailsService: loadUserByUsername(username)
+activate CustomUserDetailsService
 
-IUserService -> UserRepository: findByUsername(username)
+CustomUserDetailsService -> UserRepository: findByUsername(username)
 activate UserRepository
 
 alt User Not Found
-    UserRepository --> IUserService: null
-    deactivate UserRepository
-    IUserService --> UserController: throw new UserNotFoundException
+    UserRepository --> CustomUserDetailsService: empty Optional
+    CustomUserDetailsService --> AuthController: throw UsernameNotFoundException
+    AuthController --> User: Redirect /login?error
 
 else User Found
-    UserRepository --> IUserService: User
+    UserRepository --> CustomUserDetailsService: User
     deactivate UserRepository
 
-    IUserService -> PasswordEncoder: matches(password, storedHash)
+    CustomUserDetailsService --> AuthController: UserDetails
+    deactivate CustomUserDetailsService
+
+    AuthController -> PasswordEncoder: matches(rawPassword, hashedPassword)
     activate PasswordEncoder
 
     alt Password Incorrect
-        PasswordEncoder --> IUserService: false
-        deactivate PasswordEncoder
-        IUserService --> UserController: throw new IncorrectPasswordException
+        PasswordEncoder --> AuthController: false
+        AuthController --> User: Redirect /login?error
 
     else Password Correct
-        PasswordEncoder --> IUserService: true
+        PasswordEncoder --> AuthController: true
         deactivate PasswordEncoder
-        IUserService --> UserController: "Login successful."
+        AuthController --> User: Redirect /dashboard
+        deactivate AuthController
     end
 end
 
-deactivate IUserService
-UserController --> User: Display login message
-deactivate UserController
 
 @enduml

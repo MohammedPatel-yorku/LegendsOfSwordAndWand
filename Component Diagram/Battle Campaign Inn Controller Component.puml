@@ -1,0 +1,48 @@
+@startuml CD_Controller_Battle_Campaign_Inn
+skinparam classAttributeIconSize 0
+
+class BattleController {
+  + battlePage(auth: Authentication, session: HttpSession, model: Model): String
+  + getState(auth: Authentication, session: HttpSession): ResponseEntity
+  + action(auth: Authentication, session: HttpSession, action: ActionType, targetBattleId: Long, abilityIndex: Integer): ResponseEntity
+  + result(auth: Authentication, model: Model, session: HttpSession): String
+  + continueCampaign(auth: Authentication, session: HttpSession): String
+  + forfeit(auth: Authentication, session: HttpSession): String
+}
+
+class CampaignController {
+  + newCampaignPage(auth: Authentication): String
+  + startCampaign(auth: Authentication, heroName: String, heroClass: HeroClass, model: Model): String
+  + campaignPage(auth: Authentication, model: Model): String
+  + nextRoom(auth: Authentication): String
+  + exitCampaign(auth: Authentication, redirectAttributes: RedirectAttributes): String
+  + abandonCampaign(auth: Authentication): String
+  + useItem(auth: Authentication, heroId: Long, itemId: Long, redirectAttributes: RedirectAttributes): String
+  + levelUp(auth: Authentication, heroId: Long, heroClass: HeroClass, returnTo: String, redirectAttributes: RedirectAttributes): String
+  + completePage(auth: Authentication, model: Model): String
+  + saveParty(auth: Authentication, campaignId: Long, model: Model): String
+  + replaceParty(auth: Authentication, campaignId: Long, replacePartyId: Long): String
+  + discardParty(): String
+}
+
+class InnController {
+  + innPage(auth: Authentication, model: Model, session: HttpSession): String
+  + buyItem(auth: Authentication, itemId: Long, redirectAttributes: RedirectAttributes): String
+  + recruitHero(auth: Authentication, heroId: Long, redirectAttributes: RedirectAttributes, session: HttpSession): String
+  + leaveInn(auth: Authentication, session: HttpSession): String
+}
+
+BattleController --> IBattleService
+BattleController --> ICampaignService
+BattleController --> ICampaignProgressService
+BattleController --> IHeroService
+CampaignController --> ICampaignService
+CampaignController --> ICampaignProgressService
+CampaignController --> IHeroService
+CampaignController --> IInventoryService
+InnController --> IInnService
+InnController --> ICampaignService
+InnController --> ICampaignProgressService
+InnController --> IHeroService
+
+@enduml

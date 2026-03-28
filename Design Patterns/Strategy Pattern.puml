@@ -1,25 +1,43 @@
-@startuml
-'https://plantuml.com/class-diagram
+@startuml Strategy_Pattern
+skinparam classAttributeIconSize 0
 
-title Battle Actions - Strategy Pattern
-
-interface ActionStrategy {
-    + execute(actor : Hero, target : Hero)
+interface ClassBonusStrategy {
+    + getHeroClass(): HeroClass
+    + applyLevelBonus(hero: Hero): void
 }
 
-class AttackStrategy
-class DefendStrategy
-class CastSpellStrategy
-
-ActionStrategy <|.. AttackStrategy
-ActionStrategy <|.. DefendStrategy
-ActionStrategy <|.. CastSpellStrategy
-
-class BattleService {
-    - strategy : ActionStrategy
-    + performAction(actor : Hero, target : Hero)
+class OrderBonusStrategy {
+    + getHeroClass(): HeroClass
+    + applyLevelBonus(hero: Hero): void
 }
 
-BattleService --> ActionStrategy
+class ChaosBonusStrategy {
+    + getHeroClass(): HeroClass
+    + applyLevelBonus(hero: Hero): void
+}
+
+class WarriorBonusStrategy {
+    + getHeroClass(): HeroClass
+    + applyLevelBonus(hero: Hero): void
+}
+
+class MageBonusStrategy {
+    + getHeroClass(): HeroClass
+    + applyLevelBonus(hero: Hero): void
+}
+
+class HeroStatCalculator {
+    - strategies: List<ClassBonusStrategy>
+    + applyLevelUp(hero: Hero, heroClass: HeroClass): void
+    + applyClassBonusOnly(hero: Hero, heroClass: HeroClass): void
+    - applyClassBonus(hero: Hero, heroClass: HeroClass): void
+    - getStrategy(heroClass: HeroClass): ClassBonusStrategy
+}
+
+ClassBonusStrategy <|.. OrderBonusStrategy
+ClassBonusStrategy <|.. ChaosBonusStrategy
+ClassBonusStrategy <|.. WarriorBonusStrategy
+ClassBonusStrategy <|.. MageBonusStrategy
+HeroStatCalculator o-- ClassBonusStrategy : uses list of >
 
 @enduml

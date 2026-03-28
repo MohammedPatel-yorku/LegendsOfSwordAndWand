@@ -1,0 +1,72 @@
+@startuml Decorator_Pattern
+skinparam classAttributeIconSize 0
+
+interface Ability {
+  + getManaCost(): int
+  + execute(caster: BattleUnit, target: BattleUnit, allies: List, enemies: List, state: BattleState): void
+}
+
+abstract class AbilityDecorator {
+  # wrapped: Ability
+  + AbilityDecorator(wrapped: Ability)
+  + getManaCost(): int
+  + execute(...): void
+}
+
+class SelfHealBeforeAttackDecorator {
+  + execute(...): void
+}
+
+class StunDecorator {
+  - random: Random
+  + execute(...): void
+}
+
+class DoubleEffectDecorator {
+  + execute(...): void
+}
+
+class BerserkerAbility {
+  + getManaCost(): int
+  + execute(...): void
+}
+
+class HealAbility {
+  - multiplier: double
+  + getManaCost(): int
+  + execute(...): void
+}
+
+class ProtectAbility {
+  - multiplier: double
+  + getManaCost(): int
+  + execute(...): void
+}
+
+Ability <|.. AbilityDecorator
+Ability <|.. BerserkerAbility
+Ability <|.. HealAbility
+Ability <|.. ProtectAbility
+
+AbilityDecorator <|-- SelfHealBeforeAttackDecorator
+AbilityDecorator <|-- StunDecorator
+AbilityDecorator <|-- DoubleEffectDecorator
+
+AbilityDecorator o-- Ability : wraps >
+
+note right of SelfHealBeforeAttackDecorator
+  Applied to BerserkerAbility
+  for PALADIN hybrid
+end note
+
+note right of StunDecorator
+  Applied to BerserkerAbility
+  for KNIGHT hybrid
+end note
+
+note right of DoubleEffectDecorator
+  Applied to HealAbility and
+  ProtectAbility for PROPHET hybrid
+end note
+
+@enduml

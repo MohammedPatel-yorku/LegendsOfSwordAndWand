@@ -1,0 +1,39 @@
+@startuml CD_Service_Hero_Party_Inventory
+skinparam classAttributeIconSize 0
+
+interface IHeroService {
+  + createBaseHeroForParty(partyId: Long, heroName: String, heroClass: HeroClass): void
+  + levelUp(heroId: Long, chosenClass: HeroClass): Hero
+  + addExperience(heroId: Long, amount: int): Hero
+  + isLevelUpPending(heroId: Long): boolean
+  + findById(heroId: Long): Optional<Hero>
+  + save(hero: Hero): Hero
+  + delete(heroId: Long): void
+}
+
+interface IInventoryService {
+  + saveInventory(inventory: Inventory): Inventory
+  + useItem(campaignId: Long, heroId: Long, itemId: Long): boolean
+  + getPartyInventoryItems(campaignId: Long): List<Item>
+}
+
+interface IPartyService {
+  + createPartyForUser(userId: Long): Party
+  + deleteParty(partyId: Long): void
+}
+
+interface IPartyManagementService {
+  + getActiveParty(campaignId: Long): Party
+  + reviveAndHealParty(campaignId: Long): Party
+  + reviveAndHealPartyWithSummary(campaignId: Long): List<String>
+  + deductGold(partyId: Long, amount: int): void
+  + addGold(partyId: Long, amount: int): void
+  + addHeroToParty(partyId: Long, heroId: Long): void
+}
+
+class HeroServiceImpl implements IHeroService
+class InventoryServiceImpl implements IInventoryService
+class PartyServiceImpl implements IPartyService
+class PartyManagementServiceImpl implements IPartyManagementService
+
+@enduml
