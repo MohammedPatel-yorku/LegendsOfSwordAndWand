@@ -1,0 +1,335 @@
+Complexity metrics,Sat, 28 Mar 2026 14:15:33 EDT
+Method,CogC,ev(G),iv(G),v(G)
+"com.university.project.legendsofswordandwand.DemoDataLoader.addGold(Party, int)",0,1,1,1
+"com.university.project.legendsofswordandwand.DemoDataLoader.addHero(Party, String, HeroClass, int, HybridClass, int, int, ...)",0,1,1,1
+com.university.project.legendsofswordandwand.DemoDataLoader.buildSavedParty(User),0,1,1,1
+"com.university.project.legendsofswordandwand.DemoDataLoader.createUser(String, String)",0,1,1,1
+com.university.project.legendsofswordandwand.DemoDataLoader.run(String...),0,1,1,1
+com.university.project.legendsofswordandwand.DemoDataLoader.seedItems(),1,2,1,2
+com.university.project.legendsofswordandwand.LegendsOfSwordAndWandApplication.main(String[]),0,1,1,1
+com.university.project.legendsofswordandwand.LegendsOfSwordAndWandApplicationTests.contextLoads(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.AbilityExecutor.applyManaBurn(BattleUnit),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.AbilityExecutor.executeAbility(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState, int)",2,2,3,3
+"com.university.project.legendsofswordandwand.battle.AbilityExecutor.maybeSneak(BattleUnit, BattleUnit, BattleState)",1,1,2,2
+com.university.project.legendsofswordandwand.battle.BattleState.applyStun(Long),0,1,1,1
+com.university.project.legendsofswordandwand.battle.BattleState.findUnit(long),6,5,3,5
+com.university.project.legendsofswordandwand.battle.BattleState.getActiveUnit(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.BattleState.getLivingEnemyHeroes(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.BattleState.getLivingPlayerHeroes(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.BattleState.getShield(Long),0,1,1,1
+com.university.project.legendsofswordandwand.battle.BattleState.isOver(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.BattleState.isStunned(Long),0,1,1,1
+com.university.project.legendsofswordandwand.battle.BattleState.log(String),0,1,1,1
+com.university.project.legendsofswordandwand.battle.BattleState.recordSnapshot(List<BattleUnit>),1,1,2,2
+"com.university.project.legendsofswordandwand.battle.BattleState.setShield(Long, int)",0,1,1,1
+com.university.project.legendsofswordandwand.battle.BattleState.tickStuns(),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.BattleUnit.BattleUnit(long, HeroSnapshot, boolean)",0,1,1,1
+com.university.project.legendsofswordandwand.battle.BattleUnit.isAlive(),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.DamageCalculator.calculateDamage(int, int)",0,1,1,1
+"com.university.project.legendsofswordandwand.battle.EnemyGenerator.Archetype.Archetype(String, int, int, int, int, int, int)",0,1,1,1
+com.university.project.legendsofswordandwand.battle.EnemyGenerator.Archetype.attack(int),0,1,1,1
+com.university.project.legendsofswordandwand.battle.EnemyGenerator.Archetype.defense(int),0,1,1,1
+com.university.project.legendsofswordandwand.battle.EnemyGenerator.Archetype.hp(int),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.EnemyGenerator.EnemyType.EnemyType(String, Archetype)",0,1,1,1
+com.university.project.legendsofswordandwand.battle.EnemyGenerator.buildEnemy(int),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.EnemyGenerator.distributeLevels(int, int, int)",8,3,4,5
+"com.university.project.legendsofswordandwand.battle.EnemyGenerator.generate(int, int)",1,1,2,2
+com.university.project.legendsofswordandwand.battle.HeroSnapshot.HeroSnapshot(Hero),0,1,1,1
+com.university.project.legendsofswordandwand.battle.HeroSnapshot.isAlive(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.HeroStatCalculator.applyBaseGain(Hero),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.HeroStatCalculator.applyClassBonus(Hero, HeroClass)",0,1,1,1
+"com.university.project.legendsofswordandwand.battle.HeroStatCalculator.applyClassBonusOnly(Hero, HeroClass)",0,1,1,1
+"com.university.project.legendsofswordandwand.battle.HeroStatCalculator.applyLevelUp(Hero, HeroClass)",4,1,4,4
+com.university.project.legendsofswordandwand.battle.HeroStatCalculator.calculateExpThreshold(int),2,2,1,2
+com.university.project.legendsofswordandwand.battle.HeroStatCalculator.getStrategy(HeroClass),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.HybridClassResolver.resolve(HeroClass, HeroClass)",17,8,1,20
+"com.university.project.legendsofswordandwand.battle.ability.AbilityFactory.resolve(HeroClass, HybridClass, int)",5,1,3,7
+"com.university.project.legendsofswordandwand.battle.ability.AbilityFactory.resolveChaos(HybridClass, int)",1,1,1,2
+"com.university.project.legendsofswordandwand.battle.ability.AbilityFactory.resolveOrder(HybridClass, int)",6,3,1,5
+com.university.project.legendsofswordandwand.battle.ability.AbilityHelper.AbilityHelper(),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.AbilityHelper.applyDamage(HeroSnapshot, BattleUnit, int, BattleState)",6,1,3,6
+"com.university.project.legendsofswordandwand.battle.ability.AbilityHelper.calculateDamage(BattleUnit, BattleUnit)",0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.chaos.ChainLightningAbility.ChainLightningAbility(HybridClass, Random)",0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.chaos.ChainLightningAbility.execute(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState)",4,2,3,5
+com.university.project.legendsofswordandwand.battle.ability.chaos.ChainLightningAbility.getManaCost(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.ability.chaos.FireballAbility.FireballAbility(HybridClass),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.chaos.FireballAbility.execute(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState)",14,4,6,8
+com.university.project.legendsofswordandwand.battle.ability.chaos.FireballAbility.getManaCost(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.ability.decorator.AbilityDecorator.AbilityDecorator(Ability),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.decorator.AbilityDecorator.execute(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState)",0,1,1,1
+com.university.project.legendsofswordandwand.battle.ability.decorator.AbilityDecorator.getManaCost(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.ability.decorator.DoubleEffectDecorator.DoubleEffectDecorator(Ability),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.decorator.DoubleEffectDecorator.execute(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState)",0,1,1,1
+com.university.project.legendsofswordandwand.battle.ability.decorator.SelfHealBeforeAttackDecorator.SelfHealBeforeAttackDecorator(Ability),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.decorator.SelfHealBeforeAttackDecorator.execute(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState)",0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.decorator.StunDecorator.StunDecorator(Ability, Random)",0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.decorator.StunDecorator.execute(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState)",2,1,4,4
+com.university.project.legendsofswordandwand.battle.ability.mage.ReplenishAbility.ReplenishAbility(HybridClass),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.mage.ReplenishAbility.execute(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState)",4,1,2,4
+com.university.project.legendsofswordandwand.battle.ability.mage.ReplenishAbility.getManaCost(),1,1,1,2
+"com.university.project.legendsofswordandwand.battle.ability.order.FireShieldAbility.execute(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState)",4,1,3,3
+com.university.project.legendsofswordandwand.battle.ability.order.FireShieldAbility.getManaCost(),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.order.HealAbility.HealAbility(HybridClass, double)",0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.order.HealAbility.applyHeal(HeroSnapshot, double, BattleState)",0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.order.HealAbility.execute(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState)",2,1,2,2
+com.university.project.legendsofswordandwand.battle.ability.order.HealAbility.getManaCost(),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.order.ProtectAbility.ProtectAbility(HybridClass, double)",0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.order.ProtectAbility.execute(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState)",4,1,3,3
+com.university.project.legendsofswordandwand.battle.ability.order.ProtectAbility.getManaCost(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.ability.warrior.BerserkerAbility.BerserkerAbility(),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.ability.warrior.BerserkerAbility.execute(BattleUnit, BattleUnit, List<BattleUnit>, List<BattleUnit>, BattleState)",1,2,1,2
+com.university.project.legendsofswordandwand.battle.ability.warrior.BerserkerAbility.getManaCost(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.initializer.BattleInitializer.initialize(),3,1,3,3
+"com.university.project.legendsofswordandwand.battle.initializer.PvEBattleInitializer.PvEBattleInitializer(Long, int, IPartyManagementService, EnemyGenerator)",0,1,1,1
+com.university.project.legendsofswordandwand.battle.initializer.PvEBattleInitializer.buildEnemyUnits(),1,1,2,2
+com.university.project.legendsofswordandwand.battle.initializer.PvEBattleInitializer.buildPlayerUnits(),3,1,3,3
+com.university.project.legendsofswordandwand.battle.initializer.PvEBattleInitializer.onBattleEnd(BattleState),0,1,1,1
+"com.university.project.legendsofswordandwand.battle.initializer.PvPBattleInitializer.PvPBattleInitializer(Party, Party, Long, UserRepository)",0,1,1,1
+com.university.project.legendsofswordandwand.battle.initializer.PvPBattleInitializer.buildEnemyUnits(),3,1,3,3
+com.university.project.legendsofswordandwand.battle.initializer.PvPBattleInitializer.buildPlayerUnits(),3,1,3,3
+com.university.project.legendsofswordandwand.battle.initializer.PvPBattleInitializer.onBattleEnd(BattleState),2,1,3,3
+com.university.project.legendsofswordandwand.battle.initializer.PvPBattleInitializer.restoreParty(Party),0,1,1,1
+com.university.project.legendsofswordandwand.battle.strategy.ChaosBonusStrategy.applyLevelBonus(Hero),0,1,1,1
+com.university.project.legendsofswordandwand.battle.strategy.ChaosBonusStrategy.getHeroClass(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.strategy.MageBonusStrategy.applyLevelBonus(Hero),0,1,1,1
+com.university.project.legendsofswordandwand.battle.strategy.MageBonusStrategy.getHeroClass(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.strategy.OrderBonusStrategy.applyLevelBonus(Hero),0,1,1,1
+com.university.project.legendsofswordandwand.battle.strategy.OrderBonusStrategy.getHeroClass(),0,1,1,1
+com.university.project.legendsofswordandwand.battle.strategy.WarriorBonusStrategy.applyLevelBonus(Hero),0,1,1,1
+com.university.project.legendsofswordandwand.battle.strategy.WarriorBonusStrategy.getHeroClass(),0,1,1,1
+com.university.project.legendsofswordandwand.config.SecurityConfig.authenticationManager(AuthenticationConfiguration),0,1,1,1
+com.university.project.legendsofswordandwand.config.SecurityConfig.authenticationProvider(),0,1,1,1
+com.university.project.legendsofswordandwand.config.SecurityConfig.filterChain(HttpSecurity),0,1,1,1
+com.university.project.legendsofswordandwand.config.SecurityConfig.passwordEncoder(),0,1,1,1
+com.university.project.legendsofswordandwand.controller.AuthController.loginPage(),0,1,1,1
+"com.university.project.legendsofswordandwand.controller.AuthController.logoutCheck(HttpSession, RedirectAttributes)",2,2,3,3
+"com.university.project.legendsofswordandwand.controller.AuthController.register(RegisterRequest, RedirectAttributes)",1,1,2,2
+com.university.project.legendsofswordandwand.controller.AuthController.registerPage(),0,1,1,1
+"com.university.project.legendsofswordandwand.controller.BattleController.action(Authentication, HttpSession, ActionType, Long, Integer)",10,3,10,10
+"com.university.project.legendsofswordandwand.controller.BattleController.battlePage(Authentication, HttpSession, Model)",11,2,9,11
+"com.university.project.legendsofswordandwand.controller.BattleController.continueCampaign(Authentication, HttpSession)",9,6,6,8
+"com.university.project.legendsofswordandwand.controller.BattleController.forfeit(Authentication, HttpSession)",3,3,2,4
+"com.university.project.legendsofswordandwand.controller.BattleController.getState(Authentication, HttpSession)",2,3,3,3
+"com.university.project.legendsofswordandwand.controller.BattleController.result(Authentication, Model, HttpSession)",15,3,14,16
+com.university.project.legendsofswordandwand.controller.BattleController.toDto(BattleState),1,1,2,2
+com.university.project.legendsofswordandwand.controller.BattleController.unitDto(BattleUnit),3,1,4,4
+com.university.project.legendsofswordandwand.controller.CampaignController.abandonCampaign(Authentication),2,2,1,3
+"com.university.project.legendsofswordandwand.controller.CampaignController.campaignPage(Authentication, Model)",2,2,1,3
+"com.university.project.legendsofswordandwand.controller.CampaignController.completePage(Authentication, Model)",2,2,1,3
+com.university.project.legendsofswordandwand.controller.CampaignController.discardParty(),0,1,1,1
+"com.university.project.legendsofswordandwand.controller.CampaignController.exitCampaign(Authentication, RedirectAttributes)",4,3,4,5
+"com.university.project.legendsofswordandwand.controller.CampaignController.levelUp(Authentication, Long, HeroClass, String, RedirectAttributes)",2,2,2,3
+com.university.project.legendsofswordandwand.controller.CampaignController.newCampaignPage(Authentication),1,2,1,2
+com.university.project.legendsofswordandwand.controller.CampaignController.nextRoom(Authentication),5,3,3,6
+"com.university.project.legendsofswordandwand.controller.CampaignController.replaceParty(Authentication, Long, Long)",2,2,1,3
+"com.university.project.legendsofswordandwand.controller.CampaignController.saveParty(Authentication, Long, Model)",2,2,2,3
+"com.university.project.legendsofswordandwand.controller.CampaignController.startCampaign(Authentication, String, HeroClass, Model)",4,3,4,5
+"com.university.project.legendsofswordandwand.controller.CampaignController.useItem(Authentication, Long, Long, RedirectAttributes)",2,2,2,3
+"com.university.project.legendsofswordandwand.controller.DashboardController.dashboardPage(Authentication, Model)",1,2,1,2
+"com.university.project.legendsofswordandwand.controller.InnController.buyItem(Authentication, Long, RedirectAttributes)",4,2,3,4
+"com.university.project.legendsofswordandwand.controller.InnController.continueFromInn(Authentication, HttpSession)",4,2,2,4
+"com.university.project.legendsofswordandwand.controller.InnController.innPage(Authentication, Model, HttpSession)",9,3,7,10
+"com.university.project.legendsofswordandwand.controller.InnController.recruitHero(Authentication, Long, HttpSession, RedirectAttributes)",3,2,3,4
+"com.university.project.legendsofswordandwand.controller.ProfileController.profilePage(Authentication, Model)",1,2,1,2
+"com.university.project.legendsofswordandwand.controller.PvPController.acceptInvite(Long, Authentication, Model)",1,2,1,2
+"com.university.project.legendsofswordandwand.controller.PvPController.pvpPage(Authentication, Model)",1,2,1,2
+"com.university.project.legendsofswordandwand.controller.PvPController.sendInvite(Authentication, String, RedirectAttributes)",2,2,2,3
+"com.university.project.legendsofswordandwand.controller.PvPController.startBattle(Long, Long, Long, int, Authentication, HttpSession, Model, ...)",3,3,3,4
+"com.university.project.legendsofswordandwand.controller.RankingsController.rankingsPage(Authentication, Model)",1,2,1,2
+"com.university.project.legendsofswordandwand.model.Campaign.Campaign(User, Party, int, boolean)",0,1,1,1
+"com.university.project.legendsofswordandwand.model.Hero.Hero(String, HeroClass, Party)",0,1,1,1
+com.university.project.legendsofswordandwand.model.Inventory.Inventory(Party),0,1,1,1
+"com.university.project.legendsofswordandwand.model.Item.Item(String, int, int, int, boolean)",0,1,1,1
+com.university.project.legendsofswordandwand.model.Item.bread(),0,1,1,1
+com.university.project.legendsofswordandwand.model.Item.cheese(),0,1,1,1
+com.university.project.legendsofswordandwand.model.Item.elixir(),0,1,1,1
+com.university.project.legendsofswordandwand.model.Item.juice(),0,1,1,1
+com.university.project.legendsofswordandwand.model.Item.steak(),0,1,1,1
+com.university.project.legendsofswordandwand.model.Item.water(),0,1,1,1
+com.university.project.legendsofswordandwand.model.Item.wine(),0,1,1,1
+com.university.project.legendsofswordandwand.model.Party.Party(User),0,1,1,1
+com.university.project.legendsofswordandwand.model.Party.calculateScore(),0,1,1,1
+com.university.project.legendsofswordandwand.model.Party.getCumulativeLevel(),0,1,1,1
+"com.university.project.legendsofswordandwand.model.PvPInvitation.PvPInvitation(User, User, InvitationStatus, LocalDateTime)",0,1,1,1
+"com.university.project.legendsofswordandwand.model.User.User(String, String)",0,1,1,1
+com.university.project.legendsofswordandwand.service.auth.impl.AuthServiceImpl.register(RegisterRequest),1,2,1,2
+com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.advanceTurn(BattleState),12,6,7,9
+com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.applyBattleLoss(BattleState),1,1,2,2
+com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.awardBattleRewards(BattleState),5,2,4,5
+com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.buildTurnQueue(BattleState),0,1,1,1
+com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.checkBattleStatus(BattleState),2,3,1,3
+"com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.decideEnemyAction(BattleUnit, List<BattleUnit>, BattleState)",16,1,11,11
+"com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.executeAttack(BattleUnit, BattleUnit, BattleState)",4,1,3,5
+com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.executeDefend(HeroSnapshot),0,1,1,1
+com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.executeEnemyTurn(BattleState),8,4,7,8
+"com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.executePlayerAction(BattleState, ActionType, Long, Integer)",16,5,13,16
+"com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.initializePvEBattle(Long, int)",0,1,1,1
+"com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.initializePvPBattle(Long, Long, Long)",0,1,1,1
+com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.refillTurnQueue(BattleState),2,1,2,2
+com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.restorePartyHeroes(List<BattleUnit>),2,2,1,2
+com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl.updatePvPResult(BattleState),4,2,4,5
+com.university.project.legendsofswordandwand.service.battle.impl.InnServiceImpl.cleanupTemporaryRecruits(Long),0,1,1,1
+com.university.project.legendsofswordandwand.service.battle.impl.InnServiceImpl.generateRecruitName(),0,1,1,1
+com.university.project.legendsofswordandwand.service.battle.impl.InnServiceImpl.getAvailableRecruits(Long),8,3,9,9
+com.university.project.legendsofswordandwand.service.battle.impl.InnServiceImpl.getShopItems(),1,1,2,2
+com.university.project.legendsofswordandwand.service.battle.impl.InnServiceImpl.loadInnView(Long),0,1,1,1
+"com.university.project.legendsofswordandwand.service.battle.impl.InnServiceImpl.purchaseItem(Long, Long)",2,2,2,3
+"com.university.project.legendsofswordandwand.service.battle.impl.InnServiceImpl.recruitHero(Long, Long)",3,3,2,4
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignProgressServiceImpl.calculateAndPersistScore(Campaign),0,1,1,1
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignProgressServiceImpl.clearRoomPending(String),0,1,1,1
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignProgressServiceImpl.enterNextRoom(String),4,3,3,5
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignProgressServiceImpl.getCampaignResultsForUser(Long),0,1,1,1
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignProgressServiceImpl.getCampaignViewData(String),0,1,1,1
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignProgressServiceImpl.getCompletionData(String),0,1,1,1
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignProgressServiceImpl.isCampaignComplete(String),0,1,1,1
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignServiceImpl.abandonCampaign(String),0,1,1,1
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignServiceImpl.completeCampaign(String),1,1,2,2
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignServiceImpl.exitCampaign(String),0,1,1,1
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignServiceImpl.getActiveCampaign(String),0,1,1,1
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignServiceImpl.getMostRecentCompletedCampaign(String),0,1,1,1
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignServiceImpl.getPartyCumulativeLevel(String),0,1,1,1
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignServiceImpl.hasActiveCampaign(Long),0,1,1,1
+"com.university.project.legendsofswordandwand.service.campaign.impl.CampaignServiceImpl.replacePartyFromCampaign(Long, Long, Long)",1,1,2,2
+"com.university.project.legendsofswordandwand.service.campaign.impl.CampaignServiceImpl.savePartyFromCampaign(Long, Long)",1,2,1,2
+"com.university.project.legendsofswordandwand.service.campaign.impl.CampaignServiceImpl.startNewCampaign(String, String, HeroClass)",1,2,1,2
+"com.university.project.legendsofswordandwand.service.hero.impl.HeroServiceImpl.addExperience(Long, int)",0,1,1,1
+"com.university.project.legendsofswordandwand.service.hero.impl.HeroServiceImpl.createBaseHeroForParty(Long, String, HeroClass)",0,1,1,1
+com.university.project.legendsofswordandwand.service.hero.impl.HeroServiceImpl.delete(Long),0,1,1,1
+com.university.project.legendsofswordandwand.service.hero.impl.HeroServiceImpl.findById(Long),0,1,1,1
+"com.university.project.legendsofswordandwand.service.hero.impl.HeroServiceImpl.getClassLevel(Hero, HeroClass)",1,1,5,5
+"com.university.project.legendsofswordandwand.service.hero.impl.HeroServiceImpl.incrementClassLevel(Hero, HeroClass)",1,1,5,5
+com.university.project.legendsofswordandwand.service.hero.impl.HeroServiceImpl.isLevelUpPending(Long),1,1,2,2
+"com.university.project.legendsofswordandwand.service.hero.impl.HeroServiceImpl.levelUp(Long, HeroClass)",7,3,8,10
+com.university.project.legendsofswordandwand.service.hero.impl.HeroServiceImpl.save(Hero),0,1,1,1
+com.university.project.legendsofswordandwand.service.inventory.impl.InventoryServiceImpl.getPartyInventoryItems(Long),1,2,2,2
+com.university.project.legendsofswordandwand.service.inventory.impl.InventoryServiceImpl.saveInventory(Inventory),0,1,1,1
+"com.university.project.legendsofswordandwand.service.inventory.impl.InventoryServiceImpl.useItem(Long, Long, Long)",6,4,4,5
+"com.university.project.legendsofswordandwand.service.party.impl.PartyManagementServiceImpl.addGold(Long, int)",0,1,1,1
+"com.university.project.legendsofswordandwand.service.party.impl.PartyManagementServiceImpl.addHeroToParty(Long, Long)",0,1,1,1
+"com.university.project.legendsofswordandwand.service.party.impl.PartyManagementServiceImpl.deductGold(Long, int)",0,1,1,1
+com.university.project.legendsofswordandwand.service.party.impl.PartyManagementServiceImpl.getActiveParty(Long),0,1,1,1
+com.university.project.legendsofswordandwand.service.party.impl.PartyManagementServiceImpl.reviveAndHealParty(Long),0,1,1,1
+com.university.project.legendsofswordandwand.service.party.impl.PartyManagementServiceImpl.reviveAndHealPartyWithSummary(Long),21,1,3,8
+com.university.project.legendsofswordandwand.service.party.impl.PartyServiceImpl.createPartyForUser(Long),0,1,1,1
+com.university.project.legendsofswordandwand.service.party.impl.PartyServiceImpl.deleteParty(Long),0,1,1,1
+com.university.project.legendsofswordandwand.service.pvp.impl.PvPServiceImpl.acceptInvitation(Long),0,1,1,1
+"com.university.project.legendsofswordandwand.service.pvp.impl.PvPServiceImpl.createInvitation(String, String)",3,4,1,4
+com.university.project.legendsofswordandwand.service.security.CustomUserDetailsService.loadUserByUsername(String),0,1,1,1
+com.university.project.legendsofswordandwand.service.user.impl.ProfileServiceImpl.getHallOfFame(),1,1,2,2
+com.university.project.legendsofswordandwand.service.user.impl.ProfileServiceImpl.getProfile(String),0,1,1,1
+com.university.project.legendsofswordandwand.service.user.impl.ProfileServiceImpl.getPvPStandings(),3,1,3,3
+com.university.project.legendsofswordandwand.service.user.impl.ProfileServiceImpl.toHeroInfo(Hero),1,1,2,2
+com.university.project.legendsofswordandwand.service.user.impl.ProfileServiceImpl.toPartyInfo(Party),0,1,1,1
+com.university.project.legendsofswordandwand.service.user.impl.UserServiceImpl.getDashboardInfo(String),6,1,5,5
+com.university.project.legendsofswordandwand.service.user.impl.UserServiceImpl.getUserIdByUsername(String),0,1,1,1
+
+Class,OCavg,OCmax,WMC
+com.university.project.legendsofswordandwand.DemoDataLoader,1.17,2,7
+com.university.project.legendsofswordandwand.LegendsOfSwordAndWandApplication,1.00,1,1
+com.university.project.legendsofswordandwand.LegendsOfSwordAndWandApplicationTests,1.00,1,1
+com.university.project.legendsofswordandwand.battle.AbilityExecutor,2.00,3,6
+com.university.project.legendsofswordandwand.battle.BattleState,1.42,5,17
+com.university.project.legendsofswordandwand.battle.BattleUnit,1.00,1,2
+com.university.project.legendsofswordandwand.battle.DamageCalculator,1.00,1,1
+com.university.project.legendsofswordandwand.battle.EnemyGenerator,2.67,5,8
+com.university.project.legendsofswordandwand.battle.EnemyGenerator.Archetype,1.00,1,4
+com.university.project.legendsofswordandwand.battle.EnemyGenerator.EnemyType,1.00,1,1
+com.university.project.legendsofswordandwand.battle.HeroSnapshot,1.00,1,2
+com.university.project.legendsofswordandwand.battle.HeroStatCalculator,1.50,3,9
+com.university.project.legendsofswordandwand.battle.HybridClassResolver,10.00,10,10
+com.university.project.legendsofswordandwand.battle.ability.AbilityFactory,3.33,5,10
+com.university.project.legendsofswordandwand.battle.ability.AbilityHelper,2.00,4,6
+com.university.project.legendsofswordandwand.battle.ability.chaos.ChainLightningAbility,2.00,4,6
+com.university.project.legendsofswordandwand.battle.ability.chaos.FireballAbility,3.33,8,10
+com.university.project.legendsofswordandwand.battle.ability.decorator.AbilityDecorator,1.00,1,3
+com.university.project.legendsofswordandwand.battle.ability.decorator.DoubleEffectDecorator,1.00,1,2
+com.university.project.legendsofswordandwand.battle.ability.decorator.SelfHealBeforeAttackDecorator,1.00,1,2
+com.university.project.legendsofswordandwand.battle.ability.decorator.StunDecorator,1.50,2,3
+com.university.project.legendsofswordandwand.battle.ability.mage.ReplenishAbility,2.33,4,7
+com.university.project.legendsofswordandwand.battle.ability.order.FireShieldAbility,2.00,3,4
+com.university.project.legendsofswordandwand.battle.ability.order.HealAbility,1.25,2,5
+com.university.project.legendsofswordandwand.battle.ability.order.ProtectAbility,1.67,3,5
+com.university.project.legendsofswordandwand.battle.ability.warrior.BerserkerAbility,1.33,2,4
+com.university.project.legendsofswordandwand.battle.initializer.BattleInitializer,2.00,2,2
+com.university.project.legendsofswordandwand.battle.initializer.PvEBattleInitializer,1.75,3,7
+com.university.project.legendsofswordandwand.battle.initializer.PvPBattleInitializer,2.20,3,11
+com.university.project.legendsofswordandwand.battle.strategy.ChaosBonusStrategy,1.00,1,2
+com.university.project.legendsofswordandwand.battle.strategy.MageBonusStrategy,1.00,1,2
+com.university.project.legendsofswordandwand.battle.strategy.OrderBonusStrategy,1.00,1,2
+com.university.project.legendsofswordandwand.battle.strategy.WarriorBonusStrategy,1.00,1,2
+com.university.project.legendsofswordandwand.config.SecurityConfig,1.00,1,4
+com.university.project.legendsofswordandwand.controller.AuthController,1.25,2,5
+com.university.project.legendsofswordandwand.controller.BattleController,4.75,9,38
+com.university.project.legendsofswordandwand.controller.CampaignController,2.25,4,27
+com.university.project.legendsofswordandwand.controller.DashboardController,2.00,2,2
+com.university.project.legendsofswordandwand.controller.InnController,3.50,5,14
+com.university.project.legendsofswordandwand.controller.ProfileController,2.00,2,2
+com.university.project.legendsofswordandwand.controller.PvPController,2.25,3,9
+com.university.project.legendsofswordandwand.controller.RankingsController,2.00,2,2
+com.university.project.legendsofswordandwand.dto.request.RegisterRequest,n/a,n/a,0
+com.university.project.legendsofswordandwand.dto.response.CampaignViewInfo,n/a,n/a,0
+com.university.project.legendsofswordandwand.dto.response.CompleteCampaignInfo,n/a,n/a,0
+com.university.project.legendsofswordandwand.dto.response.DashboardInfo,n/a,n/a,0
+com.university.project.legendsofswordandwand.dto.response.HallOfFameEntry,n/a,n/a,0
+com.university.project.legendsofswordandwand.dto.response.ProfileInfo,n/a,n/a,0
+com.university.project.legendsofswordandwand.dto.response.ProfileInfo.CampaignResultInfo,n/a,n/a,0
+com.university.project.legendsofswordandwand.dto.response.ProfileInfo.HeroInfo,n/a,n/a,0
+com.university.project.legendsofswordandwand.dto.response.ProfileInfo.PartyInfo,n/a,n/a,0
+com.university.project.legendsofswordandwand.dto.response.PvPStandingEntry,n/a,n/a,0
+com.university.project.legendsofswordandwand.model.Campaign,1.00,1,1
+com.university.project.legendsofswordandwand.model.Hero,1.00,1,1
+com.university.project.legendsofswordandwand.model.Inventory,1.00,1,1
+com.university.project.legendsofswordandwand.model.Item,1.00,1,8
+com.university.project.legendsofswordandwand.model.Party,1.00,1,3
+com.university.project.legendsofswordandwand.model.PvPInvitation,1.00,1,1
+com.university.project.legendsofswordandwand.model.User,1.00,1,1
+com.university.project.legendsofswordandwand.model.enums.ActionType,n/a,n/a,0
+com.university.project.legendsofswordandwand.model.enums.BattleStatus,n/a,n/a,0
+com.university.project.legendsofswordandwand.model.enums.HeroClass,n/a,n/a,0
+com.university.project.legendsofswordandwand.model.enums.HybridClass,n/a,n/a,0
+com.university.project.legendsofswordandwand.model.enums.InvitationStatus,n/a,n/a,0
+com.university.project.legendsofswordandwand.model.enums.RoomType,n/a,n/a,0
+com.university.project.legendsofswordandwand.service.auth.impl.AuthServiceImpl,2.00,2,2
+com.university.project.legendsofswordandwand.service.battle.impl.BattleServiceImpl,3.67,10,55
+com.university.project.legendsofswordandwand.service.battle.impl.InnServiceImpl,2.43,5,17
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignProgressServiceImpl,1.57,5,11
+com.university.project.legendsofswordandwand.service.campaign.impl.CampaignServiceImpl,1.30,2,13
+com.university.project.legendsofswordandwand.service.hero.impl.HeroServiceImpl,1.56,6,14
+com.university.project.legendsofswordandwand.service.inventory.impl.InventoryServiceImpl,2.33,4,7
+com.university.project.legendsofswordandwand.service.party.impl.PartyManagementServiceImpl,1.83,6,11
+com.university.project.legendsofswordandwand.service.party.impl.PartyServiceImpl,1.00,1,2
+com.university.project.legendsofswordandwand.service.pvp.impl.PvPServiceImpl,2.50,4,5
+com.university.project.legendsofswordandwand.service.security.CustomUserDetailsService,1.00,1,1
+com.university.project.legendsofswordandwand.service.user.impl.ProfileServiceImpl,1.80,3,9
+com.university.project.legendsofswordandwand.service.user.impl.UserServiceImpl,3.00,5,6
+
+Package,v(G)avg,v(G)tot
+com.university.project.legendsofswordandwand,1.12,9
+com.university.project.legendsofswordandwand.battle,2.03,71
+com.university.project.legendsofswordandwand.battle.ability,3.67,22
+com.university.project.legendsofswordandwand.battle.ability.chaos,2.83,17
+com.university.project.legendsofswordandwand.battle.ability.decorator,1.33,12
+com.university.project.legendsofswordandwand.battle.ability.mage,2.33,7
+com.university.project.legendsofswordandwand.battle.ability.order,1.56,14
+com.university.project.legendsofswordandwand.battle.ability.warrior,1.33,4
+com.university.project.legendsofswordandwand.battle.initializer,2.10,21
+com.university.project.legendsofswordandwand.battle.strategy,1.00,8
+com.university.project.legendsofswordandwand.config,1.00,4
+com.university.project.legendsofswordandwand.controller,4.11,144
+com.university.project.legendsofswordandwand.model,1.00,16
+com.university.project.legendsofswordandwand.service.auth.impl,2.00,2
+com.university.project.legendsofswordandwand.service.battle.impl,4.23,93
+com.university.project.legendsofswordandwand.service.campaign.impl,1.47,25
+com.university.project.legendsofswordandwand.service.hero.impl,3.00,27
+com.university.project.legendsofswordandwand.service.inventory.impl,2.67,8
+com.university.project.legendsofswordandwand.service.party.impl,1.88,15
+com.university.project.legendsofswordandwand.service.pvp.impl,2.50,5
+com.university.project.legendsofswordandwand.service.security,1.00,1
+com.university.project.legendsofswordandwand.service.user.impl,2.14,15
+
+Module,v(G)avg,v(G)tot
+LegendsOfSwordAndWand,2.43,540
+
+Project,v(G)avg,v(G)tot
+project,2.43,540
+
