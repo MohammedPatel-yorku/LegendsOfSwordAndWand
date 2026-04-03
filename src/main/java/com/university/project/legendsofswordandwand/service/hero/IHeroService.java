@@ -1,6 +1,7 @@
 package com.university.project.legendsofswordandwand.service.hero;
 
 import com.university.project.legendsofswordandwand.model.Hero;
+import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import java.util.Optional;
 
@@ -19,6 +20,26 @@ public interface IHeroService {
    * @throws RuntimeException if the party is not found
    */
   void createBaseHeroForParty(Long partyId, String heroName, HeroClass heroClass);
+
+  /**
+   * Creates a hero at an arbitrary level for the given party, applying all stat gains, class
+   * bonuses, and XP thresholds that the hero would have accumulated by reaching that level through
+   * normal play.
+   *
+   * <p>This is the single authoritative place that knows how to initialise a hero to a target
+   * level. It exists so callers (e.g. the inn recruit system) never need to inline the sequence of
+   * class-level-counter assignment, repeated {@code applyLevelUp} calls, class bonus application,
+   * and XP threshold back-calculation.
+   *
+   * @param party the {@link Party} the hero belongs to
+   * @param heroName the display name of the new hero
+   * @param heroClass the {@link HeroClass} to level up in
+   * @param level the target level (1–20); 1 produces a standard base-stat hero
+   * @return the unsaved {@link Hero} entity, ready to be marked temporary and persisted by the
+   *     caller (so the caller retains control over persistence timing)
+   * @throws IllegalArgumentException if {@code level} is less than 1 or greater than 20
+   */
+  Hero createHeroAtLevel(Party party, String heroName, HeroClass heroClass, int level);
 
   /**
    * Applies a level-up to the hero using the chosen class, updating stats and potentially

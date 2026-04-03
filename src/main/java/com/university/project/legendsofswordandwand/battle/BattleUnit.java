@@ -1,8 +1,7 @@
 package com.university.project.legendsofswordandwand.battle;
 
-import java.io.Serializable;
-
 import com.university.project.legendsofswordandwand.battle.enemy.EnemyBehaviour;
+import java.io.Serializable;
 import lombok.Getter;
 
 /**
@@ -24,32 +23,31 @@ public class BattleUnit implements Serializable {
   private final boolean enemy;
 
   /**
-   * The AI behaviour archetype for this unit.
-   * {@code null} for player-controlled units; always set for enemy units.
+   * The AI behaviour archetype for this unit. {@code null} for player-controlled units; always set
+   * for enemy units.
    */
   private final EnemyBehaviour behaviour;
-
-
 
   /**
    * Constructs a player-controlled {@code BattleUnit} with no AI behaviour.
    *
    * @param battleId the unique battle ID assigned to this unit
-   * @param hero     the {@link HeroSnapshot} representing this unit's stats and state
-   * @param enemy    {@code true} if this unit is an enemy; {@code false} if player-controlled
+   * @param hero the {@link HeroSnapshot} representing this unit's stats and state
+   * @param enemy {@code true} if this unit is an enemy; {@code false} if player-controlled
    */
   public BattleUnit(long battleId, HeroSnapshot hero, boolean enemy) {
     this(battleId, hero, enemy, null);
   }
 
   /**
-   * Constructs a {@code BattleUnit} with a specified AI behaviour archetype.
-   * Use this constructor for enemy units so their targeting logic is not derived from name strings.
+   * Constructs a {@code BattleUnit} with a specified AI behaviour archetype. Use this constructor
+   * for enemy units so their targeting logic is not derived from name strings.
    *
-   * @param battleId  the unique battle ID assigned to this unit
-   * @param hero      the {@link HeroSnapshot} representing this unit's stats and state
-   * @param enemy     {@code true} if this unit is an enemy; {@code false} if player-controlled
-   * @param behaviour the {@link EnemyBehaviour} archetype for AI targeting; {@code null} for players
+   * @param battleId the unique battle ID assigned to this unit
+   * @param hero the {@link HeroSnapshot} representing this unit's stats and state
+   * @param enemy {@code true} if this unit is an enemy; {@code false} if player-controlled
+   * @param behaviour the {@link EnemyBehaviour} archetype for AI targeting; {@code null} for
+   *     players
    */
   public BattleUnit(long battleId, HeroSnapshot hero, boolean enemy, EnemyBehaviour behaviour) {
     this.battleId = battleId;

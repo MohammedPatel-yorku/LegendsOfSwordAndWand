@@ -44,11 +44,65 @@ class HeroServiceImpl implements IHeroService {
         Hero.builder().name(selectedHeroName).startingClass(selectedHeroClass).party(party).build();
 
     incrementClassLevel(hero, selectedHeroClass);
-
     heroStatCalculator.applyClassBonusOnly(hero, selectedHeroClass);
 
     party.getHeroes().add(hero);
     heroRepository.save(hero);
+  }
+
+  /**
+   * Creates a hero at the given target level for the provided party, applying all stat gains, class
+   * bonuses, and XP thresholds that the hero would have accumulated through normal play.
+   *
+   * <p>This is the single authoritative implementation of "initialise a hero to level N". It
+   * replaces the inline data clump that previously appeared in {@code InnServiceImpl
+   * .getAvailableRecruits()}: class-level-counter assignment, repeated {@code applyLevelUp} calls,
+   * class bonus application, and XP back-calculation are all performed here.
+   *
+   * <p>The returned hero is <em>not</em> persisted — the caller is responsible for saving it (and,
+   * for inn recruits, marking it temporary before doing so).
+   *
+   * @param party the {@link Party} the hero belongs to
+   * @param heroName the hero's display name
+   * @param heroClass the {@link HeroClass} to level up in
+   * @param level the target level (1–20)
+   * @return the initialised, unsaved {@link Hero}
+   * @throws IllegalArgumentException if {@code level} is outside the range 1–20
+   */
+  @Override
+  public Hero createHeroAtLevel(Party party, String heroName, HeroClass heroClass, int level) {
+    if (level < 1 || level > 20) {
+      throw new IllegalArgumentException("Hero level must be between 1 and 20, got: " + level);
+    }
+
+    Hero hero = Hero.builder().name(heroName).startingClass(heroClass).party(party).build();
+
+    // Set the class-level counter to the target level
+    setClassLevel(hero, heroClass, level);
+
+    // Apply level-up stat gains for levels 2 through target (each call also sets
+    // experienceToNextLevel)
+    for (int lvl = 1; lvl < level; lvl++) {
+      heroStatCalculator.applyLevelUp(hero, heroClass);
+    }
+
+    // Apply the class bonus for level 1 (the base class bonus not covered by applyLevelUp)
+    heroStatCalculator.applyClassBonusOnly(hero, heroClass);
+
+    // Explicitly fix the level field — applyLevelUp increments it, so after (level-1) calls
+    // it reads (level-1). We then set it to the intended target.
+    hero.setLevel(level);
+
+    // Set the hero's starting XP to the floor of their current level so they do not
+    // immediately need a level-up. Uses the public step formula from HeroStatCalculator
+    // rather than inlining the magic numbers.
+    if (level > 1) {
+      int prevThreshold =
+          hero.getExperienceToNextLevel() - heroStatCalculator.getExpStepForLevel(level);
+      hero.setExperience(Math.max(0, prevThreshold));
+    }
+
+    return hero;
   }
 
   /**
@@ -108,12 +162,9 @@ class HeroServiceImpl implements IHeroService {
    */
   @Override
   public Hero addExperience(Long heroId, int amount) {
-
     Hero hero =
         heroRepository.findById(heroId).orElseThrow(() -> new RuntimeException("Hero not found"));
-
     hero.setExperience(hero.getExperience() + amount);
-
     return heroRepository.save(hero);
   }
 
@@ -127,10 +178,8 @@ class HeroServiceImpl implements IHeroService {
    */
   @Override
   public boolean isLevelUpPending(Long heroId) {
-
     Hero hero =
         heroRepository.findById(heroId).orElseThrow(() -> new RuntimeException("Hero not found"));
-
     return hero.getLevel() < 20 && hero.getExperience() >= hero.getExperienceToNextLevel();
   }
 
@@ -164,6 +213,23 @@ class HeroServiceImpl implements IHeroService {
   @Override
   public void delete(Long heroId) {
     heroRepository.deleteById(heroId);
+  }
+
+  /**
+   * Sets the class-level counter for the given hero and class to the specified value directly. Used
+   * by {@link #createHeroAtLevel} to stamp the target level without running the increment loop.
+   *
+   * @param hero the {@link Hero} to update
+   * @param heroClass the {@link HeroClass} whose counter to set
+   * @param level the value to set the counter to
+   */
+  private void setClassLevel(Hero hero, HeroClass heroClass, int level) {
+    switch (heroClass) {
+      case ORDER -> hero.setOrderLevels(level);
+      case CHAOS -> hero.setChaosLevels(level);
+      case WARRIOR -> hero.setWarriorLevels(level);
+      case MAGE -> hero.setMageLevels(level);
+    }
   }
 
   /**

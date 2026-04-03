@@ -49,34 +49,34 @@ public class DemoDataLoader implements CommandLineRunner {
 
     // ── player1: saved party for PvP ────────────────────────────────────────
     Party p1SavedParty = buildParty(player1, true);
-    addHero(p1SavedParty, "Aldric",   HeroClass.WARRIOR, 8, HybridClass.KNIGHT,  12, 12, 145, 66);
-    addHero(p1SavedParty, "Seraphel", HeroClass.ORDER,   6, HybridClass.PALADIN,  7, 13, 130, 82);
-    addHero(p1SavedParty, "Vex",      HeroClass.CHAOS,   5, HybridClass.INVOKER, 20,  7, 125, 85);
+    addHero(p1SavedParty, "Aldric", HeroClass.WARRIOR, 8, HybridClass.KNIGHT, 12, 12, 145, 66);
+    addHero(p1SavedParty, "Seraphel", HeroClass.ORDER, 6, HybridClass.PALADIN, 7, 13, 130, 82);
+    addHero(p1SavedParty, "Vex", HeroClass.CHAOS, 5, HybridClass.INVOKER, 20, 7, 125, 85);
     addGold(p1SavedParty, 3500);
 
     // ── player1: active campaign at room 29 (one room from the end) ─────────
     Party p1CampaignParty = buildParty(player1, false);
-    addHero(p1CampaignParty, "Gareth", HeroClass.WARRIOR, 9, HybridClass.KNIGHT,  14, 13, 160, 70);
-    addHero(p1CampaignParty, "Lyra",   HeroClass.MAGE,    7, HybridClass.WIZARD,   9,  9, 140, 98);
-    addHero(p1CampaignParty, "Orion",  HeroClass.ORDER,   6, HybridClass.PROPHET,  8, 14, 135, 88);
+    addHero(p1CampaignParty, "Gareth", HeroClass.WARRIOR, 9, HybridClass.KNIGHT, 14, 13, 160, 70);
+    addHero(p1CampaignParty, "Lyra", HeroClass.MAGE, 7, HybridClass.WIZARD, 9, 9, 140, 98);
+    addHero(p1CampaignParty, "Orion", HeroClass.ORDER, 6, HybridClass.PROPHET, 8, 14, 135, 88);
     addGold(p1CampaignParty, 4200);
     addInventoryItems(p1CampaignParty);
 
     Campaign campaign =
-            Campaign.builder()
-                    .owner(player1)
-                    .party(p1CampaignParty)
-                    .currentRoom(29)
-                    .active(true)
-                    .build();
+        Campaign.builder()
+            .owner(player1)
+            .party(p1CampaignParty)
+            .currentRoom(29)
+            .active(true)
+            .build();
     campaign.setHasVisitedInn(true);
     campaignRepository.save(campaign);
 
     // ── player2: saved party for PvP ────────────────────────────────────────
     Party p2Party = buildParty(player2, true);
-    addHero(p2Party, "Mira",    HeroClass.MAGE,    7, HybridClass.WIZARD,   8,  8, 135, 96);
-    addHero(p2Party, "Drak",    HeroClass.WARRIOR, 9, HybridClass.WARLOCK, 14, 11, 150, 68);
-    addHero(p2Party, "Sylvara", HeroClass.ORDER,   5, HybridClass.PROPHET,  7, 15, 125, 90);
+    addHero(p2Party, "Mira", HeroClass.MAGE, 7, HybridClass.WIZARD, 8, 8, 135, 96);
+    addHero(p2Party, "Drak", HeroClass.WARRIOR, 9, HybridClass.WARLOCK, 14, 11, 150, 68);
+    addHero(p2Party, "Sylvara", HeroClass.ORDER, 5, HybridClass.PROPHET, 7, 15, 125, 90);
     addGold(p2Party, 2800);
 
     System.out.println("=== Demo data loaded ===");
@@ -106,7 +106,7 @@ public class DemoDataLoader implements CommandLineRunner {
    */
   private User createUser(String username, String password) {
     User user =
-            User.builder().username(username).password(passwordEncoder.encode(password)).build();
+        User.builder().username(username).password(passwordEncoder.encode(password)).build();
     return userRepository.save(user);
   }
 
@@ -134,9 +134,9 @@ public class DemoDataLoader implements CommandLineRunner {
   private void addInventoryItems(Party party) {
     List<Inventory> inventories = inventoryRepository.findByPartyId(party.getId());
     Inventory inv =
-            inventories.isEmpty()
-                    ? inventoryRepository.save(Inventory.builder().party(party).build())
-                    : inventories.get(0);
+        inventories.isEmpty()
+            ? inventoryRepository.save(Inventory.builder().party(party).build())
+            : inventories.get(0);
 
     // Resolve item IDs from the already-seeded catalogue
     itemRepository.findByName("Bread").ifPresent(i -> inv.getItemIds().add(i.getId()));
@@ -150,26 +150,26 @@ public class DemoDataLoader implements CommandLineRunner {
    * Adds a hero directly with preset stats to the party, bypassing the normal level-up flow so
    * exact levels and hybrid classes can be set for demo purposes.
    *
-   * @param party        the party to add the hero to
-   * @param name         the hero's display name
+   * @param party the party to add the hero to
+   * @param name the hero's display name
    * @param startingClass the hero's base class
-   * @param level        the hero's level
-   * @param hybridClass  the hero's hybrid class
-   * @param attack       the hero's attack stat
-   * @param defense      the hero's defense stat
-   * @param health       the hero's HP (also sets maxHealth)
-   * @param mana         the hero's mana (also sets maxMana)
+   * @param level the hero's level
+   * @param hybridClass the hero's hybrid class
+   * @param attack the hero's attack stat
+   * @param defense the hero's defense stat
+   * @param health the hero's HP (also sets maxHealth)
+   * @param mana the hero's mana (also sets maxMana)
    */
   private void addHero(
-          Party party,
-          String name,
-          HeroClass startingClass,
-          int level,
-          HybridClass hybridClass,
-          int attack,
-          int defense,
-          int health,
-          int mana) {
+      Party party,
+      String name,
+      HeroClass startingClass,
+      int level,
+      HybridClass hybridClass,
+      int attack,
+      int defense,
+      int health,
+      int mana) {
 
     Hero hero = Hero.builder().name(name).startingClass(startingClass).party(party).build();
 
@@ -195,7 +195,7 @@ public class DemoDataLoader implements CommandLineRunner {
   /**
    * Sets the gold amount on the given party.
    *
-   * @param party  the party to update
+   * @param party the party to update
    * @param amount the gold amount to set
    */
   private void addGold(Party party, int amount) {

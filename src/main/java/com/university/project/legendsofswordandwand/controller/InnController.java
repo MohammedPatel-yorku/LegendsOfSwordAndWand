@@ -51,8 +51,8 @@ public class InnController {
    * error occurs.
    *
    * @param authentication the current user's authentication
-   * @param model          the Spring MVC model
-   * @param session        the current {@link HttpSession}
+   * @param model the Spring MVC model
+   * @param session the current {@link HttpSession}
    * @return the logical view name for the inn page, or a redirect
    */
   @GetMapping
@@ -64,7 +64,7 @@ public class InnController {
       String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
       boolean retreatingAfterLoss = "PLAYER_LOSE".equals(lastResult);
       boolean innRoomPending =
-              campaign.isRoomPending() && campaign.getLastRoomType() == RoomType.INN;
+          campaign.isRoomPending() && campaign.getLastRoomType() == RoomType.INN;
       if (!retreatingAfterLoss && !innRoomPending && session.getAttribute(RECRUITS_KEY) == null) {
         return "redirect:/campaign";
       }
@@ -87,34 +87,35 @@ public class InnController {
       } else {
         // Reload from DB — filter out any already recruited
         recruits =
-                recruitIds.stream()
-                        .map(id -> heroService.findById(id).orElse(null))
-                        .filter(h -> h != null && h.isTemporary())
-                        .toList();
+            recruitIds.stream()
+                .map(id -> heroService.findById(id).orElse(null))
+                .filter(h -> h != null && h.isTemporary())
+                .toList();
       }
 
       // Refresh campaign after potential heal
       campaign = campaignService.getActiveCampaign(authentication.getName());
 
       long permanentHeroCount =
-              campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).count();
+          campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).count();
 
       model.addAttribute("healSummary", session.getAttribute("healSummary"));
       model.addAttribute(
-              "heroes",
-              campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).toList());
+          "heroes",
+          campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).toList());
       model.addAttribute("gold", campaign.getParty().getGold());
       model.addAttribute("currentRoom", campaign.getCurrentRoom());
       model.addAttribute("shopItems", innService.getShopItems());
       model.addAttribute("availableRecruits", recruits);
       model.addAttribute("permanentHeroCount", permanentHeroCount);
       // Current party inventory — shown in the inn so players know what they already own
-      model.addAttribute("inventoryItems", inventoryService.getPartyInventoryItems(campaign.getId()));
+      model.addAttribute(
+          "inventoryItems", inventoryService.getPartyInventoryItems(campaign.getId()));
       List<Hero> levelUpHeroes =
-              campaign.getParty().getHeroes().stream()
-                      .filter(h -> !h.isTemporary())
-                      .filter(h -> heroService.isLevelUpPending(h.getId()))
-                      .toList();
+          campaign.getParty().getHeroes().stream()
+              .filter(h -> !h.isTemporary())
+              .filter(h -> heroService.isLevelUpPending(h.getId()))
+              .toList();
       model.addAttribute("levelUpHeroes", levelUpHeroes);
       model.addAttribute("allHeroClasses", HeroClass.values());
     } catch (Exception e) {
@@ -129,16 +130,16 @@ public class InnController {
    * <p>Adds a success or error flash attribute depending on whether the party had sufficient gold,
    * then redirects back to the inn.
    *
-   * @param authentication     the current user's authentication
-   * @param itemId             the ID of the shop item to purchase
+   * @param authentication the current user's authentication
+   * @param itemId the ID of the shop item to purchase
    * @param redirectAttributes used to pass flash attributes across the redirect
    * @return a redirect to {@code /inn}
    */
   @PostMapping("/buy")
   public String buyItem(
-          Authentication authentication,
-          @RequestParam Long itemId,
-          RedirectAttributes redirectAttributes) {
+      Authentication authentication,
+      @RequestParam Long itemId,
+      RedirectAttributes redirectAttributes) {
     if (authentication == null) return "redirect:/login";
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
@@ -154,18 +155,18 @@ public class InnController {
   /**
    * Recruits a hero from the inn's available recruits and removes them from the session list.
    *
-   * @param authentication     the current user's authentication
-   * @param heroId             the ID of the hero to recruit
-   * @param session            the current {@link HttpSession}
+   * @param authentication the current user's authentication
+   * @param heroId the ID of the hero to recruit
+   * @param session the current {@link HttpSession}
    * @param redirectAttributes used to pass flash attributes across the redirect
    * @return a redirect to {@code /inn}
    */
   @PostMapping("/recruit")
   public String recruitHero(
-          Authentication authentication,
-          @RequestParam Long heroId,
-          HttpSession session,
-          RedirectAttributes redirectAttributes) {
+      Authentication authentication,
+      @RequestParam Long heroId,
+      HttpSession session,
+      RedirectAttributes redirectAttributes) {
     if (authentication == null) return "redirect:/login";
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
@@ -189,15 +190,15 @@ public class InnController {
   /**
    * Concludes the inn visit, cleans up temporary recruits, and returns to the campaign.
    *
-   * <p>Temporary recruits are removed from the party. Session attributes for recruits, heal summary,
-   * and last battle result are cleared. If the player is continuing after a loss, the pending room
-   * is intentionally kept so they retry the same battle room. Otherwise, the pending room is
-   * cleared normally.
+   * <p>Temporary recruits are removed from the party. Session attributes for recruits, heal
+   * summary, and last battle result are cleared. If the player is continuing after a loss, the
+   * pending room is intentionally kept so they retry the same battle room. Otherwise, the pending
+   * room is cleared normally.
    *
    * <p>Exceptions are silently ignored to ensure the redirect always occurs.
    *
    * @param authentication the current user's authentication
-   * @param session        the current {@link HttpSession}
+   * @param session the current {@link HttpSession}
    * @return a redirect to {@code /campaign}
    */
   @PostMapping("/continue")

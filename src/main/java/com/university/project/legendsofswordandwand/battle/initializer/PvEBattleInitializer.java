@@ -15,12 +15,12 @@ import java.util.List;
  * <p>Builds the player side from the active campaign party, excluding any temporary (unchosen
  * recruit) heroes. Builds the enemy side by delegating to {@link EnemyGenerator}, which scales the
  * enemy party to the player's cumulative level. Enemy units are assigned negative battle IDs to
- * avoid collisions with player unit IDs, and each enemy unit is constructed with its
- * {@link com.university.project.legendsofswordandwand.battle.enemy.EnemyBehaviour} archetype — set once
- * at battle initialisation so the battle service never needs to re-derive it from a name string.
+ * avoid collisions with player unit IDs, and each enemy unit is constructed with its {@link
+ * com.university.project.legendsofswordandwand.battle.enemy.EnemyBehaviour} archetype — set once at
+ * battle initialisation so the battle service never needs to re-derive it from a name string.
  *
- * <p>On battle end, stores the campaign ID back into the {@link BattleState} so downstream
- * services can identify which campaign the battle belonged to.
+ * <p>On battle end, stores the campaign ID back into the {@link BattleState} so downstream services
+ * can identify which campaign the battle belonged to.
  */
 public class PvEBattleInitializer extends BattleInitializer {
 
@@ -71,10 +71,11 @@ public class PvEBattleInitializer extends BattleInitializer {
   /**
    * Builds the enemy-side {@link BattleUnit} list by generating a scaled enemy party.
    *
-   * <p>Delegates to {@link EnemyGenerator#generate}, which returns {@link EnemyGenerator.EnemyEntry}
-   * records pairing each enemy hero with its {@link com.university.project.legendsofswordandwand.battle.enemy.EnemyBehaviour}.
-   * The behavior is passed directly to the {@link BattleUnit} constructor so it is available to
-   * the combat AI without any string matching at runtime.
+   * <p>Delegates to {@link EnemyGenerator#generate}, which returns {@link
+   * EnemyGenerator.EnemyEntry} records pairing each enemy hero with its {@link
+   * com.university.project.legendsofswordandwand.battle.enemy.EnemyBehaviour}. The behavior is
+   * passed directly to the {@link BattleUnit} constructor so it is available to the combat AI
+   * without any string matching at runtime.
    *
    * <p>Enemy units are assigned sequential negative battle IDs starting at {@code -1} to avoid
    * collisions with player unit IDs.
@@ -85,13 +86,12 @@ public class PvEBattleInitializer extends BattleInitializer {
   protected List<BattleUnit> buildEnemyUnits() {
     Party party = partyManagementService.getActiveParty(campaignId);
     List<EnemyGenerator.EnemyEntry> entries =
-            enemyGenerator.generate(playerCumulativeLevel, party.getHeroes().size());
+        enemyGenerator.generate(playerCumulativeLevel, party.getHeroes().size());
 
     List<BattleUnit> units = new ArrayList<>();
     long enemyId = -1L;
     for (EnemyGenerator.EnemyEntry entry : entries) {
-      units.add(
-              new BattleUnit(enemyId--, new HeroSnapshot(entry.hero()), true, entry.behaviour()));
+      units.add(new BattleUnit(enemyId--, new HeroSnapshot(entry.hero()), true, entry.behaviour()));
     }
     return units;
   }
@@ -100,8 +100,8 @@ public class PvEBattleInitializer extends BattleInitializer {
    * Stores the campaign ID into the {@link BattleState} after the battle ends.
    *
    * <p>This allows {@code BattleServiceImpl} and {@code BattleController} to identify which
-   * campaign the completed battle belongs to when distributing rewards or clearing the pending
-   * room flag.
+   * campaign the completed battle belongs to when distributing rewards or clearing the pending room
+   * flag.
    *
    * @param state the completed {@link BattleState}
    */

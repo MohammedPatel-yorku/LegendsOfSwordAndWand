@@ -198,43 +198,43 @@ class BattleServiceImpl implements IBattleService {
    *
    * <ul>
    *   <li>{@code GLASS_CANNON} — always attacks the lowest-HP target
-   *   <li>{@code BRUTE}        — 60 % targets the highest-attack hero, 40 % random target
-   *   <li>{@code SWIFT}        — 75 % targets the lowest-defense hero, 25 % waits
-   *   <li>{@code TANK}         — defends when below 25 % HP (40 % chance), otherwise highest-HP or random
-   *   <li>{@code BALANCED}     — 85 % random attack, 15 % defend
+   *   <li>{@code BRUTE} — 60 % targets the highest-attack hero, 40 % random target
+   *   <li>{@code SWIFT} — 75 % targets the lowest-defense hero, 25 % waits
+   *   <li>{@code TANK} — defends when below 25 % HP (40 % chance), otherwise highest-HP or random
+   *   <li>{@code BALANCED} — 85 % random attack, 15 % defend
    * </ul>
    *
-   * @param actor   the enemy {@link BattleUnit} taking the action
+   * @param actor the enemy {@link BattleUnit} taking the action
    * @param targets the list of living player {@link BattleUnit}s to target
-   * @param state   the current {@link BattleState}
+   * @param state the current {@link BattleState}
    */
   private void decideEnemyAction(BattleUnit actor, List<BattleUnit> targets, BattleState state) {
     EnemyBehaviour behaviour =
-            actor.getBehaviour() != null ? actor.getBehaviour() : EnemyBehaviour.BALANCED;
+        actor.getBehaviour() != null ? actor.getBehaviour() : EnemyBehaviour.BALANCED;
 
     switch (behaviour) {
       case GLASS_CANNON -> {
         BattleUnit target =
-                targets.stream()
-                        .min(Comparator.comparingInt(u -> u.getHero().getHealth()))
-                        .orElse(targets.get(0));
+            targets.stream()
+                .min(Comparator.comparingInt(u -> u.getHero().getHealth()))
+                .orElse(targets.get(0));
         executeAttack(actor, target, state);
       }
       case BRUTE -> {
         BattleUnit target =
-                random.nextInt(100) < 60
-                        ? targets.stream()
-                          .max(Comparator.comparingInt(u -> u.getHero().getAttack()))
-                          .orElse(targets.get(0))
-                        : targets.get(random.nextInt(targets.size()));
+            random.nextInt(100) < 60
+                ? targets.stream()
+                    .max(Comparator.comparingInt(u -> u.getHero().getAttack()))
+                    .orElse(targets.get(0))
+                : targets.get(random.nextInt(targets.size()));
         executeAttack(actor, target, state);
       }
       case SWIFT -> {
         if (random.nextInt(100) < 75) {
           BattleUnit target =
-                  targets.stream()
-                          .min(Comparator.comparingInt(u -> u.getHero().getDefense()))
-                          .orElse(targets.get(0));
+              targets.stream()
+                  .min(Comparator.comparingInt(u -> u.getHero().getDefense()))
+                  .orElse(targets.get(0));
           executeAttack(actor, target, state);
         } else {
           state.getTurnQueue().addLast(actor.getBattleId());
@@ -248,11 +248,11 @@ class BattleServiceImpl implements IBattleService {
           state.log("  " + actor.getHero().getName() + " defends");
         } else {
           BattleUnit target =
-                  random.nextInt(100) < 50
-                          ? targets.stream()
-                            .max(Comparator.comparingInt(u -> u.getHero().getHealth()))
-                            .orElse(targets.get(0))
-                          : targets.get(random.nextInt(targets.size()));
+              random.nextInt(100) < 50
+                  ? targets.stream()
+                      .max(Comparator.comparingInt(u -> u.getHero().getHealth()))
+                      .orElse(targets.get(0))
+                  : targets.get(random.nextInt(targets.size()));
           executeAttack(actor, target, state);
         }
       }
