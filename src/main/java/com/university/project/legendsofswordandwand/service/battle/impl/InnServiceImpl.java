@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -73,8 +74,10 @@ class InnServiceImpl implements IInnService {
    *
    * <p>Recruits are only available within the first 10 rooms and when the party has fewer than 5
    * permanent heroes. Between 1 and 3 recruits are generated with random classes and levels between
-   * 1 and 4. Stats are computed by applying level-up and class bonus logic. All recruits are marked
-   * as temporary and saved to the database.
+   * 1 and 4. Stats are computed by delegating to {@link IHeroService#createHeroAtLevel(Party,
+   * String, HeroClass, int)}, which is the single authoritative method for initialising a hero to a
+   * given level — the class-level counter assignment, level-up stat gains, class bonus, and XP
+   * threshold back-calculation previously inlined here are no longer duplicated in this method.
    *
    * <p>Any leftover temporary recruits from a previous visit are cleaned up first.
    *
@@ -101,42 +104,13 @@ class InnServiceImpl implements IInnService {
     HeroClass[] classes = HeroClass.values();
 
     List<Hero> recruits =
-        java.util.stream.IntStream.range(0, count)
+        IntStream.range(0, count)
             .mapToObj(
                 i -> {
                   HeroClass cls = classes[random.nextInt(classes.length)];
-                  // Spec: random level between 1-4
                   int level = 1 + random.nextInt(4);
 
-                  Hero h =
-                      Hero.builder()
-                          .name(generateRecruitName())
-                          .startingClass(cls)
-                          .party(party)
-                          .build();
-
-                  switch (cls) {
-                    case ORDER -> h.setOrderLevels(level);
-                    case CHAOS -> h.setChaosLevels(level);
-                    case WARRIOR -> h.setWarriorLevels(level);
-                    case MAGE -> h.setMageLevels(level);
-                  }
-
-                  // Apply base level gains for levels 2-4
-                  for (int lvl = 1; lvl < level; lvl++) {
-                    heroStatCalculator.applyLevelUp(h, cls);
-                  }
-
-                  // Apply class bonus for level 1
-                  heroStatCalculator.applyClassBonusOnly(h, cls);
-
-                  h.setLevel(level);
-                  if (level > 1) {
-                    int prevThreshold =
-                        h.getExperienceToNextLevel() - (500 + 75 * level + 20 * level * level);
-                    h.setExperience(Math.max(0, prevThreshold));
-                  }
-                  return h;
+                  return heroService.createHeroAtLevel(party, generateRecruitName(), cls, level);
                 })
             .toList();
 
@@ -224,7 +198,7 @@ class InnServiceImpl implements IInnService {
   }
 
   /**
-   * Generates a random name for a recruit from a fixed pool of fantasy names.
+   * Generates a random display name for a recruit from a fixed pool of fantasy names.
    *
    * @return a randomly selected recruit name
    */

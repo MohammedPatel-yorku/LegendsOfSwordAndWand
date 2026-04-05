@@ -1,5 +1,6 @@
-package com.university.project.legendsofswordandwand.battle;
+package com.university.project.legendsofswordandwand.battle.enemy;
 
+import com.university.project.legendsofswordandwand.battle.BattleUnit;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import java.util.ArrayList;
@@ -9,9 +10,11 @@ import java.util.Random;
 import org.springframework.stereotype.Component;
 
 /**
- * Generates a randomized enemy party scaled to the player's cumulative level. Each enemy type has a
- * distinct archetype affecting their attack, defense and HP within the spec's constraint that stats
- * scale with level and keep battles fair.
+ * Generates a randomised enemy party scaled to the player's cumulative level.
+ *
+ * <p>Each enemy type has a distinct {@link Archetype} affecting stats and an {@link EnemyBehaviour}
+ * that drives AI targeting logic in {@code BattleServiceImpl}. By carrying the behavior alongside
+ * the generated {@link Hero}, the battle service never needs to re-derive it from a name string.
  */
 @Component
 public class EnemyGenerator {
@@ -19,11 +22,25 @@ public class EnemyGenerator {
   private final Random random = new Random();
 
   /**
-   * Enemy archetypes. Each defines base stats and per-level scaling. Archetypes deliberately feel
-   * different in combat: GLASS_CANNON — high attack, low defense, low HP (hits hard, dies fast)
-   * TANK — low attack, high defense, high HP (hard to kill, weak hits) BALANCED — moderate
-   * everything (all-rounder) SWIFT — above-average attack, very low defense, medium HP (aggressive)
-   * BRUTE — high attack, medium defense, high HP (threatening)
+   * Pairs a generated enemy {@link Hero} with its {@link EnemyBehaviour} archetype. Returned by
+   * {@link #generate} so callers can build {@link BattleUnit}s with the correct behavior without
+   * coupling to the hero's display name.
+   *
+   * @param hero the generated enemy hero
+   * @param behaviour the AI behaviour archetype for this enemy
+   */
+  public record EnemyEntry(Hero hero, EnemyBehaviour behaviour) {}
+
+  /**
+   * Enemy stat archetypes. Each defines base stats and per-level scaling.
+   *
+   * <ul>
+   *   <li>GLASS_CANNON — high attack, low defense, low HP (hits hard, dies fast)
+   *   <li>TANK — low attack, high defense, high HP (hard to kill, weak hits)
+   *   <li>BALANCED — moderate everything (all-rounder)
+   *   <li>SWIFT — above-average attack, very low defense, medium HP (aggressive)
+   *   <li>BRUTE — high attack, medium defense, high HP (threatening)
+   * </ul>
    */
   private enum Archetype {
     GLASS_CANNON("glass cannon", 7, 3, 0, 0, 35, 12),
@@ -88,42 +105,51 @@ public class EnemyGenerator {
     }
   }
 
-  /** Each enemy name is pinned to an archetype so the same name always feels the same. */
+  /**
+   * Each enemy name is pinned to a stat {@link Archetype} and an {@link EnemyBehaviour} so the same
+   * name always feels and behaves the same, and the behavior is explicit rather than re-derived
+   * from a name string at battle time.
+   */
   private enum EnemyType {
-    GOBLIN("Goblin", Archetype.SWIFT),
-    ORC("Orc", Archetype.BRUTE),
-    TROLL("Troll", Archetype.TANK),
-    BANDIT("Bandit", Archetype.BALANCED),
-    SKELETON("Skeleton", Archetype.GLASS_CANNON),
-    DARK_KNIGHT("Dark Knight", Archetype.BRUTE),
-    WITCH("Witch", Archetype.GLASS_CANNON),
-    VAMPIRE("Vampire", Archetype.SWIFT),
-    WYVERN("Wyvern", Archetype.BALANCED),
-    SHADOW("Shadow", Archetype.GLASS_CANNON);
+    GOBLIN("Goblin", Archetype.SWIFT, EnemyBehaviour.SWIFT),
+    ORC("Orc", Archetype.BRUTE, EnemyBehaviour.BRUTE),
+    TROLL("Troll", Archetype.TANK, EnemyBehaviour.TANK),
+    BANDIT("Bandit", Archetype.BALANCED, EnemyBehaviour.BALANCED),
+    SKELETON("Skeleton", Archetype.GLASS_CANNON, EnemyBehaviour.GLASS_CANNON),
+    DARK_KNIGHT("Dark Knight", Archetype.BRUTE, EnemyBehaviour.BRUTE),
+    WITCH("Witch", Archetype.GLASS_CANNON, EnemyBehaviour.GLASS_CANNON),
+    VAMPIRE("Vampire", Archetype.SWIFT, EnemyBehaviour.SWIFT),
+    WYVERN("Wyvern", Archetype.BALANCED, EnemyBehaviour.BALANCED),
+    SHADOW("Shadow", Archetype.GLASS_CANNON, EnemyBehaviour.GLASS_CANNON);
 
     final String name;
     final Archetype archetype;
+    final EnemyBehaviour behaviour;
 
-    EnemyType(String name, Archetype archetype) {
+    EnemyType(String name, Archetype archetype, EnemyBehaviour behaviour) {
       this.name = name;
       this.archetype = archetype;
+      this.behaviour = behaviour;
     }
   }
 
   /**
-   * Generates a randomized enemy party scaled to the player's cumulative level and party size.
+   * Generates a randomised enemy party scaled to the player's cumulative level and party size.
+   *
+   * <p>Each entry in the returned list pairs a fully initialised enemy {@link Hero} with its {@link
+   * EnemyBehaviour} archetype. The behavior must be stored on the {@link BattleUnit} so that combat
+   * AI can dispatch on it directly without re-deriving it from the name string.
    *
    * <p>Enemy count is at least {@code min(2, playerPartySize)} to avoid single-enemy fights against
-   * larger parties. Individual enemy levels are capped at the player's average hero level plus 2,
-   * preventing any single enemy from being dramatically overleveled. The total cumulative level
-   * stays within a ±20% variance band of the player's cumulative level, slightly favouring the
-   * enemies.
+   * larger parties. Individual enemy levels are capped at the player's average hero level plus 2.
+   * The total cumulative level stays within a ±20 % variance band of the player's cumulative level,
+   * slightly favouring the enemies.
    *
    * @param playerCumulativeLevel the sum of all player hero levels
    * @param playerPartySize the number of heroes in the player's party
-   * @return a list of generated enemy {@link Hero} instances
+   * @return a list of {@link EnemyEntry} records, each holding a hero and its behavior
    */
-  public List<Hero> generate(int playerCumulativeLevel, int playerPartySize) {
+  public List<EnemyEntry> generate(int playerCumulativeLevel, int playerPartySize) {
 
     int minCount = Math.min(2, playerPartySize);
     int maxCount = Math.min(5, playerPartySize + 1);
@@ -139,11 +165,11 @@ public class EnemyGenerator {
     int maxIndividualLevel = Math.max(2, avgPartyLevel + 2);
     int[] levels = distributeLevels(count, targetCumulativeLevel, maxIndividualLevel);
 
-    List<Hero> enemies = new ArrayList<>();
+    List<EnemyEntry> entries = new ArrayList<>();
     for (int i = 0; i < count; i++) {
-      enemies.add(buildEnemy(levels[i]));
+      entries.add(buildEnemy(levels[i]));
     }
-    return enemies;
+    return entries;
   }
 
   /**
@@ -152,42 +178,37 @@ public class EnemyGenerator {
    * <p>Each enemy starts at level 1. Remaining levels are randomly assigned one at a time, capped
    * per enemy at {@code maxIndividualLevel} to prevent single overpowered enemies.
    *
-   * @param count the number of enemies to distribute levels across
+   * @param count the number of enemies
    * @param targetCumulativeLevel the total level sum to distribute
-   * @param maxIndividualLevel the maximum level any single enemy can reach
+   * @param maxIndividualLevel the maximum level any single enemy may reach
    * @return an array of individual enemy levels
    */
   private int[] distributeLevels(int count, int targetCumulativeLevel, int maxIndividualLevel) {
     int[] levels = new int[count];
     Arrays.fill(levels, 1);
-
     int remaining = targetCumulativeLevel - count;
 
     while (remaining > 0) {
-      // Find enemies that still have room to grow
       List<Integer> eligible = new ArrayList<>();
       for (int i = 0; i < count; i++) {
         if (levels[i] < maxIndividualLevel) eligible.add(i);
       }
-      // If no enemy can grow further, stop
       if (eligible.isEmpty()) break;
-
       int idx = eligible.get(random.nextInt(eligible.size()));
       levels[idx]++;
       remaining--;
     }
-
     return levels;
   }
 
   /**
-   * Builds a single enemy {@link Hero} of the given level with a randomly chosen {@link EnemyType}
-   * and its associated {@link Archetype} stats.
+   * Builds a single enemy at the given level with a randomly chosen {@link EnemyType}. Returns an
+   * {@link EnemyEntry} pairing the hero with its behavior archetype.
    *
    * @param level the level to build the enemy at
-   * @return a fully initialised enemy {@link Hero}
+   * @return an {@link EnemyEntry} containing a fully initialised enemy hero and its behavior
    */
-  private Hero buildEnemy(int level) {
+  private EnemyEntry buildEnemy(int level) {
     EnemyType type = EnemyType.values()[random.nextInt(EnemyType.values().length)];
     Archetype a = type.archetype;
 
@@ -206,6 +227,6 @@ public class EnemyGenerator {
     enemy.setMana(0);
     enemy.setMaxMana(0);
 
-    return enemy;
+    return new EnemyEntry(enemy, type.behaviour);
   }
 }

@@ -2,6 +2,8 @@ package com.university.project.legendsofswordandwand.service.battle.impl;
 
 import com.university.project.legendsofswordandwand.battle.*;
 import com.university.project.legendsofswordandwand.battle.ability.AbilityHelper;
+import com.university.project.legendsofswordandwand.battle.enemy.EnemyBehaviour;
+import com.university.project.legendsofswordandwand.battle.enemy.EnemyGenerator;
 import com.university.project.legendsofswordandwand.battle.initializer.PvEBattleInitializer;
 import com.university.project.legendsofswordandwand.battle.initializer.PvPBattleInitializer;
 import com.university.project.legendsofswordandwand.model.Hero;
@@ -29,6 +31,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 class BattleServiceImpl implements IBattleService {
 
+  // ── Smell 2 fix: named constants replacing magic number literals ───────────
+  private static final int    XP_PER_ENEMY_LEVEL          = 50;
+  private static final int    GOLD_PER_ENEMY_LEVEL        = 75;
+  private static final double XP_LOSS_PENALTY_FRACTION    = 0.30;
+  private static final double GOLD_LOSS_PENALTY_FRACTION  = 0.10;
+
   private final DamageCalculator damageCalculator;
   private final AbilityExecutor abilityExecutor;
   private final EnemyGenerator enemyGenerator;
@@ -36,6 +44,8 @@ class BattleServiceImpl implements IBattleService {
   private final IPartyManagementService partyManagementService;
   private final PartyRepository partyRepository;
   private final UserRepository userRepository;
+  // Smell 3 fix: injected so applyBattleLoss() can call getExpStepForLevel()
+  private final HeroStatCalculator heroStatCalculator;
   private final Random random = new Random();
 
   /**
@@ -191,14 +201,17 @@ class BattleServiceImpl implements IBattleService {
   }
 
   /**
-   * Selects and executes an action for an enemy unit based on its archetype.
+   * Selects and executes an action for an enemy unit based on its {@link EnemyBehaviour} archetype.
+   *
+   * <p>Dispatches on the behavior enum stored on the {@link BattleUnit} at battle initialisation,
+   * eliminating the previous fragile switch on the enemy's display-name string.
    *
    * <ul>
-   *   <li><b>Skeleton, Witch, Shadow</b> (glass cannon) — always attack the weakest target
-   *   <li><b>Orc, Dark Knight</b> (brute) — 60% attack highest attack hero, 40% random target
-   *   <li><b>Goblin, Vampire</b> (swift) — 75% attack lowest defense hero, 25% wait
-   *   <li><b>Troll</b> (tank) — defends if heavily hurt, otherwise targets highest HP or random
-   *   <li><b>Bandit, Wyvern</b> (balanced) — 85% random attack, 15% defend
+   *   <li>{@code GLASS_CANNON} — always attacks the lowest-HP target
+   *   <li>{@code BRUTE} — 60 % targets the highest-attack hero, 40 % random target
+   *   <li>{@code SWIFT} — 75 % targets the lowest-defense hero, 25 % waits
+   *   <li>{@code TANK} — defends when below 25 % HP (40 % chance), otherwise highest-HP or random
+   *   <li>{@code BALANCED} — 85 % random attack, 15 % defend
    * </ul>
    *
    * @param actor the enemy {@link BattleUnit} taking the action
@@ -206,17 +219,18 @@ class BattleServiceImpl implements IBattleService {
    * @param state the current {@link BattleState}
    */
   private void decideEnemyAction(BattleUnit actor, List<BattleUnit> targets, BattleState state) {
-    String name = actor.getHero().getName();
+    EnemyBehaviour behaviour =
+        actor.getBehaviour() != null ? actor.getBehaviour() : EnemyBehaviour.BALANCED;
 
-    switch (name) {
-      case "Skeleton", "Witch", "Shadow" -> {
+    switch (behaviour) {
+      case GLASS_CANNON -> {
         BattleUnit target =
             targets.stream()
                 .min(Comparator.comparingInt(u -> u.getHero().getHealth()))
                 .orElse(targets.get(0));
         executeAttack(actor, target, state);
       }
-      case "Orc", "Dark Knight" -> {
+      case BRUTE -> {
         BattleUnit target =
             random.nextInt(100) < 60
                 ? targets.stream()
@@ -225,7 +239,7 @@ class BattleServiceImpl implements IBattleService {
                 : targets.get(random.nextInt(targets.size()));
         executeAttack(actor, target, state);
       }
-      case "Goblin", "Vampire" -> {
+      case SWIFT -> {
         if (random.nextInt(100) < 75) {
           BattleUnit target =
               targets.stream()
@@ -237,7 +251,7 @@ class BattleServiceImpl implements IBattleService {
           state.log("  " + actor.getHero().getName() + " waits");
         }
       }
-      case "Troll" -> {
+      case TANK -> {
         boolean hurt = actor.getHero().getHealth() < actor.getHero().getMaxHealth() / 4;
         if (hurt && random.nextInt(100) < 40) {
           executeDefend(actor.getHero());
@@ -252,7 +266,7 @@ class BattleServiceImpl implements IBattleService {
           executeAttack(actor, target, state);
         }
       }
-      default -> {
+      case BALANCED -> {
         if (random.nextInt(100) < 85) {
           BattleUnit target = targets.get(random.nextInt(targets.size()));
           executeAttack(actor, target, state);
@@ -334,7 +348,7 @@ class BattleServiceImpl implements IBattleService {
     List<BattleUnit> living = state.getLivingPlayerHeroes();
     if (living.isEmpty()) return Map.of("xpEach", 0, "gold", 0, "recipients", List.of());
 
-    int totalXp = state.getEnemyUnits().stream().mapToInt(u -> 50 * u.getHero().getLevel()).sum();
+    int totalXp = state.getEnemyUnits().stream().mapToInt(u -> XP_PER_ENEMY_LEVEL * u.getHero().getLevel()).sum();
     int xpEach = totalXp / living.size();
     int remainder = totalXp % living.size();
 
@@ -345,7 +359,7 @@ class BattleServiceImpl implements IBattleService {
       recipients.add(living.get(i).getHero().getName() + " +" + xp + " XP");
     }
 
-    int gold = state.getEnemyUnits().stream().mapToInt(u -> 75 * u.getHero().getLevel()).sum();
+    int gold = state.getEnemyUnits().stream().mapToInt(u -> GOLD_PER_ENEMY_LEVEL * u.getHero().getLevel()).sum();
     if (state.getCampaignId() != null) {
       Party party = partyManagementService.getActiveParty(state.getCampaignId());
       partyManagementService.addGold(party.getId(), gold);
@@ -387,12 +401,10 @@ class BattleServiceImpl implements IBattleService {
         .forEach(
             u -> {
               int prevThreshold =
-                  u.getHero().getExperienceToNextLevel()
-                      - (500
-                          + 75 * u.getHero().getLevel()
-                          + 20 * u.getHero().getLevel() * u.getHero().getLevel());
+                      u.getHero().getExperienceToNextLevel()
+                              - heroStatCalculator.getExpStepForLevel(u.getHero().getLevel());
               int xpInCurrentLevel = Math.max(0, u.getHero().getExperience() - prevThreshold);
-              int penalty = (int) (xpInCurrentLevel * 0.30);
+              int penalty = (int) (xpInCurrentLevel * XP_LOSS_PENALTY_FRACTION);
               int newXp = Math.max(prevThreshold, u.getHero().getExperience() - penalty);
               heroService
                   .findById(u.getHero().getId())
@@ -407,7 +419,7 @@ class BattleServiceImpl implements IBattleService {
 
     if (state.getCampaignId() != null) {
       Party party = partyManagementService.getActiveParty(state.getCampaignId());
-      partyManagementService.deductGold(party.getId(), (int) (party.getGold() * 0.10));
+      partyManagementService.deductGold(party.getId(), (int) (party.getGold() * GOLD_LOSS_PENALTY_FRACTION));
     }
   }
 
@@ -437,7 +449,6 @@ class BattleServiceImpl implements IBattleService {
               userRepository.save(u);
             });
 
-    // Restore all heroes in both parties to full HP/mana after PvP
     restorePartyHeroes(state.getPlayerUnits());
     restorePartyHeroes(state.getEnemyUnits());
   }
@@ -445,7 +456,7 @@ class BattleServiceImpl implements IBattleService {
   private void restorePartyHeroes(List<BattleUnit> units) {
     units.forEach(
         u -> {
-          if (u.getHero().getId() == null) return; // skip enemy-generated units with no DB id
+          if (u.getHero().getId() == null) return; 
           heroService
               .findById(u.getHero().getId())
               .ifPresent(

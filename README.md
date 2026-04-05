@@ -371,6 +371,7 @@ Reaching Level 5 in two different classes unlocks a **Hybrid Class** with combin
 |------------------|---|
 | *Mohammed Patel* | *https://github.com/MohammedPatel-yorku* |
 | *Ethan Persaud*  | *https://github.com/221444567*           |
+| *William Bui*    | *https://github.com/william100806*       |
 
 ---
 
