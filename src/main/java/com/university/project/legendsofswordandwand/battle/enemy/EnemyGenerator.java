@@ -98,6 +98,11 @@ public class EnemyGenerator {
     int hp(int level) {
       return hpBase + (level - 1) * hpScale;
     }
+
+    @Override
+    public String toString() {
+      return label;
+    }
   }
 
   /**

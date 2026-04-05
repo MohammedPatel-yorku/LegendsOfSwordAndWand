@@ -11,6 +11,7 @@ import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import com.university.project.legendsofswordandwand.service.inventory.IInventoryService;
 import com.university.project.legendsofswordandwand.service.user.IUserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +25,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/campaign")
 @RequiredArgsConstructor
+@Slf4j
 public class CampaignController {
 
   private final ICampaignService campaignService;
@@ -108,6 +110,7 @@ public class CampaignController {
           data.heroes().stream().filter(h -> heroService.isLevelUpPending(h.getId())).toList());
       model.addAttribute("allHeroClasses", HeroClass.values());
     } catch (Exception e) {
+      log.error("Unable to render campaign page", e);
       return "redirect:/dashboard";
     }
     return "campaign/campaign";
@@ -136,6 +139,7 @@ public class CampaignController {
       RoomType room = campaignProgressService.enterNextRoom(authentication.getName());
       return room == RoomType.BATTLE ? "redirect:/battle" : "redirect:/inn";
     } catch (Exception e) {
+      log.error("Unable to advance to next room", e);
       return "redirect:/campaign";
     }
   }
@@ -183,7 +187,8 @@ public class CampaignController {
     if (authentication == null) return "redirect:/login";
     try {
       campaignService.abandonCampaign(authentication.getName());
-    } catch (Exception ignored) {
+    } catch (Exception e) {
+      log.error("Error abandoning campaign", e);
     }
     return "redirect:/dashboard";
   }
@@ -315,6 +320,7 @@ public class CampaignController {
       Long userId = userService.getUserIdByUsername(authentication.getName());
       campaignService.replacePartyFromCampaign(campaignId, userId, replacePartyId);
     } catch (Exception e) {
+      log.error("Unable to replace saved party after campaign completion", e);
     }
 
     return "redirect:/dashboard";
