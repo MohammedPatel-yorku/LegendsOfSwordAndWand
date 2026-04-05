@@ -53,13 +53,13 @@ public class ProtectAbility implements Ability {
    */
   @Override
   public void execute(
-      BattleUnit caster,
-      BattleUnit target,
-      List<BattleUnit> allies,
-      List<BattleUnit> enemies,
-      BattleState state) {
+          BattleUnit caster,
+          BattleUnit target,
+          List<BattleUnit> allies,
+          List<BattleUnit> enemies,
+          BattleState state) {
 
-    double multiplier = this.multiplier;
+    String bonusTag = hybridClass == HybridClass.PROPHET ? " (PROPHET bonus)" : "";
 
     for (BattleUnit ally : allies) {
 
@@ -67,10 +67,19 @@ public class ProtectAbility implements Ability {
 
       if (state.getShield(ally.getBattleId()) == 0) {
         state.setShield(ally.getBattleId(), shield);
-        state.log("  ✦ Protect shields " + ally.getHero().getName() + " for " + shield + " HP");
+        state.log(
+                "  ✦ Protect shields "
+                        + ally.getHero().getName()
+                        + " for "
+                        + shield
+                        + " HP"
+                        + bonusTag);
       } else {
         state.log(
-            "  ✦ Protect has no effect — " + ally.getHero().getName() + " is already shielded");
+                "  ✦ Protect has no effect — "
+                        + ally.getHero().getName()
+                        + " is already shielded"
+                        + bonusTag);
       }
     }
   }
