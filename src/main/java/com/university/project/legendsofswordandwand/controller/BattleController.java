@@ -66,14 +66,7 @@ public class BattleController {
         var campaign = campaignService.getActiveCampaign(authentication.getName());
         int cumulativeLevel = campaignService.getPartyCumulativeLevel(authentication.getName());
         state = battleService.initializePvEBattle(campaign.getId(), cumulativeLevel);
-
-        int safetyLimit = 50;
-        while (!state.isOver() && !state.isPlayerTurn() && safetyLimit-- > 0) {
-          state = battleService.executeEnemyTurn(state);
-        }
-        if (!state.isOver() && !state.isPlayerTurn()) {
-          state.setStatus(battleService.checkBattleStatus(state));
-        }
+        state = runEnemyTurns(state); // Smell 1 fix: extracted from duplicated block
         session.setAttribute(SESSION_KEY, state);
       }
 
@@ -134,13 +127,7 @@ public class BattleController {
       state = battleService.executePlayerAction(state, action, targetBattleId, abilityIndex);
 
       if (!state.isPvp()) {
-        int safetyLimit = 50;
-        while (!state.isOver() && !state.isPlayerTurn() && safetyLimit-- > 0) {
-          state = battleService.executeEnemyTurn(state);
-        }
-        if (!state.isOver() && !state.isPlayerTurn()) {
-          state.setStatus(battleService.checkBattleStatus(state));
-        }
+        state = runEnemyTurns(state); // Smell 1 fix: extracted from duplicated block
       }
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -304,6 +291,29 @@ public class BattleController {
     session.setAttribute(SESSION_KEY, state);
     session.removeAttribute("rewardsGiven");
     return "redirect:/battle/result";
+  }
+
+  /**
+   * Runs consecutive enemy turns until it is the player's turn or the battle ends.
+   *
+   * <p>A safety limit of 50 iterations prevents infinite loops in degenerate states. If the limit
+   * is exhausted, and it is still not the player's turn, the battle status is forcibly rechecked.
+   *
+   * <p>Extracted from the duplicated blocks in {@link #battlePage} and {@link #action} to
+   * eliminate code duplication (Smell 1 refactoring).
+   *
+   * @param state the current {@link BattleState}
+   * @return the updated {@link BattleState} after all enemy turns have been processed
+   */
+  private BattleState runEnemyTurns(BattleState state) {
+    int safetyLimit = 50;
+    while (!state.isOver() && !state.isPlayerTurn() && safetyLimit-- > 0) {
+      state = battleService.executeEnemyTurn(state);
+    }
+    if (!state.isOver() && !state.isPlayerTurn()) {
+      state.setStatus(battleService.checkBattleStatus(state));
+    }
+    return state;
   }
 
   /**

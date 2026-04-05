@@ -1,5 +1,6 @@
 package com.university.project.legendsofswordandwand.service.battle.impl;
 
+import com.university.project.legendsofswordandwand.battle.HeroStatCalculator;
 import com.university.project.legendsofswordandwand.model.*;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
 import com.university.project.legendsofswordandwand.repository.CampaignRepository;
@@ -31,6 +32,7 @@ class InnServiceImpl implements IInnService {
   private final Random random = new Random();
   private final IHeroService heroService;
   private final InventoryRepository inventoryRepository;
+  private final HeroStatCalculator heroStatCalculator;
   private final CampaignRepository campaignRepository;
 
   /**
