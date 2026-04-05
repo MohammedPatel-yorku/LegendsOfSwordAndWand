@@ -63,8 +63,22 @@ public class HeroStatCalculator {
    * @param heroClass the {@link HeroClass} whose bonus strategy to apply
    */
   public void applyClassBonusOnly(Hero hero, HeroClass heroClass) {
-
     applyClassBonus(hero, heroClass);
+  }
+
+  /**
+   * Returns the XP step increment required to advance from level {@code level - 1} to {@code
+   * level}.
+   *
+   * <p>Formula: {@code 500 + 75 * level + 20 * level²}. This is the single-level delta used by
+   * callers (e.g. {@code HeroServiceImpl}) that need to back-calculate a hero's starting XP without
+   * duplicating the formula inline.
+   *
+   * @param level the target level (must be &ge; 1)
+   * @return the XP step for reaching {@code level}
+   */
+  public int getExpStepForLevel(int level) {
+    return 500 + 75 * level + 20 * level * level;
   }
 
   /**
@@ -77,8 +91,8 @@ public class HeroStatCalculator {
    * @return the total experience required to reach {@code level}
    */
   private int calculateExpThreshold(int level) {
-    if (level <= 1) return 500 + 75 + 20; // Exp(1) = 0 + 500 + 75*1 + 20*1 = 595
-    return calculateExpThreshold(level - 1) + 500 + 75 * level + 20 * level * level;
+    if (level <= 1) return getExpStepForLevel(1);
+    return calculateExpThreshold(level - 1) + getExpStepForLevel(level);
   }
 
   /**
@@ -88,7 +102,6 @@ public class HeroStatCalculator {
    * @param hero the {@link Hero} to apply base gains to
    */
   private void applyBaseGain(Hero hero) {
-
     hero.setLevel(hero.getLevel() + 1);
     hero.setAttack(hero.getAttack() + 1);
     hero.setDefense(hero.getDefense() + 1);
@@ -106,7 +119,6 @@ public class HeroStatCalculator {
    * @param heroClass the {@link HeroClass} whose strategy to use
    */
   private void applyClassBonus(Hero hero, HeroClass heroClass) {
-
     getStrategy(heroClass).applyLevelBonus(hero);
   }
 
@@ -118,7 +130,6 @@ public class HeroStatCalculator {
    * @throws IllegalArgumentException if no strategy is registered for the given class
    */
   private ClassBonusStrategy getStrategy(HeroClass heroClass) {
-
     return strategies.stream()
         .filter(s -> s.getHeroClass() == heroClass)
         .findFirst()
