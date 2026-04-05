@@ -23,7 +23,6 @@ public class PvPBattleInitializer extends BattleInitializer {
 
   private final Party senderParty;
   private final Party receiverParty;
-  private final Long invitationId;
   private final UserRepository userRepository;
 
   /**
@@ -42,7 +41,6 @@ public class PvPBattleInitializer extends BattleInitializer {
 
     this.senderParty = senderParty;
     this.receiverParty = receiverParty;
-    this.invitationId = invitationId;
     this.userRepository = userRepository;
 
     restoreParty(senderParty);

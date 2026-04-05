@@ -4,20 +4,18 @@ import com.university.project.legendsofswordandwand.battle.BattleState;
 import com.university.project.legendsofswordandwand.battle.BattleUnit;
 import com.university.project.legendsofswordandwand.battle.HeroSnapshot;
 import com.university.project.legendsofswordandwand.model.Campaign;
-import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.enums.ActionType;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
+import com.university.project.legendsofswordandwand.service.battle.BattleResultDTO;
 import com.university.project.legendsofswordandwand.service.battle.IBattleService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
-import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -31,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/battle")
 @RequiredArgsConstructor
+@Slf4j
 public class BattleController {
 
   private static final String SESSION_KEY = "battleState";
@@ -39,7 +38,6 @@ public class BattleController {
   private final IBattleService battleService;
   private final ICampaignService campaignService;
   private final ICampaignProgressService campaignProgressService;
-  private final IHeroService heroService;
 
   /**
    * Serves the battle page, initialising a new PvE battle if one is not already in progress.
@@ -79,6 +77,7 @@ public class BattleController {
 
       model.addAttribute("isPvp", state != null && state.isPvp());
     } catch (Exception e) {
+      log.error("Unable to initialize or resume battle page", e);
       return "redirect:/campaign";
     }
     return "battle/battle";
@@ -171,34 +170,14 @@ public class BattleController {
     if (state == null || !state.isOver()) return "redirect:/battle";
 
     try {
-
       boolean rewardsAlreadyGiven = Boolean.TRUE.equals(session.getAttribute("rewardsGiven"));
-      if (!rewardsAlreadyGiven && state.getStatus() == BattleStatus.PLAYER_WIN) {
-        Map<String, Object> rewards = battleService.awardBattleRewards(state);
-        model.addAttribute("rewardGold", rewards.get("gold"));
-        model.addAttribute("rewardRecipients", rewards.get("recipients"));
+      BattleResultDTO result = battleService.prepareBattleResult(state, rewardsAlreadyGiven);
+      model.addAttribute("rewardGold", result.getRewardGold());
+      model.addAttribute("rewardRecipients", result.getRewardRecipients());
+      model.addAttribute("levelUpHeroes", result.getLevelUpHeroes());
+      model.addAttribute("allHeroClasses", HeroClass.values());
+      if (result.isRewardsApplied()) {
         session.setAttribute("rewardsGiven", true);
-      } else if (state.getStatus() == BattleStatus.PLAYER_WIN) {
-        // Rewards already given, just show level up panel
-        model.addAttribute("rewardGold", 0);
-        model.addAttribute("rewardRecipients", List.of());
-      }
-
-      if (!rewardsAlreadyGiven && state.getStatus() == BattleStatus.PLAYER_LOSE) {
-        battleService.applyBattleLoss(state);
-        session.setAttribute("rewardsGiven", true);
-      }
-
-      if (state.getStatus() == BattleStatus.PLAYER_WIN) {
-        List<Hero> levelUpHeroes =
-            state.getPlayerUnits().stream()
-                .filter(u -> u.isAlive() && u.getHero().getId() != null)
-                .filter(u -> heroService.isLevelUpPending(u.getHero().getId()))
-                .map(u -> heroService.findById(u.getHero().getId()).orElse(null))
-                .filter(Objects::nonNull)
-                .toList();
-        model.addAttribute("levelUpHeroes", levelUpHeroes);
-        model.addAttribute("allHeroClasses", HeroClass.values());
       }
 
       model.addAttribute("status", state.getStatus());
@@ -212,12 +191,9 @@ public class BattleController {
         model.addAttribute("pvpSenderUsername", state.getPvpSenderUsername());
         model.addAttribute("pvpReceiverUsername", state.getPvpReceiverUsername());
       }
-      if (state.isPvp() && !rewardsAlreadyGiven) {
-        battleService.updatePvPResult(state);
-        session.setAttribute("rewardsGiven", true);
-      }
       session.setAttribute(LAST_RESULT_KEY, state.getStatus().name());
     } catch (Exception e) {
+      log.error("Error rendering battle result page", e);
       model.addAttribute("error", e.getMessage());
     }
 
@@ -274,7 +250,8 @@ public class BattleController {
 
       session.removeAttribute(LAST_RESULT_KEY);
       campaignProgressService.clearRoomPending(authentication.getName());
-    } catch (Exception ignored) {
+    } catch (Exception e) {
+      log.error("Error continuing campaign after battle result", e);
     }
     return "redirect:/campaign";
   }

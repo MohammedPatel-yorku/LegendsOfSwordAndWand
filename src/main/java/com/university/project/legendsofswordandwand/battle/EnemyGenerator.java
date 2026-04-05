@@ -81,6 +81,11 @@ public class EnemyGenerator {
     int hp(int level) {
       return hpBase + (level - 1) * hpScale;
     }
+
+    @Override
+    public String toString() {
+      return label;
+    }
   }
 
   /** Each enemy name is pinned to an archetype so the same name always feels the same. */

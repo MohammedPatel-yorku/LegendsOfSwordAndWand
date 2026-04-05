@@ -141,7 +141,7 @@ public class PvPController {
     try {
       BattleState state =
           battleService.initializePvPBattle(senderPartyId, receiverPartyId, inviteId);
-      session.setAttribute("battleState", state);
+      session.setAttribute(SESSION_KEY, state);
       return "redirect:/battle";
     } catch (Exception e) {
       redirectAttributes.addFlashAttribute("error", e.getMessage());

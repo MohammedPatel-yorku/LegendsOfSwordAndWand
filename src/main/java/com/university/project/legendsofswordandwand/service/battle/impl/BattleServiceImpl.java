@@ -4,8 +4,10 @@ import com.university.project.legendsofswordandwand.battle.*;
 import com.university.project.legendsofswordandwand.battle.ability.AbilityHelper;
 import com.university.project.legendsofswordandwand.battle.initializer.PvEBattleInitializer;
 import com.university.project.legendsofswordandwand.battle.initializer.PvPBattleInitializer;
+import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.enums.ActionType;
+import com.university.project.legendsofswordandwand.service.battle.BattleResultDTO;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
 import com.university.project.legendsofswordandwand.model.enums.HybridClass;
 import com.university.project.legendsofswordandwand.repository.PartyRepository;
@@ -276,6 +278,47 @@ class BattleServiceImpl implements IBattleService {
     return BattleStatus.IN_PROGRESS;
   }
 
+  @Override
+  public BattleResultDTO prepareBattleResult(BattleState state, boolean rewardsAlreadyGiven) {
+    if (state == null || !state.isOver()) return BattleResultDTO.empty();
+
+    int rewardGold = 0;
+    List<String> rewardRecipients = List.of();
+    List<Hero> levelUpHeroes = List.of();
+    boolean rewardsApplied = false;
+
+    if (state.getStatus() == BattleStatus.PLAYER_WIN) {
+      if (!rewardsAlreadyGiven) {
+        Map<String, Object> rewards = awardBattleRewards(state);
+        rewardGold = (int) rewards.getOrDefault("gold", 0);
+        Object recipientsValue = rewards.get("recipients");
+        if (recipientsValue instanceof List<?> recipientsList) {
+          rewardRecipients =
+              recipientsList.stream()
+                  .filter(String.class::isInstance)
+                  .map(String.class::cast)
+                  .toList();
+        }
+        rewardsApplied = true;
+      }
+      levelUpHeroes =
+          state.getPlayerUnits().stream()
+              .filter(u -> u.isAlive() && u.getHero().getId() != null)
+              .filter(u -> heroService.isLevelUpPending(u.getHero().getId()))
+              .map(u -> heroService.findById(u.getHero().getId()).orElse(null))
+              .filter(Objects::nonNull)
+              .toList();
+      if (state.isPvp() && !rewardsAlreadyGiven) {
+        updatePvPResult(state);
+      }
+    } else if (state.getStatus() == BattleStatus.PLAYER_LOSE && !rewardsAlreadyGiven) {
+      applyBattleLoss(state);
+      rewardsApplied = true;
+    }
+
+    return new BattleResultDTO(rewardGold, rewardRecipients, levelUpHeroes, rewardsApplied);
+  }
+
   /**
    * Awards XP and gold to surviving player heroes after a victory.
    *
@@ -503,18 +546,6 @@ class BattleServiceImpl implements IBattleService {
    * Builds the initial turn queue and sets the first active unit and player turn flag.
    *
    * @param state the {@link BattleState} to initialise the turn queue for
-   */
-  private void buildTurnQueue(BattleState state) {
-    refillTurnQueue(state);
-    state.setActiveUnitBattleId(state.getTurnQueue().pollFirst());
-    state.setPlayerTurn(!state.getActiveUnit().isEnemy());
-  }
-
-  /**
-   * Clears and rebuilds the turn queue from all living units, ordered by level descending, then by
-   * attack descending as a tiebreaker.
-   *
-   * @param state the {@link BattleState} whose turn queue to refill
    */
   private void refillTurnQueue(BattleState state) {
     state.getTurnQueue().clear();

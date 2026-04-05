@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -28,6 +29,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
  */
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/inn")
 public class InnController {
 
@@ -60,67 +62,67 @@ public class InnController {
     if (authentication == null) return "redirect:/login";
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
-
-      String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
-      boolean retreatingAfterLoss = "PLAYER_LOSE".equals(lastResult);
-      boolean innRoomPending =
-              campaign.isRoomPending() && campaign.getLastRoomType() == RoomType.INN;
-      if (!retreatingAfterLoss && !innRoomPending && session.getAttribute(RECRUITS_KEY) == null) {
+      if (!isInnAccessPermitted(campaign, session)) {
         return "redirect:/campaign";
       }
 
-      // Heal only on first arrival, not on every buy/recruit redirect
       if (session.getAttribute(RECRUITS_KEY) == null) {
-        List<String> healSummary = innService.loadInnView(campaign.getId());
-        session.setAttribute("healSummary", healSummary);
+        session.setAttribute("healSummary", innService.loadInnView(campaign.getId()));
       }
 
-      // Generate recruits once per inn visit, store IDs to avoid stale entities
-      @SuppressWarnings("unchecked")
-      List<Long> recruitIds = (List<Long>) session.getAttribute(RECRUITS_KEY);
-      List<Hero> recruits;
-      if (recruitIds == null) {
-        List<Hero> freshRecruits = innService.getAvailableRecruits(campaign.getId());
-        recruitIds = freshRecruits.stream().map(Hero::getId).toList();
-        session.setAttribute(RECRUITS_KEY, recruitIds);
-        recruits = freshRecruits;
-      } else {
-        // Reload from DB — filter out any already recruited
-        recruits =
-                recruitIds.stream()
-                        .map(id -> heroService.findById(id).orElse(null))
-                        .filter(h -> h != null && h.isTemporary())
-                        .toList();
-      }
-
-      // Refresh campaign after potential heal
+      List<Hero> recruits = loadOrRefreshRecruits(campaign.getId(), session);
       campaign = campaignService.getActiveCampaign(authentication.getName());
-
-      long permanentHeroCount =
-              campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).count();
-
-      model.addAttribute("healSummary", session.getAttribute("healSummary"));
-      model.addAttribute(
-              "heroes",
-              campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).toList());
-      model.addAttribute("gold", campaign.getParty().getGold());
-      model.addAttribute("currentRoom", campaign.getCurrentRoom());
-      model.addAttribute("shopItems", innService.getShopItems());
-      model.addAttribute("availableRecruits", recruits);
-      model.addAttribute("permanentHeroCount", permanentHeroCount);
-      // Current party inventory — shown in the inn so players know what they already own
-      model.addAttribute("inventoryItems", inventoryService.getPartyInventoryItems(campaign.getId()));
-      List<Hero> levelUpHeroes =
-              campaign.getParty().getHeroes().stream()
-                      .filter(h -> !h.isTemporary())
-                      .filter(h -> heroService.isLevelUpPending(h.getId()))
-                      .toList();
-      model.addAttribute("levelUpHeroes", levelUpHeroes);
-      model.addAttribute("allHeroClasses", HeroClass.values());
+      populateInnModel(model, campaign, recruits, session);
     } catch (Exception e) {
+      log.error("Unable to render inn page", e);
       return "redirect:/campaign";
     }
     return "campaign/inn";
+  }
+
+  private boolean isInnAccessPermitted(Campaign campaign, HttpSession session) {
+    String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
+    boolean retreatingAfterLoss = "PLAYER_LOSE".equals(lastResult);
+    boolean innRoomPending = campaign.isRoomPending() && campaign.getLastRoomType() == RoomType.INN;
+    return retreatingAfterLoss || innRoomPending || session.getAttribute(RECRUITS_KEY) != null;
+  }
+
+  private List<Hero> loadOrRefreshRecruits(Long campaignId, HttpSession session) {
+    @SuppressWarnings("unchecked")
+    List<Long> recruitIds = (List<Long>) session.getAttribute(RECRUITS_KEY);
+    if (recruitIds == null) {
+      List<Hero> freshRecruits = innService.getAvailableRecruits(campaignId);
+      recruitIds = freshRecruits.stream().map(Hero::getId).toList();
+      session.setAttribute(RECRUITS_KEY, recruitIds);
+      return freshRecruits;
+    }
+    return recruitIds.stream()
+        .map(id -> heroService.findById(id).orElse(null))
+        .filter(h -> h != null && h.isTemporary())
+        .toList();
+  }
+
+  private void populateInnModel(Model model, Campaign campaign, List<Hero> recruits, HttpSession session) {
+    long permanentHeroCount =
+        campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).count();
+
+    model.addAttribute("healSummary", session.getAttribute("healSummary"));
+    model.addAttribute(
+        "heroes",
+        campaign.getParty().getHeroes().stream().filter(h -> !h.isTemporary()).toList());
+    model.addAttribute("gold", campaign.getParty().getGold());
+    model.addAttribute("currentRoom", campaign.getCurrentRoom());
+    model.addAttribute("shopItems", innService.getShopItems());
+    model.addAttribute("availableRecruits", recruits);
+    model.addAttribute("permanentHeroCount", permanentHeroCount);
+    model.addAttribute("inventoryItems", inventoryService.getPartyInventoryItems(campaign.getId()));
+    List<Hero> levelUpHeroes =
+        campaign.getParty().getHeroes().stream()
+            .filter(h -> !h.isTemporary())
+            .filter(h -> heroService.isLevelUpPending(h.getId()))
+            .toList();
+    model.addAttribute("levelUpHeroes", levelUpHeroes);
+    model.addAttribute("allHeroClasses", HeroClass.values());
   }
 
   /**
@@ -218,7 +220,8 @@ public class InnController {
       } else {
         campaignProgressService.clearRoomPending(authentication.getName());
       }
-    } catch (Exception ignored) {
+    } catch (Exception e) {
+      log.error("Error cleaning up inn visit", e);
     }
     return "redirect:/campaign";
   }
