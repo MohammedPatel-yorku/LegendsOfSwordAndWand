@@ -40,7 +40,7 @@ public interface IBattleService {
    * @return the updated {@link BattleState}
    */
   BattleState executePlayerAction(
-      BattleState state, ActionType actionType, Long targetBattleId, Integer abilityIndex);
+          BattleState state, ActionType actionType, Long targetBattleId, Integer abilityIndex);
 
   /**
    * Executes one enemy turn for the currently active enemy unit and advances the turn.
@@ -58,6 +58,16 @@ public interface IBattleService {
    *     BattleStatus#IN_PROGRESS}
    */
   BattleStatus checkBattleStatus(BattleState state);
+
+  /**
+   * Prepares the battle result display data for the result page and gives any rewards or
+   * penalties that have not been processed yet.
+   *
+   * @param state the current {@link BattleState}
+   * @param rewardsAlreadyGiven whether rewards/loss handling has already been applied for this session
+   * @return a {@link BattleResultDTO} containing the display data for the result view
+   */
+  BattleResultDTO prepareBattleResult(BattleState state, boolean rewardsAlreadyGiven);
 
   /**
    * Awards XP and gold to surviving player heroes after a victory and persists the changes.
