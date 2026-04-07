@@ -58,27 +58,4 @@ public interface IBattleService {
    *     BattleStatus#IN_PROGRESS}
    */
   BattleStatus checkBattleStatus(BattleState state);
-
-  /**
-   * Awards XP and gold to surviving player heroes after a victory and persists the changes.
-   *
-   * @param state the current {@link BattleState}
-   * @return a map containing {@code "gold"} (int) and {@code "recipients"} (list of reward strings)
-   */
-  Map<String, Object> awardBattleRewards(BattleState state);
-
-  /**
-   * Applies XP and gold penalties to all player heroes after a battle loss.
-   *
-   * @param state the current {@link BattleState}
-   */
-  void applyBattleLoss(BattleState state);
-
-  /**
-   * Records the PvP win and loss counts in the database after a PvP battle concludes. Has no effect
-   * if the battle is not a PvP battle or has not yet ended.
-   *
-   * @param state the current {@link BattleState}
-   */
-  void updatePvPResult(BattleState state);
 }

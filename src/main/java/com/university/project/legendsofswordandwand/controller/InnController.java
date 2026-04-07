@@ -1,5 +1,6 @@
 package com.university.project.legendsofswordandwand.controller;
 
+import com.university.project.legendsofswordandwand.SessionConstants;
 import com.university.project.legendsofswordandwand.model.Campaign;
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
@@ -32,7 +33,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class InnController {
 
   private static final String RECRUITS_KEY = "innRecruits";
-  private static final String LAST_RESULT_KEY = "lastBattleResult";
 
   private final IInnService innService;
   private final IHeroService heroService;
@@ -61,7 +61,7 @@ public class InnController {
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
 
-      String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
+      String lastResult = (String) session.getAttribute(SessionConstants.LAST_RESULT);
       boolean retreatingAfterLoss = "PLAYER_LOSE".equals(lastResult);
       boolean innRoomPending =
               campaign.isRoomPending() && campaign.getLastRoomType() == RoomType.INN;
@@ -209,8 +209,8 @@ public class InnController {
       session.removeAttribute(RECRUITS_KEY);
       session.removeAttribute("healSummary");
 
-      String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
-      session.removeAttribute(LAST_RESULT_KEY);
+      String lastResult = (String) session.getAttribute(SessionConstants.LAST_RESULT);
+      session.removeAttribute(SessionConstants.LAST_RESULT);
 
       if ("PLAYER_LOSE".equals(lastResult)) {
         // Keep room pending so player retries the same battle room
