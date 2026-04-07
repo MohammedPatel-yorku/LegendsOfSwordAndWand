@@ -61,10 +61,10 @@ public class CampaignController {
    */
   @PostMapping("/new")
   public String startCampaign(
-          Authentication authentication,
-          @RequestParam("heroName") String heroName,
-          @RequestParam("heroClass") HeroClass heroClass,
-          Model model) {
+      Authentication authentication,
+      @RequestParam("heroName") String heroName,
+      @RequestParam("heroClass") HeroClass heroClass,
+      Model model) {
 
     if (authentication == null) return "redirect:/login";
 
@@ -100,14 +100,14 @@ public class CampaignController {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
       CampaignViewInfo data = campaignProgressService.getCampaignViewData(authentication.getName());
       model.addAttribute(
-              "inventoryItems", inventoryService.getPartyInventoryItems(campaign.getId()));
+          "inventoryItems", inventoryService.getPartyInventoryItems(campaign.getId()));
       model.addAttribute("heroes", data.heroes());
       model.addAttribute("currentRoom", data.currentRoom());
       model.addAttribute("gold", data.gold());
 
       model.addAttribute(
-              "levelUpHeroes",
-              data.heroes().stream().filter(h -> heroService.isLevelUpPending(h.getId())).toList());
+          "levelUpHeroes",
+          data.heroes().stream().filter(h -> heroService.isLevelUpPending(h.getId())).toList());
       model.addAttribute("allHeroClasses", HeroClass.values());
     } catch (Exception e) {
       log.error("Unable to render campaign page", e);
@@ -204,10 +204,10 @@ public class CampaignController {
    */
   @PostMapping("/use-item")
   public String useItem(
-          Authentication authentication,
-          @RequestParam Long heroId,
-          @RequestParam Long itemId,
-          RedirectAttributes redirectAttributes) {
+      Authentication authentication,
+      @RequestParam Long heroId,
+      @RequestParam Long itemId,
+      RedirectAttributes redirectAttributes) {
     if (authentication == null) return "redirect:/login";
     try {
       Campaign campaign = campaignService.getActiveCampaign(authentication.getName());
@@ -234,11 +234,11 @@ public class CampaignController {
    */
   @PostMapping("/level-up")
   public String levelUp(
-          Authentication authentication,
-          @RequestParam Long heroId,
-          @RequestParam HeroClass heroClass,
-          @RequestParam(defaultValue = "campaign") String returnTo,
-          RedirectAttributes redirectAttributes) {
+      Authentication authentication,
+      @RequestParam Long heroId,
+      @RequestParam HeroClass heroClass,
+      @RequestParam(defaultValue = "campaign") String returnTo,
+      RedirectAttributes redirectAttributes) {
     if (authentication == null) return "redirect:/login";
     try {
       heroService.levelUp(heroId, heroClass);
@@ -263,7 +263,7 @@ public class CampaignController {
     if (authentication == null) return "redirect:/login";
     try {
       CompleteCampaignInfo data =
-              campaignProgressService.getCompletionData(authentication.getName());
+          campaignProgressService.getCompletionData(authentication.getName());
       model.addAttribute("campaignId", data.campaignId());
       model.addAttribute("score", data.score());
       model.addAttribute("gold", data.gold());
@@ -287,7 +287,7 @@ public class CampaignController {
    */
   @PostMapping("/complete/save")
   public String saveParty(
-          Authentication authentication, @RequestParam("campaignId") Long campaignId, Model model) {
+      Authentication authentication, @RequestParam("campaignId") Long campaignId, Model model) {
     if (authentication == null) return "redirect:/login";
     try {
       Long userId = userService.getUserIdByUsername(authentication.getName());
@@ -312,9 +312,9 @@ public class CampaignController {
    */
   @PostMapping("/complete/replace")
   public String replaceParty(
-          Authentication authentication,
-          @RequestParam("campaignId") Long campaignId,
-          @RequestParam("replacePartyId") Long replacePartyId) {
+      Authentication authentication,
+      @RequestParam("campaignId") Long campaignId,
+      @RequestParam("replacePartyId") Long replacePartyId) {
     if (authentication == null) return "redirect:/login";
     try {
       Long userId = userService.getUserIdByUsername(authentication.getName());

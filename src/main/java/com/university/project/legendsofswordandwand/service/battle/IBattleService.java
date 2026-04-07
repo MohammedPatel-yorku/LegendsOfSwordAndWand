@@ -3,7 +3,6 @@ package com.university.project.legendsofswordandwand.service.battle;
 import com.university.project.legendsofswordandwand.battle.BattleState;
 import com.university.project.legendsofswordandwand.model.enums.ActionType;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
-import java.util.Map;
 
 /**
  * Service interface defining the contract for managing the full lifecycle of a battle, including
@@ -40,7 +39,7 @@ public interface IBattleService {
    * @return the updated {@link BattleState}
    */
   BattleState executePlayerAction(
-          BattleState state, ActionType actionType, Long targetBattleId, Integer abilityIndex);
+      BattleState state, ActionType actionType, Long targetBattleId, Integer abilityIndex);
 
   /**
    * Executes one enemy turn for the currently active enemy unit and advances the turn.
@@ -60,35 +59,13 @@ public interface IBattleService {
   BattleStatus checkBattleStatus(BattleState state);
 
   /**
-   * Prepares the battle result display data for the result page and gives any rewards or
-   * penalties that have not been processed yet.
+   * Prepares the battle result display data for the result page and gives any rewards or penalties
+   * that have not been processed yet.
    *
    * @param state the current {@link BattleState}
-   * @param rewardsAlreadyGiven whether rewards/loss handling has already been applied for this session
+   * @param rewardsAlreadyGiven whether rewards/loss handling has already been applied for this
+   *     session
    * @return a {@link BattleResultDTO} containing the display data for the result view
    */
   BattleResultDTO prepareBattleResult(BattleState state, boolean rewardsAlreadyGiven);
-
-  /**
-   * Awards XP and gold to surviving player heroes after a victory and persists the changes.
-   *
-   * @param state the current {@link BattleState}
-   * @return a map containing {@code "gold"} (int) and {@code "recipients"} (list of reward strings)
-   */
-  Map<String, Object> awardBattleRewards(BattleState state);
-
-  /**
-   * Applies XP and gold penalties to all player heroes after a battle loss.
-   *
-   * @param state the current {@link BattleState}
-   */
-  void applyBattleLoss(BattleState state);
-
-  /**
-   * Records the PvP win and loss counts in the database after a PvP battle concludes. Has no effect
-   * if the battle is not a PvP battle or has not yet ended.
-   *
-   * @param state the current {@link BattleState}
-   */
-  void updatePvPResult(BattleState state);
 }

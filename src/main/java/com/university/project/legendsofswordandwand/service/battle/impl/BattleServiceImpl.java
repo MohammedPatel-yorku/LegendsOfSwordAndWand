@@ -9,14 +9,16 @@ import com.university.project.legendsofswordandwand.battle.initializer.PvPBattle
 import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.enums.ActionType;
-import com.university.project.legendsofswordandwand.service.battle.BattleResultDTO;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
 import com.university.project.legendsofswordandwand.model.enums.HybridClass;
 import com.university.project.legendsofswordandwand.repository.PartyRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
+import com.university.project.legendsofswordandwand.service.battle.BattleResultDTO;
+import com.university.project.legendsofswordandwand.service.battle.IBattleRewardService;
 import com.university.project.legendsofswordandwand.service.battle.IBattleService;
 import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import com.university.project.legendsofswordandwand.service.party.IPartyManagementService;
+import com.university.project.legendsofswordandwand.service.pvp.IPvPService;
 import jakarta.transaction.Transactional;
 import java.util.*;
 import lombok.RequiredArgsConstructor;
@@ -31,21 +33,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 class BattleServiceImpl implements IBattleService {
 
-  // ── Smell 2 fix: named constants replacing magic number literals ───────────
-  private static final int    XP_PER_ENEMY_LEVEL          = 50;
-  private static final int    GOLD_PER_ENEMY_LEVEL        = 75;
-  private static final double XP_LOSS_PENALTY_FRACTION    = 0.30;
-  private static final double GOLD_LOSS_PENALTY_FRACTION  = 0.10;
-
   private final DamageCalculator damageCalculator;
   private final AbilityExecutor abilityExecutor;
   private final EnemyGenerator enemyGenerator;
   private final IHeroService heroService;
   private final IPartyManagementService partyManagementService;
+  private final IBattleRewardService battleRewardService;
+  private final IPvPService pvPService;
   private final PartyRepository partyRepository;
   private final UserRepository userRepository;
-  // Smell 3 fix: injected so applyBattleLoss() can call getExpStepForLevel()
-  private final HeroStatCalculator heroStatCalculator;
   private final Random random = new Random();
 
   /**
@@ -62,8 +58,8 @@ class BattleServiceImpl implements IBattleService {
   @Override
   public BattleState initializePvEBattle(Long campaignId, int playerCumulativeLevel) {
     PvEBattleInitializer initializer =
-            new PvEBattleInitializer(
-                    campaignId, playerCumulativeLevel, partyManagementService, enemyGenerator);
+        new PvEBattleInitializer(
+            campaignId, playerCumulativeLevel, partyManagementService, enemyGenerator);
     BattleState state = initializer.initialize();
     state.setCampaignId(campaignId);
     return state;
@@ -80,19 +76,19 @@ class BattleServiceImpl implements IBattleService {
    */
   @Override
   public BattleState initializePvPBattle(
-          Long senderPartyId, Long receiverPartyId, Long invitationId) {
+      Long senderPartyId, Long receiverPartyId, Long invitationId) {
 
     Party senderParty =
-            partyRepository
-                    .findById(senderPartyId)
-                    .orElseThrow(() -> new RuntimeException("Sender party not found"));
+        partyRepository
+            .findById(senderPartyId)
+            .orElseThrow(() -> new RuntimeException("Sender party not found"));
     Party receiverParty =
-            partyRepository
-                    .findById(receiverPartyId)
-                    .orElseThrow(() -> new RuntimeException("Receiver party not found"));
+        partyRepository
+            .findById(receiverPartyId)
+            .orElseThrow(() -> new RuntimeException("Receiver party not found"));
 
     PvPBattleInitializer initializer =
-            new PvPBattleInitializer(senderParty, receiverParty, invitationId, userRepository);
+        new PvPBattleInitializer(senderParty, receiverParty, invitationId, userRepository);
     BattleState state = initializer.initialize();
     state.setPvp(true);
     state.setPvpInvitationId(invitationId);
@@ -117,7 +113,7 @@ class BattleServiceImpl implements IBattleService {
    */
   @Override
   public BattleState executePlayerAction(
-          BattleState state, ActionType actionType, Long targetBattleId, Integer abilityIndex) {
+      BattleState state, ActionType actionType, Long targetBattleId, Integer abilityIndex) {
 
     if (state.isOver()) return state;
     if (!state.isPvp() && !state.isPlayerTurn()) return state;
@@ -126,12 +122,12 @@ class BattleServiceImpl implements IBattleService {
     if (actor == null || !actor.isAlive()) return advanceTurn(state);
 
     state.log(
-            "► "
-                    + actor.getHero().getName()
-                    + " [HP:"
-                    + actor.getHero().getHealth()
-                    + "] acts: "
-                    + actionType);
+        "► "
+            + actor.getHero().getName()
+            + " [HP:"
+            + actor.getHero().getHealth()
+            + "] acts: "
+            + actionType);
 
     BattleUnit target = targetBattleId != null ? state.findUnit(targetBattleId) : null;
 
@@ -152,11 +148,11 @@ class BattleServiceImpl implements IBattleService {
       }
       case CAST -> {
         List<BattleUnit> allies =
-                actor.isEnemy() ? state.getLivingEnemyHeroes() : state.getLivingPlayerHeroes();
+            actor.isEnemy() ? state.getLivingEnemyHeroes() : state.getLivingPlayerHeroes();
         List<BattleUnit> enemies =
-                actor.isEnemy() ? state.getLivingPlayerHeroes() : state.getLivingEnemyHeroes();
+            actor.isEnemy() ? state.getLivingPlayerHeroes() : state.getLivingEnemyHeroes();
         abilityExecutor.executeAbility(
-                actor, target, allies, enemies, state, abilityIndex != null ? abilityIndex : 0);
+            actor, target, allies, enemies, state, abilityIndex != null ? abilityIndex : 0);
       }
     }
 
@@ -220,31 +216,31 @@ class BattleServiceImpl implements IBattleService {
    */
   private void decideEnemyAction(BattleUnit actor, List<BattleUnit> targets, BattleState state) {
     EnemyBehaviour behaviour =
-            actor.getBehaviour() != null ? actor.getBehaviour() : EnemyBehaviour.BALANCED;
+        actor.getBehaviour() != null ? actor.getBehaviour() : EnemyBehaviour.BALANCED;
 
     switch (behaviour) {
       case GLASS_CANNON -> {
         BattleUnit target =
-                targets.stream()
-                        .min(Comparator.comparingInt(u -> u.getHero().getHealth()))
-                        .orElse(targets.get(0));
+            targets.stream()
+                .min(Comparator.comparingInt(u -> u.getHero().getHealth()))
+                .orElse(targets.get(0));
         executeAttack(actor, target, state);
       }
       case BRUTE -> {
         BattleUnit target =
-                random.nextInt(100) < 60
-                        ? targets.stream()
-                          .max(Comparator.comparingInt(u -> u.getHero().getAttack()))
-                          .orElse(targets.get(0))
-                        : targets.get(random.nextInt(targets.size()));
+            random.nextInt(100) < 60
+                ? targets.stream()
+                    .max(Comparator.comparingInt(u -> u.getHero().getAttack()))
+                    .orElse(targets.get(0))
+                : targets.get(random.nextInt(targets.size()));
         executeAttack(actor, target, state);
       }
       case SWIFT -> {
         if (random.nextInt(100) < 75) {
           BattleUnit target =
-                  targets.stream()
-                          .min(Comparator.comparingInt(u -> u.getHero().getDefense()))
-                          .orElse(targets.get(0));
+              targets.stream()
+                  .min(Comparator.comparingInt(u -> u.getHero().getDefense()))
+                  .orElse(targets.get(0));
           executeAttack(actor, target, state);
         } else {
           state.getTurnQueue().addLast(actor.getBattleId());
@@ -258,11 +254,11 @@ class BattleServiceImpl implements IBattleService {
           state.log("  " + actor.getHero().getName() + " defends");
         } else {
           BattleUnit target =
-                  random.nextInt(100) < 50
-                          ? targets.stream()
-                            .max(Comparator.comparingInt(u -> u.getHero().getHealth()))
-                            .orElse(targets.get(0))
-                          : targets.get(random.nextInt(targets.size()));
+              random.nextInt(100) < 50
+                  ? targets.stream()
+                      .max(Comparator.comparingInt(u -> u.getHero().getHealth()))
+                      .orElse(targets.get(0))
+                  : targets.get(random.nextInt(targets.size()));
           executeAttack(actor, target, state);
         }
       }
@@ -303,169 +299,34 @@ class BattleServiceImpl implements IBattleService {
 
     if (state.getStatus() == BattleStatus.PLAYER_WIN) {
       if (!rewardsAlreadyGiven) {
-        Map<String, Object> rewards = awardBattleRewards(state);
+        Map<String, Object> rewards = battleRewardService.awardBattleRewards(state);
         rewardGold = (int) rewards.getOrDefault("gold", 0);
         Object recipientsValue = rewards.get("recipients");
         if (recipientsValue instanceof List<?> recipientsList) {
           rewardRecipients =
-                  recipientsList.stream()
-                          .filter(String.class::isInstance)
-                          .map(String.class::cast)
-                          .toList();
+              recipientsList.stream()
+                  .filter(String.class::isInstance)
+                  .map(String.class::cast)
+                  .toList();
         }
         rewardsApplied = true;
       }
       levelUpHeroes =
-              state.getPlayerUnits().stream()
-                      .filter(u -> u.isAlive() && u.getHero().getId() != null)
-                      .filter(u -> heroService.isLevelUpPending(u.getHero().getId()))
-                      .map(u -> heroService.findById(u.getHero().getId()).orElse(null))
-                      .filter(Objects::nonNull)
-                      .toList();
+          state.getPlayerUnits().stream()
+              .filter(u -> u.isAlive() && u.getHero().getId() != null)
+              .filter(u -> heroService.isLevelUpPending(u.getHero().getId()))
+              .map(u -> heroService.findById(u.getHero().getId()).orElse(null))
+              .filter(Objects::nonNull)
+              .toList();
       if (state.isPvp() && !rewardsAlreadyGiven) {
-        updatePvPResult(state);
+        pvPService.updatePvPResult(state);
       }
     } else if (state.getStatus() == BattleStatus.PLAYER_LOSE && !rewardsAlreadyGiven) {
-      applyBattleLoss(state);
+      battleRewardService.applyBattleLoss(state);
       rewardsApplied = true;
     }
 
     return new BattleResultDTO(rewardGold, rewardRecipients, levelUpHeroes, rewardsApplied);
-  }
-
-  /**
-   * Awards XP and gold to surviving player heroes after a victory.
-   *
-   * <p>Total XP is split evenly among living heroes, with any remainder awarded to the first hero.
-   * Gold is calculated from enemy levels and added to the party treasury. Each surviving hero's HP
-   * and mana snapshots are written back to the database.
-   *
-   * @param state the current {@link BattleState}
-   * @return a map containing {@code "gold"} (int) and {@code "recipients"} (list of reward strings)
-   */
-  @Override
-  public Map<String, Object> awardBattleRewards(BattleState state) {
-    List<BattleUnit> living = state.getLivingPlayerHeroes();
-    if (living.isEmpty()) return Map.of("xpEach", 0, "gold", 0, "recipients", List.of());
-
-    int totalXp = state.getEnemyUnits().stream().mapToInt(u -> XP_PER_ENEMY_LEVEL * u.getHero().getLevel()).sum();
-    int xpEach = totalXp / living.size();
-    int remainder = totalXp % living.size();
-
-    List<String> recipients = new ArrayList<>();
-    for (int i = 0; i < living.size(); i++) {
-      int xp = xpEach + (i == 0 ? remainder : 0);
-      heroService.addExperience(living.get(i).getHero().getId(), xp);
-      recipients.add(living.get(i).getHero().getName() + " +" + xp + " XP");
-    }
-
-    int gold = state.getEnemyUnits().stream().mapToInt(u -> GOLD_PER_ENEMY_LEVEL * u.getHero().getLevel()).sum();
-    if (state.getCampaignId() != null) {
-      Party party = partyManagementService.getActiveParty(state.getCampaignId());
-      partyManagementService.addGold(party.getId(), gold);
-    }
-
-    state
-            .getPlayerUnits()
-            .forEach(
-                    u ->
-                            heroService
-                                    .findById(u.getHero().getId())
-                                    .ifPresent(
-                                            hero -> {
-                                              hero.setHealth(u.getHero().getHealth());
-                                              hero.setMana(u.getHero().getMana());
-                                              heroService.save(hero);
-                                            }));
-
-    Map<String, Object> rewards = new HashMap<>();
-    rewards.put("gold", gold);
-    rewards.put("recipients", recipients);
-    return rewards;
-  }
-
-  /**
-   * Applies penalties to all player heroes after a battle loss.
-   *
-   * <p>Each hero loses 30% of the XP accumulated within their current level, floored at the start
-   * of that level. HP and mana snapshots are written back to the database. The party also loses 10%
-   * of their current gold.
-   *
-   * @param state the current {@link BattleState}
-   */
-  @Override
-  public void applyBattleLoss(BattleState state) {
-
-    state
-            .getPlayerUnits()
-            .forEach(
-                    u -> {
-                      int prevThreshold =
-                              u.getHero().getExperienceToNextLevel()
-                                      - heroStatCalculator.getExpStepForLevel(u.getHero().getLevel());
-                      int xpInCurrentLevel = Math.max(0, u.getHero().getExperience() - prevThreshold);
-                      int penalty = (int) (xpInCurrentLevel * XP_LOSS_PENALTY_FRACTION);
-                      int newXp = Math.max(prevThreshold, u.getHero().getExperience() - penalty);
-                      heroService
-                              .findById(u.getHero().getId())
-                              .ifPresent(
-                                      hero -> {
-                                        hero.setExperience(newXp);
-                                        hero.setHealth(u.getHero().getHealth());
-                                        hero.setMana(u.getHero().getMana());
-                                        heroService.save(hero);
-                                      });
-                    });
-
-    if (state.getCampaignId() != null) {
-      Party party = partyManagementService.getActiveParty(state.getCampaignId());
-      partyManagementService.deductGold(party.getId(), (int) (party.getGold() * GOLD_LOSS_PENALTY_FRACTION));
-    }
-  }
-
-  @Override
-  public void updatePvPResult(BattleState state) {
-    if (!state.isPvp() || !state.isOver()) return;
-
-    boolean senderWon = state.getStatus() == BattleStatus.PLAYER_WIN;
-
-    String winnerUsername =
-            senderWon ? state.getPvpSenderUsername() : state.getPvpReceiverUsername();
-    String loserUsername =
-            senderWon ? state.getPvpReceiverUsername() : state.getPvpSenderUsername();
-
-    userRepository
-            .findByUsername(winnerUsername)
-            .ifPresent(
-                    u -> {
-                      u.setPvpWins(u.getPvpWins() + 1);
-                      userRepository.save(u);
-                    });
-    userRepository
-            .findByUsername(loserUsername)
-            .ifPresent(
-                    u -> {
-                      u.setPvpLosses(u.getPvpLosses() + 1);
-                      userRepository.save(u);
-                    });
-
-    restorePartyHeroes(state.getPlayerUnits());
-    restorePartyHeroes(state.getEnemyUnits());
-  }
-
-  private void restorePartyHeroes(List<BattleUnit> units) {
-    units.forEach(
-            u -> {
-              if (u.getHero().getId() == null) return;
-              heroService
-                      .findById(u.getHero().getId())
-                      .ifPresent(
-                              hero -> {
-                                hero.setHealth(hero.getMaxHealth());
-                                hero.setMana(hero.getMaxMana());
-                                heroService.save(hero);
-                              });
-            });
   }
 
   /**
@@ -481,26 +342,26 @@ class BattleServiceImpl implements IBattleService {
    */
   private void executeAttack(BattleUnit attacker, BattleUnit defender, BattleState state) {
     int damage =
-            damageCalculator.calculateDamage(
-                    attacker.getHero().getAttack(), defender.getHero().getDefense());
+        damageCalculator.calculateDamage(
+            attacker.getHero().getAttack(), defender.getHero().getDefense());
     int hpBefore = defender.getHero().getHealth();
     int shieldBefore = Math.abs(state.getShield(defender.getBattleId()));
     AbilityHelper.applyDamage(attacker.getHero(), defender, damage, state);
     int actualDamage = hpBefore - defender.getHero().getHealth();
 
     state.log(
-            "  "
-                    + attacker.getHero().getName()
-                    + " attacks "
-                    + defender.getHero().getName()
-                    + " for "
-                    + damage
-                    + " dmg → "
-                    + defender.getHero().getHealth()
-                    + " HP left"
-                    + (shieldBefore > 0 && actualDamage < damage
-                    ? " (shield absorbed " + (damage - actualDamage) + ")"
-                    : ""));
+        "  "
+            + attacker.getHero().getName()
+            + " attacks "
+            + defender.getHero().getName()
+            + " for "
+            + damage
+            + " dmg → "
+            + defender.getHero().getHealth()
+            + " HP left"
+            + (shieldBefore > 0 && actualDamage < damage
+                ? " (shield absorbed " + (damage - actualDamage) + ")"
+                : ""));
 
     HybridClass hybrid = attacker.getHero().getHybridClass();
     if (hybrid == HybridClass.ROGUE) abilityExecutor.maybeSneak(attacker, defender, state);
@@ -565,10 +426,10 @@ class BattleServiceImpl implements IBattleService {
     living.addAll(state.getLivingPlayerHeroes());
     living.addAll(state.getLivingEnemyHeroes());
     living.sort(
-            (a, b) -> {
-              int lvlDiff = b.getHero().getLevel() - a.getHero().getLevel();
-              return lvlDiff != 0 ? lvlDiff : b.getHero().getAttack() - a.getHero().getAttack();
-            });
+        (a, b) -> {
+          int lvlDiff = b.getHero().getLevel() - a.getHero().getLevel();
+          return lvlDiff != 0 ? lvlDiff : b.getHero().getAttack() - a.getHero().getAttack();
+        });
     living.forEach(u -> state.getTurnQueue().add(u.getBattleId()));
   }
 }

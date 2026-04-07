@@ -1,5 +1,7 @@
 package com.university.project.legendsofswordandwand.service.pvp;
 
+import com.university.project.legendsofswordandwand.battle.BattleState;
+
 /** Service interface defining the contract for PvP invitation management. */
 public interface IPvPService {
 
@@ -22,4 +24,12 @@ public interface IPvPService {
    * @throws RuntimeException if the invitation is not found or is not in {@code PENDING} status
    */
   void acceptInvitation(Long inviteId);
+
+  /**
+   * Records the PvP win and loss counts in the database after a PvP battle concludes. Has no effect
+   * if the battle is not a PvP battle or has not yet ended.
+   *
+   * @param state the current {@link BattleState}
+   */
+  void updatePvPResult(BattleState state);
 }
