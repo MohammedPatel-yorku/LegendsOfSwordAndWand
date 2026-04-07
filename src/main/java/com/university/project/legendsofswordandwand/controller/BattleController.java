@@ -1,5 +1,6 @@
 package com.university.project.legendsofswordandwand.controller;
 
+import com.university.project.legendsofswordandwand.SessionConstants;
 import com.university.project.legendsofswordandwand.battle.BattleState;
 import com.university.project.legendsofswordandwand.battle.BattleUnit;
 import com.university.project.legendsofswordandwand.battle.HeroSnapshot;
@@ -8,10 +9,12 @@ import com.university.project.legendsofswordandwand.model.Hero;
 import com.university.project.legendsofswordandwand.model.enums.ActionType;
 import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
 import com.university.project.legendsofswordandwand.model.enums.HeroClass;
+import com.university.project.legendsofswordandwand.service.battle.IBattleRewardService;
 import com.university.project.legendsofswordandwand.service.battle.IBattleService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignProgressService;
 import com.university.project.legendsofswordandwand.service.campaign.ICampaignService;
 import com.university.project.legendsofswordandwand.service.hero.IHeroService;
+import com.university.project.legendsofswordandwand.service.pvp.IPvPService;
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
@@ -34,12 +37,13 @@ import org.springframework.web.bind.annotation.*;
 public class BattleController {
 
   private static final String SESSION_KEY = "battleState";
-  private static final String LAST_RESULT_KEY = "lastBattleResult";
 
   private final IBattleService battleService;
+  private final IPvPService pvPService;
   private final ICampaignService campaignService;
   private final ICampaignProgressService campaignProgressService;
   private final IHeroService heroService;
+  private final IBattleRewardService battleRewardService;
 
   /**
    * Serves the battle page, initialising a new PvE battle if one is not already in progress.
@@ -161,7 +165,7 @@ public class BattleController {
 
       boolean rewardsAlreadyGiven = Boolean.TRUE.equals(session.getAttribute("rewardsGiven"));
       if (!rewardsAlreadyGiven && state.getStatus() == BattleStatus.PLAYER_WIN) {
-        Map<String, Object> rewards = battleService.awardBattleRewards(state);
+        Map<String, Object> rewards = battleRewardService.awardBattleRewards(state);
         model.addAttribute("rewardGold", rewards.get("gold"));
         model.addAttribute("rewardRecipients", rewards.get("recipients"));
         session.setAttribute("rewardsGiven", true);
@@ -172,7 +176,7 @@ public class BattleController {
       }
 
       if (!rewardsAlreadyGiven && state.getStatus() == BattleStatus.PLAYER_LOSE) {
-        battleService.applyBattleLoss(state);
+        battleRewardService.applyBattleLoss(state);
         session.setAttribute("rewardsGiven", true);
       }
 
@@ -200,10 +204,10 @@ public class BattleController {
         model.addAttribute("pvpReceiverUsername", state.getPvpReceiverUsername());
       }
       if (state.isPvp() && !rewardsAlreadyGiven) {
-        battleService.updatePvPResult(state);
+        pvPService.updatePvPResult(state);
         session.setAttribute("rewardsGiven", true);
       }
-      session.setAttribute(LAST_RESULT_KEY, state.getStatus().name());
+      session.setAttribute(SessionConstants.LAST_RESULT, state.getStatus().name());
     } catch (Exception e) {
       model.addAttribute("error", e.getMessage());
     }
@@ -234,15 +238,15 @@ public class BattleController {
     session.removeAttribute("rewardsGiven");
 
     if (wasPvp) {
-      session.removeAttribute(LAST_RESULT_KEY);
+      session.removeAttribute(SessionConstants.LAST_RESULT);
       return "redirect:/pvp";
     }
 
     try {
-      String lastResult = (String) session.getAttribute(LAST_RESULT_KEY);
+      String lastResult = (String) session.getAttribute(SessionConstants.LAST_RESULT);
 
       if (campaignProgressService.isCampaignComplete(authentication.getName())) {
-        session.removeAttribute(LAST_RESULT_KEY);
+        session.removeAttribute(SessionConstants.LAST_RESULT);
         campaignService.completeCampaign(authentication.getName());
         return "redirect:/campaign/complete";
       }
@@ -253,13 +257,13 @@ public class BattleController {
           return "redirect:/inn";
         } else {
           // No inn visited yet — just clear the pending room and return to campaign
-          session.removeAttribute(LAST_RESULT_KEY);
+          session.removeAttribute(SessionConstants.LAST_RESULT);
           campaignService.abandonCampaign(authentication.getName());
           return "redirect:/dashboard";
         }
       }
 
-      session.removeAttribute(LAST_RESULT_KEY);
+      session.removeAttribute(SessionConstants.LAST_RESULT);
       campaignProgressService.clearRoomPending(authentication.getName());
     } catch (Exception ignored) {
     }
@@ -299,8 +303,8 @@ public class BattleController {
    * <p>A safety limit of 50 iterations prevents infinite loops in degenerate states. If the limit
    * is exhausted, and it is still not the player's turn, the battle status is forcibly rechecked.
    *
-   * <p>Extracted from the duplicated blocks in {@link #battlePage} and {@link #action} to
-   * eliminate code duplication (Smell 1 refactoring).
+   * <p>Extracted from the duplicated blocks in {@link #battlePage} and {@link #action} to eliminate
+   * code duplication (Smell 1 refactoring).
    *
    * @param state the current {@link BattleState}
    * @return the updated {@link BattleState} after all enemy turns have been processed

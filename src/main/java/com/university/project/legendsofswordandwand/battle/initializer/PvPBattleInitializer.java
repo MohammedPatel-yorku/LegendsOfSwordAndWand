@@ -37,7 +37,7 @@ public class PvPBattleInitializer extends BattleInitializer {
    * @param userRepository used to persist win/loss stat updates after the battle ends
    */
   public PvPBattleInitializer(
-          Party senderParty, Party receiverParty, Long invitationId, UserRepository userRepository) {
+      Party senderParty, Party receiverParty, Long invitationId, UserRepository userRepository) {
 
     this.senderParty = senderParty;
     this.receiverParty = receiverParty;
@@ -99,28 +99,28 @@ public class PvPBattleInitializer extends BattleInitializer {
   public void onBattleEnd(BattleState state) {
 
     boolean senderWon =
-            state.getStatus()
-                    == com.university.project.legendsofswordandwand.model.enums.BattleStatus.PLAYER_WIN;
+        state.getStatus()
+            == com.university.project.legendsofswordandwand.model.enums.BattleStatus.PLAYER_WIN;
 
     String winnerUsername =
-            senderWon ? senderParty.getOwner().getUsername() : receiverParty.getOwner().getUsername();
+        senderWon ? senderParty.getOwner().getUsername() : receiverParty.getOwner().getUsername();
     String loserUsername =
-            senderWon ? receiverParty.getOwner().getUsername() : senderParty.getOwner().getUsername();
+        senderWon ? receiverParty.getOwner().getUsername() : senderParty.getOwner().getUsername();
 
     userRepository
-            .findByUsername(winnerUsername)
-            .ifPresent(
-                    u -> {
-                      u.setPvpWins(u.getPvpWins() + 1);
-                      userRepository.save(u);
-                    });
+        .findByUsername(winnerUsername)
+        .ifPresent(
+            u -> {
+              u.setPvpWins(u.getPvpWins() + 1);
+              userRepository.save(u);
+            });
     userRepository
-            .findByUsername(loserUsername)
-            .ifPresent(
-                    u -> {
-                      u.setPvpLosses(u.getPvpLosses() + 1);
-                      userRepository.save(u);
-                    });
+        .findByUsername(loserUsername)
+        .ifPresent(
+            u -> {
+              u.setPvpLosses(u.getPvpLosses() + 1);
+              userRepository.save(u);
+            });
   }
 
   /**
@@ -134,11 +134,11 @@ public class PvPBattleInitializer extends BattleInitializer {
    */
   private void restoreParty(Party party) {
     party.getHeroes().stream()
-            .filter(h -> !h.isTemporary())
-            .forEach(
-                    h -> {
-                      h.setHealth(h.getMaxHealth());
-                      h.setMana(h.getMaxMana());
-                    });
+        .filter(h -> !h.isTemporary())
+        .forEach(
+            h -> {
+              h.setHealth(h.getMaxHealth());
+              h.setMana(h.getMaxMana());
+            });
   }
 }

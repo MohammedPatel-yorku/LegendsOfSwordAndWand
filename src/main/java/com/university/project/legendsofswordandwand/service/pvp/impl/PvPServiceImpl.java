@@ -1,13 +1,18 @@
 package com.university.project.legendsofswordandwand.service.pvp.impl;
 
+import com.university.project.legendsofswordandwand.battle.BattleState;
+import com.university.project.legendsofswordandwand.battle.BattleUnit;
 import com.university.project.legendsofswordandwand.model.Party;
 import com.university.project.legendsofswordandwand.model.PvPInvitation;
 import com.university.project.legendsofswordandwand.model.User;
+import com.university.project.legendsofswordandwand.model.enums.BattleStatus;
 import com.university.project.legendsofswordandwand.model.enums.InvitationStatus;
 import com.university.project.legendsofswordandwand.repository.PvPInvitationRepository;
 import com.university.project.legendsofswordandwand.repository.UserRepository;
+import com.university.project.legendsofswordandwand.service.hero.IHeroService;
 import com.university.project.legendsofswordandwand.service.pvp.IPvPService;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +23,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 class PvPServiceImpl implements IPvPService {
 
+  private final IHeroService heroService;
   private final UserRepository userRepository;
   private final PvPInvitationRepository pvpInvitationRepository;
 
@@ -76,5 +82,50 @@ class PvPServiceImpl implements IPvPService {
             .orElseThrow(() -> new RuntimeException("Invitation not found"));
     invite.setStatus(InvitationStatus.ACCEPTED);
     pvpInvitationRepository.save(invite);
+  }
+
+  @Override
+  public void updatePvPResult(BattleState state) {
+    if (!state.isPvp() || !state.isOver()) return;
+
+    boolean senderWon = state.getStatus() == BattleStatus.PLAYER_WIN;
+
+    String winnerUsername =
+        senderWon ? state.getPvpSenderUsername() : state.getPvpReceiverUsername();
+    String loserUsername =
+        senderWon ? state.getPvpReceiverUsername() : state.getPvpSenderUsername();
+
+    userRepository
+        .findByUsername(winnerUsername)
+        .ifPresent(
+            u -> {
+              u.setPvpWins(u.getPvpWins() + 1);
+              userRepository.save(u);
+            });
+    userRepository
+        .findByUsername(loserUsername)
+        .ifPresent(
+            u -> {
+              u.setPvpLosses(u.getPvpLosses() + 1);
+              userRepository.save(u);
+            });
+
+    restorePartyHeroes(state.getPlayerUnits());
+    restorePartyHeroes(state.getEnemyUnits());
+  }
+
+  private void restorePartyHeroes(List<BattleUnit> units) {
+    units.forEach(
+        u -> {
+          if (u.getHero().getId() == null) return;
+          heroService
+              .findById(u.getHero().getId())
+              .ifPresent(
+                  hero -> {
+                    hero.setHealth(hero.getMaxHealth());
+                    hero.setMana(hero.getMaxMana());
+                    heroService.save(hero);
+                  });
+        });
   }
 }
